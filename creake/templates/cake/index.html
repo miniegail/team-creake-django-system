@@ -1,0 +1,260 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CREAKE - Shop Cakes</title>
+
+<!-- Google Font -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<!-- External CSS -->
+<link rel="stylesheet" href="{% static 'cake/css/style.css' %}">
+</head>
+
+<body>
+
+<!-- ================= HEADER ================= -->
+<header class="site-header">
+    <div class="header-logo">
+        <img src="{% static 'cake/images/creaked.png' %}" alt="CREAKE Logo" id="logo" onclick="scrollToSection('hero-banner')">
+    </div>
+    <nav class="header-nav">
+        <a id="homeNav" href="#hero-banner" class="active">🏠 Home</a>
+        <a id="browseNav" href="#main-content">🎂 Browse</a>
+        <a class="cart-icon-btn" onclick="toggleCart()">
+            🛒 Cart <span class="cart-count" id="cartCount">0</span>
+        </a>
+        <a id="loginNav" href="/admin/" class="login-btn">👤 Admin</a>
+        <button class="mobile-menu-btn" onclick="toggleMobileFilters()">☰</button>
+    </nav>
+</header>
+
+<!-- ================= HERO BANNER ================= -->
+<div class="hero-banner" id="hero-banner">
+    <div class="banner-bg">
+        <div class="banner-shape"></div>
+        <div class="banner-shape"></div>
+        <div class="banner-shape"></div>
+        <div class="banner-dots">
+            <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        </div>
+    </div>
+
+    <div class="floating-cake-image strawberry-cake-floating">
+        <img src="{% static 'cake/images/straw.png' %}" alt="Strawberry Cake">
+    </div>
+    <div class="floating-cake-image matcha-cake-floating">
+        <img src="{% static 'cake/images/coco.png' %}" alt="Matcha Cake">
+    </div>
+    <div class="floating-cake-image chocolate-cake-floating">
+        <img src="{% static 'cake/images/choco.png' %}" alt="Chocolate Cake">
+    </div>
+    <div class="floating-cake-image lemon-cake-floating">
+        <img src="{% static 'cake/images/lemon.png' %}" alt="Lemon Cake">
+    </div>
+
+    <div class="banner-content">
+        <div class="banner-logo-wrapper">
+            <div class="banner-logo">
+                <img src="{% static 'cake/images/logo.png' %}" alt="CREAKE Banner Logo">
+            </div>
+            <p class="banner-tagline">Create Your Dream Cake.</p>
+            <button class="btn" id="startBtn">Start Creaking</button>
+        </div>
+    </div>
+    <div class="banner-decoration"></div>
+</div>
+
+<!-- ================= MAIN CONTENT ================= -->
+<div class="main-content" id="main-content">
+
+    <!-- ================= SIDEBAR FILTERS ================= -->
+    <aside class="filters-panel">
+        <h3>🔍 Filters</h3>
+
+        <div class="filter-group">
+            <label for="categoryFilter">Category</label>
+            <select id="categoryFilter">
+                <option value="all">All Categories</option>
+                <option value="chocolate">🍫 Chocolate</option>
+                <option value="vanilla">🧁 Vanilla</option>
+                <option value="strawberry">🍓 Strawberry</option>
+                <option value="redvelvet">❤️ Red Velvet</option>
+            </select>
+        </div>
+
+        <div class="filter-group">
+            <label for="searchCake">Search</label>
+            <input type="text" id="searchCake" placeholder="Type cake name...">
+        </div>
+
+        <div class="filter-group">
+            <label for="priceRange">Price Range</label>
+            <input type="range" id="priceRange" min="0" max="1000" value="1000">
+            <div class="price-range-display">Up to ₱<span id="priceDisplay">1000</span></div>
+        </div>
+
+        <div class="filter-group">
+            <label for="ratingFilter">Rating</label>
+            <select id="ratingFilter">
+                <option value="0">All Ratings</option>
+                <option value="3">⭐ 3+ Stars</option>
+                <option value="4">⭐⭐ 4+ Stars</option>
+                <option value="5">⭐⭐⭐ 5 Stars</option>
+            </select>
+        </div>
+
+        <div class="filter-actions">
+            <button onclick="applyFilters()">✓ Apply</button>
+            <button class="clear-btn" onclick="clearFilters()">↻ Reset</button>
+        </div>
+    </aside>
+
+    <!-- ================= CONTENT AREA ================= -->
+    <div class="content-area">
+
+        <!-- ================= TOP BAR ================= -->
+        <div class="top-bar">
+            <div class="results-count">
+                <strong id="resultsCount">0</strong> cakes found
+            </div>
+            <div class="sort-container">
+                <label for="sortBy">Sort:</label>
+                <select id="sortBy">
+                    <option value="name">Name (A-Z)</option>
+                    <option value="price-low">Price ↑</option>
+                    <option value="price-high">Price ↓</option>
+                    <option value="rating">Top Rated</option>
+                    <option value="newest">Newest</option>
+                </select>
+            </div>
+            <div class="view-toggle">
+                <button class="active" onclick="setGridView(3)" title="Grid View">⊞⊞⊞</button>
+                <button onclick="setGridView(2)" title="Compact View">⊞⊞</button>
+                <button onclick="setGridView(1)" title="List View">⊞</button>
+            </div>
+        </div>
+
+        <!-- ================= CAKE GRID ================= -->
+        <div class="cake-grid" id="cakeGrid"></div>
+
+    </div>
+
+</div>
+
+<!-- ================= CART MODAL ================= -->
+<div class="cart-modal" id="cartModal">
+    <div class="cart-sidebar">
+        <div class="cart-header">
+            <span>🛒 Your Cart</span>
+            <button class="close-cart" onclick="toggleCart()">✕</button>
+        </div>
+        
+        <div class="cart-items-list" id="cartItemsList">
+            <div class="cart-empty">
+                <div class="cart-empty-icon">🛒</div>
+                <p><strong>Your cart is empty!</strong></p>
+                <p style="font-size: 12px; color: #999; margin-top: 10px;">Add some delicious cakes to get started.</p>
+            </div>
+        </div>
+
+        <div class="cart-footer">
+            <div class="cart-summary">
+                <span>Subtotal:</span>
+                <span id="subtotal">₱0.00</span>
+            </div>
+            <div class="cart-summary">
+                <span>Delivery:</span>
+                <span id="delivery">₱0.00</span>
+            </div>
+            <div class="cart-summary">
+                <span class="total">Total:</span>
+                <span class="total" id="total">₱0.00</span>
+            </div>
+            <button class="checkout-btn" id="checkoutBtn" onclick="openCheckout()" disabled>Proceed to Checkout</button>
+        </div>
+    </div>
+</div>
+
+<!-- ================= CHECKOUT MODAL ================= -->
+<div class="checkout-modal" id="checkoutModal">
+    <div class="checkout-container">
+        <h2>📦 Checkout</h2>
+        
+        <div class="checkout-order-summary" id="checkoutSummary"></div>
+
+        <form id="checkoutForm">
+            <div class="form-group">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" placeholder="John Doe" required>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" placeholder="john@example.com" required>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone</label>
+                <input type="tel" id="phone" placeholder="+63 9XX XXX XXXX" required>
+            </div>
+
+            <div class="form-group">
+                <label for="address">Address</label>
+                <input type="text" id="address" placeholder="123 Main St, City" required>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="city">City</label>
+                    <input type="text" id="city" placeholder="Manila" required>
+                </div>
+                <div class="form-group">
+                    <label for="postalCode">Zip Code</label>
+                    <input type="text" id="postalCode" placeholder="1000" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="deliveryType">Delivery</label>
+                    <select id="deliveryType" required onchange="updateDelivery()">
+                        <option value="">Select delivery</option>
+                        <option value="standard">Standard (₱50)</option>
+                        <option value="express">Express (₱150)</option>
+                        <option value="sameday">Same Day (₱300)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="paymentMethod">Payment</label>
+                    <select id="paymentMethod" required>
+                        <option value="">Select payment</option>
+                        <option value="credit">💳 Credit Card</option>
+                        <option value="debit">💳 Debit Card</option>
+                        <option value="paypal">🅿️ PayPal</option>
+                        <option value="cod">💵 Cash on Delivery</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Special Instructions (Optional)</label>
+                <input type="text" id="notes" placeholder="Any special requests?">
+            </div>
+
+            <div class="checkout-buttons">
+                <button type="button" class="cancel-checkout" onclick="closeCheckout()">Cancel</button>
+                <button type="submit" class="place-order-btn">Place Order</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ================= JS ================= -->
+<script src="{% static 'cake/js/cake.js' %}"></script>
+</body>
+</html>
