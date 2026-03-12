@@ -1,7 +1,7 @@
-from django.urls import path
+from django.urls import path # type: ignore
 from . import views
 
-app_name = 'creake'
+app_name = 'cakes'
 
 urlpatterns = [
     path('', views.index, name='index'),
