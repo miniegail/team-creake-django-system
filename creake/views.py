@@ -1,173 +1,360 @@
-from django.shortcuts import render # type: ignore
-from django.http import JsonResponse # type: ignore
-from django.views.decorators.http import require_http_methods # type: ignore
-from django.views.decorators.csrf import csrf_exempt # type: ignore
-from django.db.models import Q # type: ignore
-from decimal import Decimal
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_http_methods
+from django.http import JsonResponse
+from django.contrib import messages
+from django.db.models import Q, Sum, Count
+from datetime import datetime, timedelta
 import json
-import logging
 
-from .models import Cake, Order, OrderItem
+from .models import Cake, Order, CakeDesign, Wishlist, UserProfile, Address
+from .forms import UserRegistrationForm, UserProfileForm
 
-logger = logging.getLogger(__name__)
+# ==================== PUBLIC VIEWS ====================
 
+def quiz(request):
+    return render(request, 'creake/quiz.html')
 
 def index(request):
-    """Home page with cake listing"""
+    """Main shop page with all cakes."""
+    cakes = Cake.objects.all()
     context = {
-        'categories': Cake.CATEGORY_CHOICES,
+        'cakes': cakes,
+        'show_quiz': request.session.pop('show_quiz', False),
     }
-    return render(request, 'cake/index.html', context)
+    return render(request, 'creake/index.html', context)
 
 
-@require_http_methods(["GET"])
-def get_cakes(request):
-    """API endpoint to get filtered and sorted cakes"""
-    try:
-        cakes = Cake.objects.all()
+def login_view(request):
+    """Handle user login."""
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            login(request, user)
+            next_page = request.POST.get('next', 'creake:delivery')
+            messages.success(request, f'Welcome back, {user.first_name or user.username}!')
+            return redirect(next_page)
+        else:
+            messages.error(request, 'Invalid email or password.')
+    
+    return render(request, 'creake/index.html')
 
-        # Filter by category
-        category = request.GET.get('category', 'all')
-        if category and category != 'all':
-            cakes = cakes.filter(category=category)
 
-        # Filter by search
-        search = request.GET.get('search', '').strip()
-        if search:
-            cakes = cakes.filter(
-                Q(name__icontains=search) | Q(description__icontains=search)
+def register_view(request):
+    if request.method == 'POST':
+        form = UserRegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.username = form.cleaned_data['email']
+            user.email = form.cleaned_data['email']
+            user.save()
+
+            profile = UserProfile.objects.create(
+                user=user,
+                phone=form.cleaned_data.get('phone', '')
             )
 
-        # Filter by price
-        max_price = request.GET.get('maxPrice', '10000')
-        try:
-            cakes = cakes.filter(price__lte=Decimal(max_price))
-        except (ValueError, TypeError):
-            pass
-
-        # Filter by rating
-        min_rating = request.GET.get('minRating', '0')
-        try:
-            cakes = cakes.filter(rating__gte=float(min_rating))
-        except (ValueError, TypeError):
-            pass
-
-        # Sort
-        sort_by = request.GET.get('sortBy', 'name')
-        if sort_by == 'price-low':
-            cakes = cakes.order_by('price')
-        elif sort_by == 'price-high':
-            cakes = cakes.order_by('-price')
-        elif sort_by == 'rating':
-            cakes = cakes.order_by('-rating', '-reviews')
-        elif sort_by == 'newest':
-            cakes = cakes.order_by('-created_at')
+            login(request, user)
+            messages.success(request, '🎉 Account created! Let\'s find your perfect cake.')
+            return redirect('creake:quiz')  # ← change this line
         else:
-            cakes = cakes.order_by('name')
+            messages.error(request, 'Please fix the errors below.')
+            return redirect('creake:index')
+    
+    return redirect('creake:index')
 
-        # Serialize data
-        cakes_data = [
-            {
-                'id': cake.id,
-                'name': cake.name,
-                'category': cake.category,
-                'desc': cake.description[:100] + '...' if len(cake.description) > 100 else cake.description,
-                'price': float(cake.price),
-                'img': cake.image.url if cake.image else '/static/cake/images/placeholder.png',
-                'badge': 'Best Seller' if cake.is_bestseller else ('New' if cake.is_new else ''),
-                'rating': cake.rating,
-                'reviews': cake.reviews,
-                'new': cake.is_new,
-            }
-            for cake in cakes
-        ]
 
-        return JsonResponse({
-            'success': True,
-            'cakes': cakes_data,
-            'count': len(cakes_data)
-        })
-    except Exception as e:
-        logger.error(f"Error fetching cakes: {str(e)}")
-        return JsonResponse({
-            'success': False,
-            'message': 'Error loading cakes'
-        }, status=500)
+def logout_view(request):
+    """Handle user logout."""
+    logout(request)
+    messages.success(request, '👋 Logged out successfully!')
+    return redirect('creake:index')
 
+
+# ==================== DASHBOARD VIEWS ====================
+
+@login_required
+def delivery(request):
+    """User delivery progress dashboard."""
+    user = request.user
+    active_orders = Order.objects.filter(
+        user=user,
+        status__in=['pending', 'paid', 'baking', 'out_for_delivery']
+    ).order_by('-created_at')
+    
+    delivered_count = Order.objects.filter(user=user, status='delivered').count()
+    out_for_delivery_count = Order.objects.filter(user=user, status='out_for_delivery').count()
+    active_orders_count = active_orders.count()
+    total_spent = Order.objects.filter(user=user, status='delivered').aggregate(
+        total=Sum('total')
+    )['total'] or 0
+    
+    context = {
+        'active_orders': active_orders,
+        'active_orders_count': active_orders_count,
+        'out_for_delivery_count': out_for_delivery_count,
+        'delivered_count': delivered_count,
+        'total_spent': total_spent,
+    }
+    return render(request, 'creake/delivery.html', context)
+
+
+@login_required
+def my_designs(request):
+    """User's saved cake designs."""
+    user = request.user
+    designs = CakeDesign.objects.filter(user=user)
+    
+    context = {
+        'designs': designs,
+        'designs_count': designs.count(),
+    }
+    return render(request, 'creake/my_designs.html', context)
+
+
+@login_required
+def order_history(request):
+    """User's complete order history."""
+    user = request.user
+    orders = Order.objects.filter(user=user).order_by('-created_at')
+    
+    context = {
+        'orders': orders,
+        'total_orders': orders.count(),
+    }
+    return render(request, 'creake/order_history.html', context)
+
+
+@login_required
+def wishlist(request):
+    """User's wishlist."""
+    user = request.user
+    wishlist_items = Wishlist.objects.filter(user=user).select_related('cake')
+    
+    context = {
+        'wishlist_items': wishlist_items,
+        'wishlist_count': wishlist_items.count(),
+    }
+    return render(request, 'creake/wishlist.html', context)
+
+
+@login_required
+def profile(request):
+    """User profile management."""
+    user = request.user
+    profile, created = UserProfile.objects.get_or_create(user=user)
+    addresses = Address.objects.filter(user=user)
+    cakes = Cake.objects.all()
+    
+    total_orders = Order.objects.filter(user=user).count()
+    designs_count = CakeDesign.objects.filter(user=user).count()
+    wishlist_count = Wishlist.objects.filter(user=user).count()
+    total_spent = Order.objects.filter(user=user, status='delivered').aggregate(
+        total=Sum('total')
+    )['total'] or 0
+    
+    if request.method == 'POST':
+        if 'update_profile' in request.POST:
+            user.first_name = request.POST.get('first_name', user.first_name)
+            user.last_name = request.POST.get('last_name', user.last_name)
+            user.email = request.POST.get('email', user.email)
+            user.save()
+            
+            profile.phone = request.POST.get('phone', '')
+            birthday_str = request.POST.get('birthday')
+            if birthday_str:
+                profile.birthday = birthday_str
+            fav_cake_id = request.POST.get('favourite_cake')
+            if fav_cake_id:
+                profile.favourite_cake_id = int(fav_cake_id)
+            profile.save()
+            messages.success(request, 'Profile updated!')
+        
+        elif 'update_notifications' in request.POST:
+            profile.notif_orders = request.POST.get('notif_orders') == 'on'
+            profile.notif_promos = request.POST.get('notif_promos') == 'on'
+            profile.notif_arrivals = request.POST.get('notif_arrivals') == 'on'
+            profile.notif_quiz = request.POST.get('notif_quiz') == 'on'
+            profile.save()
+            messages.success(request, 'Notification preferences updated!')
+    
+    context = {
+        'profile': profile,
+        'addresses': addresses,
+        'cakes': cakes,
+        'total_orders': total_orders,
+        'designs_count': designs_count,
+        'wishlist_count': wishlist_count,
+        'total_spent': total_spent,
+    }
+    return render(request, 'creake/profile.html', context)
+
+
+# ==================== CART & CHECKOUT ====================
 
 @require_http_methods(["POST"])
-@csrf_exempt
-def create_order(request):
-    """Create an order from cart"""
+def checkout(request):
+    """Process checkout and create order."""
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Not authenticated'}, status=401)
+    
     try:
         data = json.loads(request.body)
+        cart = data.get('cart', [])
+        delivery_type = data.get('delivery_type', 'standard')
+        payment_method = data.get('payment_method', 'credit')
         
-        # Validate input
-        if not data.get('cartItems'):
-            return JsonResponse({
-                'success': False,
-                'message': 'Cart is empty'
-            }, status=400)
-
-        # Calculate delivery cost
-        delivery_costs = {
-            'standard': 50,
-            'express': 150,
-            'sameday': 300,
-        }
+        if not cart:
+            return JsonResponse({'error': 'Cart is empty'}, status=400)
         
-        delivery_fee = Decimal(str(delivery_costs.get(data.get('deliveryType'), 0)))
+        # Calculate totals
+        subtotal = sum(item['price'] * item['quantity'] for item in cart)
+        delivery_cost = {'standard': 50, 'express': 150, 'sameday': 300}.get(delivery_type, 0)
+        total = subtotal + delivery_cost
         
-        # Create order
-        order = Order.objects.create(
-            full_name=data.get('fullName', '').strip(),
-            email=data.get('email', '').strip(),
-            phone=data.get('phone', '').strip(),
-            address=data.get('address', '').strip(),
-            city=data.get('city', '').strip(),
-            postal_code=data.get('postalCode', '').strip(),
-            delivery_type=data.get('deliveryType'),
-            payment_method=data.get('paymentMethod'),
-            special_instructions=data.get('notes', '').strip(),
-            total_amount=Decimal(str(data.get('total', 0))),
-            status='pending',
-        )
-
-        # Add items to order
-        for item in data.get('cartItems', []):
-            try:
-                cake = Cake.objects.get(id=item['id'])
-                
-                OrderItem.objects.create(
-                    order=order,
-                    cake=cake,
-                    quantity=item['quantity'],
-                    price=Decimal(str(item['price'])),
-                )
-                
-            except Cake.DoesNotExist:
-                order.delete()
-                return JsonResponse({
-                    'success': False,
-                    'message': f'Cake with ID {item["id"]} not found'
-                }, status=400)
-
-        logger.info(f"Order #{order.id} created successfully")
+        # Create order for each cake in cart
+        for item in cart:
+            Order.objects.create(
+                user=request.user,
+                cake_name=item['name'],
+                quantity=item['quantity'],
+                total=item['price'] * item['quantity'],
+                status='pending',
+                delivery_type=delivery_type,
+                payment_method=payment_method,
+                address=data.get('address', ''),
+                city=data.get('city', ''),
+                zip_code=data.get('zip_code', ''),
+                phone=data.get('phone', ''),
+                special_instructions=data.get('notes', ''),
+                estimated_arrival=_calculate_arrival(delivery_type),
+            )
         
-        return JsonResponse({
-            'success': True,
-            'orderId': order.id,
-            'message': 'Order placed successfully!'
-        })
-        
-    except json.JSONDecodeError:
-        return JsonResponse({
-            'success': False,
-            'message': 'Invalid JSON data'
-        }, status=400)
+        messages.success(request, '🎉 Order placed successfully!')
+        return JsonResponse({'success': True})
+    
     except Exception as e:
-        logger.error(f"Error creating order: {str(e)}")
-        return JsonResponse({
-            'success': False,
-            'message': f'Error: {str(e)}'
-        }, status=500)
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+def _calculate_arrival(delivery_type):
+    """Calculate estimated arrival time."""
+    now = datetime.now()
+    if delivery_type == 'sameday':
+        arrival = now + timedelta(hours=4)
+    elif delivery_type == 'express':
+        arrival = now + timedelta(days=1)
+    else:  # standard
+        arrival = now + timedelta(days=2)
+    return arrival.strftime('%B %d, %I:%M %p')
+
+
+# ==================== WISHLIST MANAGEMENT ====================
+
+@login_required
+def add_wishlist(request, cake_id):
+    """Add cake to wishlist."""
+    cake = get_object_or_404(Cake, id=cake_id)
+    wishlist, created = Wishlist.objects.get_or_create(user=request.user, cake=cake)
+    
+    if created:
+        messages.success(request, f'Added {cake.name} to wishlist!')
+    return redirect(request.META.get('HTTP_REFERER', 'creake:index'))
+
+
+@login_required
+def remove_wishlist(request, wishlist_id):
+    """Remove cake from wishlist."""
+    wishlist = get_object_or_404(Wishlist, id=wishlist_id, user=request.user)
+    cake_name = wishlist.cake.name
+    wishlist.delete()
+    messages.success(request, f'Removed {cake_name} from wishlist!')
+    return redirect(request.META.get('HTTP_REFERER', 'creake:wishlist'))
+
+
+# ==================== DESIGNS ====================
+
+@login_required
+def create_design(request):
+    """Create new cake design."""
+    if request.method == 'POST':
+        name = request.POST.get('name', 'My Design')
+        emoji = request.POST.get('emoji', '🎂')
+        layers = int(request.POST.get('layers', 2))
+        description = request.POST.get('description', '')
+        
+        design = CakeDesign.objects.create(
+            user=request.user,
+            name=name,
+            emoji=emoji,
+            layers=layers,
+            description=description,
+        )
+        messages.success(request, 'Design created!')
+        return redirect('creake:my_designs')
+    
+    return render(request, 'creake/create_design.html')
+
+
+@login_required
+def edit_design(request, design_id):
+    """Edit cake design."""
+    design = get_object_or_404(CakeDesign, id=design_id, user=request.user)
+    
+    if request.method == 'POST':
+        design.name = request.POST.get('name', design.name)
+        design.emoji = request.POST.get('emoji', design.emoji)
+        design.layers = int(request.POST.get('layers', design.layers))
+        design.description = request.POST.get('description', design.description)
+        design.save()
+        messages.success(request, 'Design updated!')
+        return redirect('creake:my_designs')
+    
+    context = {'design': design}
+    return render(request, 'creake/edit_design.html', context)
+
+
+@login_required
+def reorder_design(request, design_id):
+    """Reorder a design as a cake."""
+    design = get_object_or_404(CakeDesign, id=design_id, user=request.user)
+    # Add to cart logic here (handled by JS)
+    messages.success(request, f'Added {design.name} to cart!')
+    return redirect('creake:index')
+
+
+# ==================== ADDRESSES ====================
+
+@login_required
+def add_address(request):
+    """Add new address."""
+    if request.method == 'POST':
+        Address.objects.create(
+            user=request.user,
+            label=request.POST.get('label', 'Home'),
+            street=request.POST.get('street'),
+            city=request.POST.get('city'),
+            zip_code=request.POST.get('zip_code'),
+            is_default=request.POST.get('is_default') == 'on',
+        )
+        messages.success(request, 'Address added!')
+        return redirect('creake:profile')
+    
+    return render(request, 'creake/add_address.html')
+
+
+# ==================== UTILS ====================
+
+def custom_404(request, exception):
+    """Custom 404 page."""
+    return render(request, 'creake/404.html', status=404)
+
+
+def custom_500(request):
+    """Custom 500 page."""
+    return render(request, 'creake/500.html', status=500)

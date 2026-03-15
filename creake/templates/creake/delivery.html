@@ -1,0 +1,95 @@
+Try AI directly in your favorite apps … Use Gemini to generate drafts and refine content, plus get Gemini Pro with access to Google's next-gen AI for ₱1,100 ₱0 for 1 month
+{% extends 'creake/base_dashboard.html' %}
+{% block title %}Delivery Progress{% endblock %}
+{% block nav_delivery %}active{% endblock %}
+
+{% block content %}
+
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-icon">&#128230;</div>
+    <div class="stat-label">Active Orders</div>
+    <div class="stat-value">{{ active_orders_count|default:"0" }}</div>
+    <div class="stat-sub">In transit or prep</div>
+  </div>
+  <div class="stat-card blue">
+    <div class="stat-icon">&#128666;</div>
+    <div class="stat-label">Out for Delivery</div>
+    <div class="stat-value">{{ out_for_delivery_count|default:"0" }}</div>
+    <div class="stat-sub">Arriving today</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-icon">&#9989;</div>
+    <div class="stat-label">Delivered</div>
+    <div class="stat-value">{{ delivered_count|default:"0" }}</div>
+    <div class="stat-sub">All time</div>
+  </div>
+  <div class="stat-card purple">
+    <div class="stat-icon">&#11088;</div>
+    <div class="stat-label">Total Spent</div>
+    <div class="stat-value">&#8369;{{ total_spent|default:"0" }}</div>
+    <div class="stat-sub">Lifetime value</div>
+  </div>
+</div>
+
+{% if active_orders %}
+  {% for order in active_orders %}
+  <div>
+    <div class="section-title">{% if forloop.first %}Active Delivery{% else %}Other Active Order{% endif %}</div>
+    <div class="section-sub">Order #{{ order.id }} &middot; {{ order.cake_name }}</div>
+    <div class="delivery-card">
+      <div class="order-meta">
+        <div>
+          <div class="order-id">Order #{{ order.id }} <span>&middot; Placed {{ order.created_at|date:"M d, Y" }}</span></div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:3px;">
+            {{ order.cake_name }} &times;{{ order.quantity }} &nbsp;|&nbsp; &#8369;{{ order.total }}
+          </div>
+        </div>
+        <div class="order-status-pill {% if order.status == 'out_for_delivery' %}transit{% else %}prep{% endif %}">
+          {{ order.get_status_display }}
+        </div>
+      </div>
+      <div class="tracker">
+        <div class="track-step {% if order.step >= 1 %}done{% endif %}">
+          <div class="track-dot">&#10003;</div>
+          <div class="track-label">Order<br>Placed</div>
+          <div class="track-time">{{ order.created_at|date:"M d" }}</div>
+        </div>
+        <div class="track-step {% if order.step >= 2 %}done{% endif %}">
+          <div class="track-dot">&#10003;</div>
+          <div class="track-label">Payment<br>Confirmed</div>
+          <div class="track-time">{{ order.paid_at|date:"M d"|default:"&mdash;" }}</div>
+        </div>
+        <div class="track-step {% if order.step >= 3 %}done{% elif order.step == 2 %}active{% endif %}">
+          <div class="track-dot">&#127874;</div>
+          <div class="track-label">Baking<br>in Progress</div>
+          <div class="track-time">{{ order.baking_at|date:"M d"|default:"&mdash;" }}</div>
+        </div>
+        <div class="track-step {% if order.step >= 4 %}done{% elif order.step == 3 %}active{% endif %}">
+          <div class="track-dot">&#128666;</div>
+          <div class="track-label">Out for<br>Delivery</div>
+          <div class="track-time">{% if order.step >= 3 %}Now{% else %}&mdash;{% endif %}</div>
+        </div>
+        <div class="track-step {% if order.step >= 5 %}done{% endif %}">
+          <div class="track-dot">&#127968;</div>
+          <div class="track-label">Delivered</div>
+          <div class="track-time">{% if order.step >= 5 %}{{ order.delivered_at|date:"M d" }}{% else %}&mdash;{% endif %}</div>
+        </div>
+      </div>
+      <div class="delivery-info-row">
+        <div class="delivery-info-item"><label>Estimated Arrival</label><p>{{ order.estimated_arrival|default:"TBD" }}</p></div>
+        <div class="delivery-info-item"><label>Delivery Address</label><p>{{ order.address }}</p></div>
+        <div class="delivery-info-item"><label>Rider</label><p>{{ order.rider_name|default:"Assigning..." }}</p></div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+{% else %}
+  <div class="empty-state">
+    <div style="font-size:48px;margin-bottom:16px;">&#128666;</div>
+    <h3 style="color:var(--coral);margin-bottom:8px;">No Active Deliveries</h3>
+    <p style="color:var(--text-muted);font-size:13px;">Your active orders will appear here once you place an order.</p>
+  </div>
+{% endif %}
+
+{% endblock %}

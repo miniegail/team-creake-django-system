@@ -1,0 +1,40 @@
+
+{% extends 'creake/base_dashboard.html' %}
+{% block title %}My Designs{% endblock %}
+{% block nav_designs %}active{% endblock %}
+
+{% block content %}
+
+<div>
+  <div class="section-title">My Cake Designs</div>
+  <div class="section-sub">Your saved custom creations &mdash; edit, reorder, or start fresh.</div>
+</div>
+
+<div class="designs-grid">
+  {% for design in designs %}
+  <div class="design-card">
+    <div class="design-thumb {{ design.thumb_class|default:'custom' }}">
+      {{ design.emoji|default:"&#127874;" }}
+      {% if design.badge %}<div class="design-badge">{{ design.badge }}</div>{% endif %}
+    </div>
+    <div class="design-info">
+      <h4>{{ design.name }}</h4>
+      <p>Saved {{ design.created_at|date:"M d" }} &middot; {{ design.layers }} layers</p>
+      <div class="design-actions">
+        <a href="{% url 'creake:edit_design' design.id %}" class="design-btn edit">&#9999;&#65039; Edit</a>
+        <form method="post" action="{% url 'creake:reorder_design' design.id %}" style="flex:1;">
+          {% csrf_token %}
+          <button type="submit" class="design-btn order" style="width:100%;">&#128722; Order</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  {% empty %}{% endfor %}
+
+  <a class="design-add-card" href="{% url 'creake:create_design' %}">
+    <div class="design-add-icon">&#127912;</div>
+    <p>Create New Design</p>
+  </a>
+</div>
+
+{% endblock %}

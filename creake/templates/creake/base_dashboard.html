@@ -1,0 +1,94 @@
+Try AI directly in your favorite apps … Use Gemini to generate drafts and refine content, plus get Gemini Pro with access to Google's next-gen AI for ₱1,100 ₱0 for 1 month
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CREAKE - {% block title %}Dashboard{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'creake/css/dashboard.css' %}">
+{% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-logo">
+    <a href="{% url 'creake:index' %}">
+      <img src="{% static 'creake/images/creaked.png' %}" alt="CREAKE">
+    </a>
+  </div>
+  <nav class="header-nav">
+    <a href="{% url 'creake:index' %}">&#127968; Home</a>
+    <a href="{% url 'creake:index' %}#main-content">&#127874; Browse</a>
+    <a class="cart-icon-btn" href="{% url 'creake:index' %}">&#128722; Cart<span class="cart-count">0</span></a>
+    <div class="user-dropdown-wrap">
+      <button class="user-nav-btn" onclick="toggleDropdown()">
+        &#128100; {{ request.user.first_name|default:request.user.username }} &#9660;
+      </button>
+      <div class="user-dropdown" id="userDropdown">
+        <div class="user-dropdown-header">
+          <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+          <span>&#128100; User</span>
+        </div>
+        <a href="{% url 'creake:delivery' %}">&#128202; Dashboard</a>
+        <a href="{% url 'creake:profile' %}">&#128100; My Profile</a>
+        <a href="{% url 'creake:order_history' %}">&#127874; My Orders</a>
+        <form method="post" action="{% url 'creake:logout' %}" style="margin:0;">
+          {% csrf_token %}
+          <button type="submit" class="logout-item">&#128682; Log Out</button>
+        </form>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<div class="db-page">
+  <aside class="db-side">
+    <div class="side-avatar">
+      <div class="avatar-ring">&#127874;</div>
+      <h3>{{ request.user.get_full_name|default:request.user.username }}</h3>
+      <span>{{ request.user.email }}</span>
+      <div class="side-badge">&#127775; Sweet Member</div>
+    </div>
+    <nav class="side-nav">
+      <a class="nav-item {% block nav_delivery %}{% endblock %}" href="{% url 'creake:delivery' %}">
+        <span class="nav-icon">&#128666;</span> Delivery Progress
+        <span class="nav-badge">{{ active_orders_count|default:"0" }}</span>
+      </a>
+      <a class="nav-item {% block nav_designs %}{% endblock %}" href="{% url 'creake:my_designs' %}">
+        <span class="nav-icon">&#127912;</span> My Designs
+        <span class="nav-badge">{{ designs_count|default:"0" }}</span>
+      </a>
+      <a class="nav-item {% block nav_wishlist %}{% endblock %}" href="{% url 'creake:wishlist' %}">
+        <span class="nav-icon">&#128150;</span> Wishlist
+        <span class="nav-badge">{{ wishlist_count|default:"0" }}</span>
+      </a>
+      <a class="nav-item {% block nav_history %}{% endblock %}" href="{% url 'creake:order_history' %}">
+        <span class="nav-icon">&#128203;</span> Order History
+      </a>
+      <a class="nav-item {% block nav_profile %}{% endblock %}" href="{% url 'creake:profile' %}">
+        <span class="nav-icon">&#128100;</span> Profile
+      </a>
+    </nav>
+    <div class="side-bottom">
+      <form method="post" action="{% url 'creake:logout' %}" style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" class="side-logout">&#128682; Log Out</button>
+      </form>
+    </div>
+  </aside>
+
+  <main class="db-main">
+    <div class="db-body">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</div>
+
+<script src="{% static 'creake/js/dashboard.js' %}"></script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,50 @@
+Try AI directly in your favorite apps … Use Gemini to generate drafts and refine content, plus get Gemini Pro with access to Google's next-gen AI for ₱1,100 ₱0 for 1 month
+{% extends 'creake/base_dashboard.html' %}
+{% block title %}Order History{% endblock %}
+{% block nav_history %}active{% endblock %}
+
+{% block content %}
+
+<div>
+  <div class="section-title">Order History</div>
+  <div class="section-sub">All your past and current orders in one place.</div>
+</div>
+
+{% if orders %}
+<div class="history-table">
+  <div class="ht-row ht-head">
+    <div>Order ID</div>
+    <div>Cake</div>
+    <div>Date</div>
+    <div>Amount</div>
+    <div>Status</div>
+  </div>
+  {% for order in orders %}
+  <div class="ht-row" onclick="window.location.href=''">
+    <div class="ht-id">#{{ order.id }}</div>
+    <div class="ht-name">{{ order.cake_name }}{% if order.quantity > 1 %} &times;{{ order.quantity }}{% endif %}</div>
+    <div class="ht-date">{{ order.created_at|date:"M d, Y" }}</div>
+    <div class="ht-amount">&#8369;{{ order.total }}</div>
+    <div>
+      <span class="status-pill
+        {% if order.status == 'delivered' %}sp-delivered
+        {% elif order.status == 'out_for_delivery' or order.status == 'transit' %}sp-transit
+        {% elif order.status == 'baking' or order.status == 'preparing' %}sp-prep
+        {% elif order.status == 'cancelled' %}sp-cancelled
+        {% else %}sp-prep{% endif %}">
+        {{ order.get_status_display }}
+      </span>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+  <div style="font-size:48px;margin-bottom:16px;">&#128203;</div>
+  <h3 style="color:var(--coral);margin-bottom:8px;">No Orders Yet</h3>
+  <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px;">Your order history will appear here once you place your first order.</p>
+  <a href="{% url 'creake:index' %}#main-content" style="background:linear-gradient(135deg,var(--coral),var(--coral-dark));color:white;padding:12px 28px;border-radius:25px;text-decoration:none;font-weight:700;font-size:13px;">Shop Now</a>
+</div>
+{% endif %}
+
+{% endblock %}

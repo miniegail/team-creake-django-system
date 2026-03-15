@@ -1,0 +1,130 @@
+Try AI directly in your favorite apps … Use Gemini to generate drafts and refine content, plus get Gemini Pro with access to Google's next-gen AI for ₱1,100 ₱0 for 1 month
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CREAKE - Cake Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'creake/css/quiz.css' %}">
+</head>
+<body>
+
+<!-- ========== HEADER ========== -->
+<header class="site-header">
+  <div class="header-logo">
+    <a href="{% url 'creake:index' %}">
+      <img src="{% static 'creake/images/creaked.png' %}" alt="CREAKE Logo">
+    </a>
+  </div>
+  <nav class="header-nav">
+    <a href="{% url 'creake:index' %}">&#127968; Home</a>
+    <a href="{% url 'creake:index' %}#main-content">&#127874; Browse</a>
+    {% if request.user.is_authenticated %}
+    <a href="{% url 'creake:delivery' %}">&#128202; Dashboard</a>
+    {% else %}
+    <a href="{% url 'creake:index' %}" onclick="openAuthModal()">&#128100; Log In</a>
+    {% endif %}
+  </nav>
+</header>
+
+<!-- ========== QUIZ PAGE ========== -->
+<div class="quiz-page">
+
+  <!-- Background blobs -->
+  <div class="qz-blob qz-blob-1"></div>
+  <div class="qz-blob qz-blob-2"></div>
+  <div class="qz-blob qz-blob-3"></div>
+  <div id="qzEmojiWrap"></div>
+
+  <div class="quiz-inner">
+
+    <!-- INTRO -->
+    <div class="qz-intro" id="qzIntro">
+      <div class="qz-badge">&#127881; Welcome to CREAKE!</div>
+      <span class="qz-big-emoji">&#127874;</span>
+      <h2 class="qz-intro-title">
+        Hey <span class="qz-hl">{% if request.user.is_authenticated %}{{ request.user.first_name|default:"there" }}{% else %}there{% endif %}</span>!<br>
+        Let's Find Your <span class="qz-hl">Perfect Cake!</span>
+      </h2>
+      <p class="qz-intro-sub">Answer 5 fun questions and we'll recommend cakes that were basically made for you. Only takes a minute!</p>
+      <button class="qz-start-btn" onclick="qzStart()">Let's Go! &#128640;</button>
+      <div class="qz-pills">
+        <span class="qz-pill">&#10024; Takes 1 min</span>
+        <span class="qz-pill">&#127919; Personalised picks</span>
+        <span class="qz-pill">&#127856; 5 quick questions</span>
+      </div>
+    </div>
+
+    <!-- STEP -->
+    <div id="qzStepWrap" style="display:none;width:100%;">
+      <div class="qz-prog">
+        <div class="qz-prog-top">
+          <span class="qz-prog-label">&#127874; Cake Quiz</span>
+          <span class="qz-prog-step" id="qzStepText">Step 1 of 5</span>
+        </div>
+        <div class="qz-track"><div class="qz-fill" id="qzFill" style="width:20%"></div></div>
+        <div class="qz-dots" id="qzDots"></div>
+      </div>
+      <div class="qz-q-card" id="qzQCard"></div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="qz-results" id="qzResults">
+      <div class="qr-hero">
+        <div class="qr-confetti" id="qrConfetti">&#127882;</div>
+        <p class="qr-sublabel">Your Cake Personality</p>
+        <h2 class="qr-title" id="qrTitle">The Decadent Dreamer</h2>
+        <p class="qr-desc" id="qrDesc">You love bold, rich flavours!</p>
+        <div class="qr-tags" id="qrTags"></div>
+      </div>
+      <p class="qr-reco-title">&#127775; Your Personalised Recommendations</p>
+      <div class="qr-grid" id="qrGrid"></div>
+      <div class="qr-actions">
+        <a class="qr-btn qr-primary" href="{% url 'creake:index' %}#main-content">&#128717;&#65039; Shop All Cakes</a>
+        <button class="qr-btn qr-secondary" onclick="qzRetake()">&#128260; Retake Quiz</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ========== SCRIPTS ========== -->
+<script>
+var QZ_QUESTIONS = [
+  {id:'mood',tag:'Question 1',emoji:'\u{1F60A}',title:"What's your cake mood today?",sub:'Pick the vibe that speaks to your soul.',layout:'c2',opts:[{ic:'\u{1F525}',lb:'Bold & Indulgent',ds:'Go big or go home!',v:'bold'},{ic:'\u{1F338}',lb:'Light & Delicate',ds:'Soft and pretty.',v:'light'},{ic:'\u{1F389}',lb:'Fun & Festive',ds:'Celebration mode!',v:'festive'},{ic:'\u{1F342}',lb:'Cosy & Comforting',ds:'Warm hug in cake form.',v:'cosy'}]},
+  {id:'flavor',tag:'Question 2',emoji:'\u{1F445}',title:'Which flavour family are you?',sub:'Close your eyes and imagine your dream bite.',layout:'c2',opts:[{ic:'\u{1F36B}',lb:'Chocolate',ds:'Dark, milk or white.',v:'chocolate'},{ic:'\u{1F353}',lb:'Fruity',ds:'Fresh, tangy, bright.',v:'strawberry'},{ic:'\u{1F9C1}',lb:'Vanilla',ds:'Classic elegance.',v:'vanilla'},{ic:'\u2764\uFE0F',lb:'Red Velvet',ds:'Dramatic & velvety.',v:'redvelvet'}]},
+  {id:'occasion',tag:'Question 3',emoji:'\u{1F38A}',title:"What's the occasion?",sub:"Every cake has its moment — what's yours?",layout:'c2',opts:[{ic:'\u{1F382}',lb:'Birthday Party',ds:'Make it memorable!',v:'birthday'},{ic:'\u{1F48D}',lb:'Special Romance',ds:'Love is sweet.',v:'romance'},{ic:'\u{1F60B}',lb:'Just Because',ds:'No reason needed.',v:'casual'},{ic:'\u{1F393}',lb:'Achievement',ds:'Celebrate a milestone!',v:'milestone'}]},
+  {id:'texture',tag:'Question 4',emoji:'\u2728',title:'How do you like your cake?',sub:"The texture tells a story — what's yours?",layout:'c2',opts:[{ic:'\u{1F30A}',lb:'Super Moist',ds:'Melts in your mouth.',v:'moist'},{ic:'\u{1F382}',lb:'Classic Layered',ds:'Tall and gorgeous.',v:'layered'},{ic:'\u2601\uFE0F',lb:'Light & Fluffy',ds:'Like a sweet cloud.',v:'fluffy'},{ic:'\u{1F48E}',lb:'Dense & Fudgy',ds:'Rich and satisfying.',v:'fudgy'}]},
+  {id:'topping',tag:'Question 5',emoji:'\u{1F3A8}',title:'Pick your dream topping!',sub:'The finishing touch that makes it you.',layout:'c2',opts:[{ic:'\u{1F353}',lb:'Fresh Berries',ds:'Natural and vibrant.',v:'berries'},{ic:'\u{1F36B}',lb:'Choco Drizzle',ds:'More chocolate!',v:'choco'},{ic:'\u{1F339}',lb:'Buttercream Roses',ds:'Elegant and beautiful.',v:'roses'},{ic:'\u2728',lb:'Gold Sprinkles',ds:'Extra glamorous.',v:'sprinkles'}]}
+];
+
+var QZ_CAKES = [
+  {name:'Chocolate Fudge',price:500,img:"{% static 'creake/images/cakes/cake1.jpg' %}",tags:['bold','chocolate','fudgy','choco','birthday','milestone'],why:'A rich, dense chocolate dream for the bold soul.'},
+  {name:'Vanilla Dream',price:450,img:"{% static 'creake/images/cakes/cake2.jpg' %}",tags:['light','vanilla','fluffy','roses','romance','casual'],why:'Classic elegance with a cloud-like fluffy texture.'},
+  {name:'Strawberry Surprise',price:550,img:"{% static 'creake/images/cakes/cake3.jpg' %}",tags:['festive','strawberry','moist','berries','birthday','casual'],why:'Bright fruity layers bursting with freshness.'},
+  {name:'Red Velvet Luxury',price:600,img:"{% static 'creake/images/cakes/cake4.jpg' %}",tags:['bold','redvelvet','layered','roses','romance','milestone'],why:'Velvety, dramatic and utterly show-stopping.'},
+  {name:'Choco Strawberry',price:580,img:"{% static 'creake/images/cakes/cake5.jpg' %}",tags:['festive','chocolate','moist','berries','choco','birthday'],why:'Chocolate meets strawberry — the best of both worlds.'},
+  {name:'Vanilla Berry',price:470,img:"{% static 'creake/images/cakes/cake6.jpg' %}",tags:['light','cosy','vanilla','fluffy','berries','casual','romance'],why:'Delicate vanilla paired with gorgeous fresh berries.'}
+];
+
+var QZ_PROFILES = {
+  bold:    {name:'The Decadent Dreamer',desc:"You crave bold, rich flavours. Life's too short for bland cake!",cf:'\u{1F525}',tags:['Bold Soul','Flavour Chaser','Indulgent']},
+  light:   {name:'The Delicate Connoisseur',desc:'You appreciate subtle beauty and elegant, airy textures.',cf:'\u{1F338}',tags:['Refined Taste','Elegance Lover','Detail-Oriented']},
+  festive: {name:'The Celebration Queen',desc:"Every day is a party waiting to happen — cake makes it official!",cf:'\u{1F389}',tags:['Party Starter','Joy Spreader','Life of the Party']},
+  cosy:    {name:'The Comfort Seeker',desc:'You find joy in warmth, softness, and everything delicious.',cf:'\u{1F342}',tags:['Cosy Vibes','Comfort Lover','Sweet Soul']}
+};
+</script>
+
+<script src="{% static 'creake/js/quiz.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  initQuizEmojis();
+});
+</script>
+
+</body>
+</html>

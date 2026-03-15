@@ -1,0 +1,106 @@
+
+{% extends 'creake/base_dashboard.html' %}
+{% block title %}Profile{% endblock %}
+{% block nav_profile %}active{% endblock %}
+
+{% block content %}
+
+{% if messages %}
+  {% for message in messages %}
+  <div class="alert-success">&#10003; {{ message }}</div>
+  {% endfor %}
+{% endif %}
+
+<div class="profile-wrap">
+
+  <!-- LEFT COLUMN -->
+  <div>
+    <div class="profile-card">
+      <div class="profile-avatar-wrap">
+        <div class="profile-avatar-big">&#127874;</div>
+        <div class="profile-name-big">{{ request.user.get_full_name|default:request.user.username }}</div>
+        <div class="profile-email-sm">{{ request.user.email }}</div>
+        <div class="pf-badge">&#127775; Sweet Member since {{ request.user.date_joined|date:"M Y" }}</div>
+      </div>
+      <div class="stats-mini-grid">
+        <div class="smg-item"><div class="smg-num">{{ total_orders|default:"0" }}</div><div class="smg-lbl">Orders</div></div>
+        <div class="smg-item"><div class="smg-num">{{ designs_count|default:"0" }}</div><div class="smg-lbl">Designs</div></div>
+        <div class="smg-item"><div class="smg-num">{{ wishlist_count|default:"0" }}</div><div class="smg-lbl">Wishlist</div></div>
+        <div class="smg-item"><div class="smg-num" style="font-size:16px;">&#8369;{{ total_spent|default:"0" }}</div><div class="smg-lbl">Total Spent</div></div>
+      </div>
+    </div>
+
+    <div class="profile-card" style="margin-top:20px;">
+      <h3>&#128205; Saved Addresses</h3>
+      {% for address in addresses %}
+      <div class="address-item">
+        {% if address.is_default %}<div class="address-default">Default</div>{% endif %}
+        <h4>{{ address.label }}</h4>
+        <p>{{ address.street }}<br>{{ address.city }}, {{ address.zip_code }}</p>
+      </div>
+      {% empty %}
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">No saved addresses yet.</p>
+      {% endfor %}
+      <a href="{% url 'creake:add_address' %}" class="add-address-btn">+ Add New Address</a>
+    </div>
+  </div>
+
+  <!-- RIGHT COLUMN -->
+  <div>
+    <div class="profile-card">
+      <h3>&#9999;&#65039; Edit Profile</h3>
+      <form method="post" action="{% url 'creake:profile' %}"> <input type="hidden" name="update_profile" value="1"></form>
+        {% csrf_token %}
+        <div class="pf-two-col">
+          <div class="pf-field"><label>First Name</label><input type="text" name="first_name" value="{{ request.user.first_name }}"></div>
+          <div class="pf-field"><label>Last Name</label><input type="text" name="last_name" value="{{ request.user.last_name }}"></div>
+        </div>
+        <div class="pf-field"><label>Email Address</label><input type="email" name="email" value="{{ request.user.email }}"></div>
+        <div class="pf-field"><label>Phone Number</label><input type="tel" name="phone" value="{{ profile.phone|default:'' }}"></div>
+        <div class="pf-field"><label>Birthday</label><input type="date" name="birthday" value="{{ profile.birthday|date:'Y-m-d'|default:'' }}"></div>
+        <div class="pf-field">
+          <label>Favourite Cake</label>
+          <select name="favourite_cake">
+            <option value="">-- Select --</option>
+            {% for cake in cakes %}
+            <option value="{{ cake.id }}" {% if profile.favourite_cake_id == cake.id %}selected{% endif %}>{{ cake.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="pf-save">Save Changes</button>
+      </form>
+    </div>
+
+    <div class="profile-card" style="margin-top:20px;">
+      <h3>&#128276; Notifications</h3>
+      <form method="post" action="{% url 'creake:profile' %}"> <input type="hidden" name="update_notifications" value="1"></form>
+        {% csrf_token %}
+        <div class="pref-row">
+          <div><label>Order Updates</label><br><span>SMS and email alerts</span></div>
+          <div class="toggle-sw {% if profile.notif_orders %}on{% endif %}" onclick="toggleNotif(this,'notif_orders')"></div>
+          <input type="hidden" name="notif_orders" id="notif_orders" value="{{ profile.notif_orders|yesno:'on,' }}">
+        </div>
+        <div class="pref-row">
+          <div><label>Promotions</label><br><span>Deals and discounts</span></div>
+          <div class="toggle-sw {% if profile.notif_promos %}on{% endif %}" onclick="toggleNotif(this,'notif_promos')"></div>
+          <input type="hidden" name="notif_promos" id="notif_promos" value="{{ profile.notif_promos|yesno:'on,' }}">
+        </div>
+        <div class="pref-row">
+          <div><label>New Arrivals</label><br><span>Fresh cake drops</span></div>
+          <div class="toggle-sw {% if profile.notif_arrivals %}on{% endif %}" onclick="toggleNotif(this,'notif_arrivals')"></div>
+          <input type="hidden" name="notif_arrivals" id="notif_arrivals" value="{{ profile.notif_arrivals|yesno:'on,' }}">
+        </div>
+        <div class="pref-row">
+          <div><label>Quiz Reminders</label><br><span>Monthly cake quiz</span></div>
+          <div class="toggle-sw {% if profile.notif_quiz %}on{% endif %}" onclick="toggleNotif(this,'notif_quiz')"></div>
+          <input type="hidden" name="notif_quiz" id="notif_quiz" value="{{ profile.notif_quiz|yesno:'on,' }}">
+        </div>
+        <div style="margin-top:14px;">
+          <button type="submit" class="pf-save" style="width:100%;">Save Preferences</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

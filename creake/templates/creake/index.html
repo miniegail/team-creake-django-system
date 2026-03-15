@@ -1,0 +1,351 @@
+Try AI directly in your favorite apps … Use Gemini to generate drafts and refine content, plus get Gemini Pro with access to Google's next-gen AI for ₱1,100 ₱0 for 1 month
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CREAKE - Shop Cakes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'creake/css/index.css' %}">
+</head>
+<body>
+
+<!-- ========== HEADER ========== -->
+<header class="site-header">
+  <div class="header-logo">
+    <img src="{% static 'creake/images/creaked.png' %}" alt="CREAKE Logo" onclick="scrollToSection('hero-banner')">
+  </div>
+  <nav class="header-nav">
+    <a id="homeNav" href="#hero-banner" class="active">&#127968; Home</a>
+    <a id="browseNav" href="#main-content">&#127874; Browse</a>
+    <a class="cart-icon-btn" onclick="toggleCart()" href="#">&#128722; Cart<span class="cart-count" id="cartCount">0</span></a>
+    {% if request.user.is_authenticated %}
+    <div class="user-dropdown-wrap">
+      <button class="user-nav-btn" onclick="toggleUserDropdown()">
+        {% if request.user.is_staff %}&#128737;&#65039;{% else %}&#128100;{% endif %}
+        {{ request.user.first_name|default:request.user.username }}
+        <span style="font-size:10px;">&#9660;</span>
+      </button>
+      <div class="user-dropdown" id="userDropdown">
+        <div class="user-dropdown-header">
+          <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+          <span>{% if request.user.is_staff %}&#128737;&#65039; Admin{% else %}&#128100; User{% endif %}</span>
+        </div>
+        <a href="{% url 'creake:delivery' %}">&#127874; Dashboard</a>
+        <a href="{% url 'creake:quiz' %}">&#127919; Cake Quiz</a>
+        <a href="{% url 'creake:order_history' %}">&#128203; My Orders</a>
+        <form method="post" action="{% url 'creake:logout' %}" style="margin:0;">
+          {% csrf_token %}
+          <button type="submit" class="logout-item">&#128682; Log Out</button>
+        </form>
+      </div>
+    </div>
+    {% else %}
+    <a id="loginNav" class="login-btn" onclick="openAuthModal()">&#128100; Log In</a>
+    {% endif %}
+    <button class="mobile-menu-btn" onclick="toggleMobileFilters()">&#9776;</button>
+  </nav>
+</header>
+
+<!-- ========== HERO BANNER ========== -->
+<div class="hero-banner" id="hero-banner">
+  <div class="banner-bg">
+    <div class="banner-shape"></div>
+    <div class="banner-shape"></div>
+    <div class="banner-shape"></div>
+    <div class="banner-dots">
+      <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      <div class="dot"></div><div class="dot"></div>
+    </div>
+  </div>
+  <div class="floating-cake-image strawberry-cake-floating"><img src="{% static 'creake/images/straw.png' %}" alt=""></div>
+  <div class="floating-cake-image matcha-cake-floating"><img src="{% static 'creake/images/coco.png' %}" alt=""></div>
+  <div class="floating-cake-image chocolate-cake-floating"><img src="{% static 'creake/images/choco.png' %}" alt=""></div>
+  <div class="floating-cake-image lemon-cake-floating"><img src="{% static 'creake/images/lemon.png' %}" alt=""></div>
+  <div class="banner-content">
+    <div class="banner-logo-wrapper">
+      <div class="banner-logo"><img src="{% static 'creake/images/logo.png' %}" alt="CREAKE Banner Logo"></div>
+      <p class="banner-tagline">Create Your Dream Cake.</p>
+      <a href="" class="btn">Start Creaking</a>
+    </div>
+  </div>
+  <div class="banner-decoration"></div>
+</div>
+
+<!-- ========== MAIN SHOP ========== -->
+<div class="main-content" id="main-content">
+  <aside class="filters-panel">
+    <h3>&#128269; Filters</h3>
+    <div class="filter-group">
+      <label>Category</label>
+      <select id="categoryFilter">
+        <option value="all">All Categories</option>
+        <option value="chocolate">&#127851; Chocolate</option>
+        <option value="vanilla">&#129361; Vanilla</option>
+        <option value="strawberry">&#127827; Strawberry</option>
+        <option value="redvelvet">&#10084;&#65039; Red Velvet</option>
+      </select>
+    </div>
+    <div class="filter-group"><label>Search</label><input type="text" id="searchCake" placeholder="Type cake name..."></div>
+    <div class="filter-group">
+      <label>Price Range</label>
+      <input type="range" id="priceRange" min="0" max="1000" value="1000">
+      <div class="price-range-display">Up to &#8369;<span id="priceDisplay">1000</span></div>
+    </div>
+    <div class="filter-group">
+      <label>Rating</label>
+      <select id="ratingFilter">
+        <option value="0">All Ratings</option>
+        <option value="3">&#11088; 3+ Stars</option>
+        <option value="4">&#11088;&#11088; 4+ Stars</option>
+        <option value="5">&#11088;&#11088;&#11088; 5 Stars</option>
+      </select>
+    </div>
+    <div class="filter-actions">
+      <button onclick="applyFilters()">&#10003; Apply</button>
+      <button class="clear-btn" onclick="clearFilters()">&#8635; Reset</button>
+    </div>
+  </aside>
+
+  <div class="content-area">
+    <div class="top-bar">
+      <div class="results-count"><strong id="resultsCount">0</strong> cakes found</div>
+      <div class="sort-container">
+        <label>Sort:</label>
+        <select id="sortBy">
+          <option value="name">Name (A-Z)</option>
+          <option value="price-low">Price &#8593;</option>
+          <option value="price-high">Price &#8595;</option>
+          <option value="rating">Top Rated</option>
+          <option value="newest">Newest</option>
+        </select>
+      </div>
+      <div class="view-toggle">
+        <button class="active" onclick="setGridView(3)">&#8862;&#8862;&#8862;</button>
+        <button onclick="setGridView(2)">&#8862;&#8862;</button>
+        <button onclick="setGridView(1)">&#8862;</button>
+      </div>
+    </div>
+    <div class="cake-grid" id="cakeGrid"></div>
+  </div>
+</div>
+
+<!-- ========== CART MODAL ========== -->
+<div class="cart-modal" id="cartModal">
+  <div class="cart-sidebar">
+    <div class="cart-header">
+      <span>&#128722; Your Cart</span>
+      <button class="close-cart" onclick="toggleCart()">&#10005;</button>
+    </div>
+    <div class="cart-items-list" id="cartItemsList">
+      <div class="cart-empty">
+        <div class="cart-empty-icon">&#128722;</div>
+        <p><strong>Your cart is empty!</strong></p>
+        <p style="font-size:12px;color:#999;margin-top:10px;">Add some delicious cakes to get started.</p>
+      </div>
+    </div>
+    <div class="cart-footer">
+      <div class="cart-summary"><span>Subtotal:</span><span id="subtotal">&#8369;0.00</span></div>
+      <div class="cart-summary"><span>Delivery:</span><span id="delivery">&#8369;0.00</span></div>
+      <div class="cart-summary"><span class="total">Total:</span><span class="total" id="total">&#8369;0.00</span></div>
+      <button class="checkout-btn" id="checkoutBtn" onclick="openCheckout()" disabled>Proceed to Checkout</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========== CHECKOUT MODAL ========== -->
+<div class="checkout-modal" id="checkoutModal">
+  <div class="checkout-container">
+    <h2>&#128230; Checkout</h2>
+    <div class="checkout-order-summary" id="checkoutSummary"></div>
+    <form id="checkoutForm">
+      {% csrf_token %}
+      <div class="form-group"><label>Full Name</label><input type="text" id="fullName" placeholder="John Doe" required></div>
+      <div class="form-group"><label>Email</label><input type="email" id="emailField" placeholder="john@example.com" required value="{{ request.user.email }}"></div>
+      <div class="form-group"><label>Phone</label><input type="tel" id="phoneField" placeholder="+63 9XX XXX XXXX" required></div>
+      <div class="form-group"><label>Address</label><input type="text" id="address" placeholder="123 Main St, City" required></div>
+      <div class="form-row">
+        <div class="form-group"><label>City</label><input type="text" id="city" placeholder="Manila" required></div>
+        <div class="form-group"><label>Zip Code</label><input type="text" id="postalCode" placeholder="1000" required></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Delivery</label>
+          <select id="deliveryType" required onchange="updateDelivery()">
+            <option value="">Select delivery</option>
+            <option value="standard">Standard (&#8369;50)</option>
+            <option value="express">Express (&#8369;150)</option>
+            <option value="sameday">Same Day (&#8369;300)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Payment</label>
+          <select id="paymentMethod" required>
+            <option value="">Select payment</option>
+            <option value="credit">&#128179; Credit Card</option>
+            <option value="debit">&#128179; Debit Card</option>
+            <option value="paypal">&#127837;&#65039; PayPal</option>
+            <option value="cod">&#128181; Cash on Delivery</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label>Special Instructions (Optional)</label><input type="text" id="notes" placeholder="Any special requests?"></div>
+      <div class="checkout-buttons">
+        <button type="button" class="cancel-checkout" onclick="closeCheckout()">Cancel</button>
+        <button type="submit" class="place-order-btn">Place Order</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ========== AUTH MODAL (guests only) ========== -->
+{% if not request.user.is_authenticated %}
+<div class="auth-modal-overlay" id="authModalOverlay" onclick="handleOverlayClick(event)">
+  <div class="auth-modal-bg"><div class="am-blob am-blob-1"></div><div class="am-blob am-blob-2"></div></div>
+  <span class="am-emoji" style="left:5%;top:70%;animation-duration:8s;">&#127874;</span>
+  <span class="am-emoji" style="left:90%;top:60%;animation-duration:10s;">&#129361;</span>
+  <span class="am-emoji" style="left:15%;top:80%;animation-duration:12s;">&#127827;</span>
+  <span class="am-emoji" style="left:80%;top:75%;animation-duration:9s;">&#127856;</span>
+  <div class="auth-card">
+    <div class="card-header">
+      <button class="card-close-btn" onclick="closeAuthModal()">&#10005;</button>
+      <img src="{% static 'creake/images/logo.png' %}" alt="CREAKE" class="card-logo" onerror="this.style.display='none'">
+      <h1 id="authCardTitle">Welcome Back!</h1>
+      <p id="authCardSubtitle">Sign in to your sweet account &#127856;</p>
+    </div>
+    <div class="card-body">
+
+      <!-- LOGIN -->
+      <div class="form-panel-auth active" id="panelLogin">
+        <form method="post" action="{% url 'creake:login' %}" id="loginForm">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <div class="auth-form-group">
+            <label>Email Address</label>
+            <div class="input-wrap">
+              <span class="input-icon">&#128231;</span>
+              <input type="email" name="username" id="loginEmail" placeholder="you@example.com" autocomplete="email" required>
+            </div>
+          </div>
+          <div class="auth-form-group">
+            <label>Password</label>
+            <div class="input-wrap">
+              <span class="input-icon">&#128274;</span>
+              <input type="password" name="password" id="loginPassword" placeholder="Your password" autocomplete="current-password" required>
+              <button type="button" class="toggle-pw" onclick="togglePassword('loginPassword',this)">&#128065;&#65039;</button>
+            </div>
+          </div>
+          <div class="forgot-link"><a href="{% url 'password_reset' %}">Forgot Password?</a></div>
+          {% if messages %}
+          {% for msg in messages %}
+          <div class="field-error" style="display:block;margin-bottom:10px;">{{ msg }}</div>
+          {% endfor %}
+          {% endif %}
+          <button type="submit" class="auth-submit-btn">&#128273; Log In</button>
+        </form>
+        <div class="switch-link">Don't have an account? <a onclick="switchAuthTab('signup')">Sign Up</a></div>
+      </div>
+
+      <!-- SIGNUP -->
+      <div class="form-panel-auth" id="panelSignup">
+        <form method="post" action="{% url 'creake:register' %}" id="signupForm">
+          {% csrf_token %}
+          <div class="auth-form-row">
+            <div class="auth-form-group">
+              <label>First Name</label>
+              <div class="input-wrap"><span class="input-icon">&#128100;</span><input type="text" name="first_name" placeholder="Jane" autocomplete="given-name" required></div>
+            </div>
+            <div class="auth-form-group">
+              <label>Last Name</label>
+              <div class="input-wrap"><span class="input-icon">&#128100;</span><input type="text" name="last_name" placeholder="Doe" autocomplete="family-name" required></div>
+            </div>
+          </div>
+          <div class="auth-form-group">
+            <label>Email Address</label>
+            <div class="input-wrap"><span class="input-icon">&#128231;</span><input type="email" name="email" placeholder="you@example.com" autocomplete="email" required></div>
+          </div>
+          <div class="auth-form-group">
+            <label>Phone Number</label>
+            <div class="input-wrap"><span class="input-icon">&#128242;</span><input type="tel" name="phone" placeholder="+63 9XX XXX XXXX" autocomplete="tel" required></div>
+          </div>
+          <div class="auth-form-group">
+            <label>Password</label>
+            <div class="input-wrap">
+              <span class="input-icon">&#128274;</span>
+              <input type="password" name="password1" id="signupPassword" placeholder="Create a strong password" autocomplete="new-password" oninput="checkStrength(this.value)" required>
+              <button type="button" class="toggle-pw" onclick="togglePassword('signupPassword',this)">&#128065;&#65039;</button>
+            </div>
+            <div class="pw-strength" id="pwStrength">
+              <div class="pw-strength-bar"><div class="pw-strength-fill" id="pwFill"></div></div>
+              <div class="pw-strength-label" id="pwLabel">Too short</div>
+            </div>
+          </div>
+          <div class="auth-form-group">
+            <label>Confirm Password</label>
+            <div class="input-wrap">
+              <span class="input-icon">&#128274;</span>
+              <input type="password" name="password2" placeholder="Re-enter password" autocomplete="new-password" required>
+              <button type="button" class="toggle-pw" onclick="togglePassword('signupPassword',this)">&#128065;&#65039;</button>
+            </div>
+          </div>
+          <button type="submit" class="auth-submit-btn">&#127874; Create Account</button>
+        </form>
+        <div class="switch-link">Already have an account? <a onclick="switchAuthTab('login')">Log In</a></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- ========== SCRIPTS ========== -->
+
+<!-- Django data — template tags required, cannot go in .js files -->
+<script>
+var cakesData = [
+  {% for cake in cakes %}
+  {
+    name:     "{{ cake.name|escapejs }}",
+    category: "{{ cake.category|escapejs }}",
+    desc:     "{{ cake.description|escapejs }}",
+    price:    {{ cake.price }},
+    img:      "{% static 'creake/images/' %}{{ cake.image }}",
+    badge:    "{{ cake.badge|default:''|escapejs }}",
+    rating:   {{ cake.rating|default:0 }},
+    reviews:  {{ cake.review_count|default:0 }},
+    new:      {{ cake.is_new|yesno:"true,false" }}
+  }
+  
+  {% if not forloop.last %},{% endif %}
+  {% empty %}
+  {name:"Chocolate Fudge",category:"chocolate",desc:"Rich chocolate cake",price:500,img:"{% static 'creake/images/cakes/cake1.jpg' %}",badge:"Best Seller",rating:4.8,reviews:324,new:false},
+  {name:"Vanilla Dream",category:"vanilla",desc:"Classic vanilla delight",price:450,img:"{% static 'creake/images/cakes/cake2.jpg' %}",badge:"New",rating:4.6,reviews:98,new:true},
+  {name:"Strawberry Surprise",category:"strawberry",desc:"Fresh strawberry layers",price:550,img:"{% static 'creake/images/cakes/cake3.jpg' %}",badge:"",rating:4.7,reviews:156,new:false},
+  {name:"Red Velvet Luxury",category:"redvelvet",desc:"Velvety red cake with cream",price:600,img:"{% static 'creake/images/cakes/cake4.jpg' %}",badge:"Best Seller",rating:4.9,reviews:287,new:false},
+  {name:"Choco Strawberry",category:"chocolate",desc:"Chocolate & strawberry mix",price:580,img:"{% static 'creake/images/cakes/cake5.jpg' %}",badge:"",rating:4.5,reviews:189,new:false},
+  {name:"Vanilla Berry",category:"vanilla",desc:"Vanilla with berries",price:470,img:"{% static 'creake/images/cakes/cake6.jpg' %}",badge:"New",rating:4.4,reviews:67,new:true}
+  {% endfor %}
+];
+
+{% for message in messages %}
+document.addEventListener('DOMContentLoaded', function() {
+  showNotification("{{ message|escapejs }}", "{% if message.tags %}{{ message.tags }}{% else %}success{% endif %}");
+});
+{% endfor %}
+</script>
+
+<!-- External JS -->
+<script src="{% static 'creake/js/index.js' %}"></script>
+
+<!-- Init -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  initShop();
+});
+</script>
+
+</body>
+</html>

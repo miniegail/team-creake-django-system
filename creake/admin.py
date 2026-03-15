@@ -1,65 +1,79 @@
-from django.contrib import admin # type: ignore
-from .models import Cake, Order, OrderItem
-
+from django.contrib import admin
+from .models import Cake, Order, CakeDesign, Wishlist, UserProfile, Address
 
 @admin.register(Cake)
 class CakeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'category', 'price', 'rating', 'is_bestseller', 'is_new', 'stock')
-    list_filter = ('category', 'is_bestseller', 'is_new', 'created_at')
+    list_display = ('name', 'category', 'price', 'is_new', 'created_at')
+    list_filter = ('category', 'is_new', 'created_at')
     search_fields = ('name', 'description')
-    readonly_fields = ('created_at', 'updated_at')
     fieldsets = (
         ('Basic Info', {
-            'fields': ('name', 'category', 'description')
+            'fields': ('name', 'category', 'description', 'price')
         }),
-        ('Pricing & Stock', {
-            'fields': ('price', 'stock')
+        ('Image & Display', {
+            'fields': ('image', 'badge', 'is_new')
         }),
-        ('Ratings', {
-            'fields': ('rating', 'reviews')
-        }),
-        ('Status', {
-            'fields': ('is_new', 'is_bestseller')
-        }),
-        ('Media', {
-            'fields': ('image',)
-        }),
-        ('Timestamps', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
+        ('Rating', {
+            'fields': ('rating', 'review_count')
         }),
     )
 
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ('id', 'full_name', 'email', 'total_amount', 'status', 'created_at')
-    list_filter = ('status', 'delivery_type', 'payment_method', 'created_at')
-    search_fields = ('full_name', 'email', 'phone')
-    readonly_fields = ('created_at', 'updated_at')
+    list_display = ('id', 'user', 'cake_name', 'total', 'status', 'created_at')
+    list_filter = ('status', 'created_at')
+    search_fields = ('user__username', 'cake_name', 'address')
+    readonly_fields = ('created_at', 'user')
     fieldsets = (
         ('Order Info', {
-            'fields': ('id', 'status', 'total_amount', 'created_at', 'updated_at')
+            'fields': ('user', 'id', 'created_at', 'status')
         }),
-        ('Customer Info', {
-            'fields': ('full_name', 'email', 'phone')
+        ('Cake Details', {
+            'fields': ('cake_name', 'quantity', 'total')
         }),
-        ('Delivery Address', {
-            'fields': ('address', 'city', 'postal_code')
+        ('Delivery', {
+            'fields': ('delivery_type', 'address', 'city', 'zip_code', 'phone', 'rider_name', 'estimated_arrival')
         }),
-        ('Delivery & Payment', {
-            'fields': ('delivery_type', 'payment_method')
+        ('Payment', {
+            'fields': ('payment_method',)
         }),
-        ('Special Instructions', {
-            'fields': ('special_instructions',),
-            'classes': ('collapse',)
+        ('Tracking', {
+            'fields': ('step', 'paid_at', 'baking_at', 'delivered_at')
         }),
     )
 
 
-@admin.register(OrderItem)
-class OrderItemAdmin(admin.ModelAdmin):
-    list_display = ('order', 'cake', 'quantity', 'price')
-    list_filter = ('order__created_at', 'cake__category')
-    search_fields = ('order__full_name', 'cake__name')
-    readonly_fields = ('order', 'cake', 'price')
+@admin.register(CakeDesign)
+class CakeDesignAdmin(admin.ModelAdmin):
+    list_display = ('name', 'user', 'layers', 'created_at')
+    list_filter = ('created_at', 'layers')
+    search_fields = ('name', 'user__username')
+
+
+@admin.register(Wishlist)
+class WishlistAdmin(admin.ModelAdmin):
+    list_display = ('user', 'cake', 'added_at')
+    list_filter = ('added_at',)
+    search_fields = ('user__username', 'cake__name')
+
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'phone', 'created_at')
+    search_fields = ('user__username', 'user__email')
+    fieldsets = (
+        ('User Info', {
+            'fields': ('user', 'phone', 'birthday', 'favourite_cake')
+        }),
+        ('Notifications', {
+            'fields': ('notif_orders', 'notif_promos', 'notif_arrivals', 'notif_quiz')
+        }),
+    )
+
+
+@admin.register(Address)
+class AddressAdmin(admin.ModelAdmin):
+    list_display = ('user', 'label', 'city', 'is_default')
+    list_filter = ('is_default', 'created_at')
+    search_fields = ('user__username', 'city')
