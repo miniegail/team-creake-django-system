@@ -14,6 +14,25 @@
         html, body { width: 100%; min-height: 100%; overflow-x: hidden; }
         body { font-family: 'Poppins', sans-serif; background: #fffaf5; min-height: 100vh; padding-top: 75px; }
 
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeInUp  { from{opacity:0;transform:translateY(18px);} to{opacity:1;transform:translateY(0);} }
+        @keyframes fadeIn    { from{opacity:0;} to{opacity:1;} }
+        @keyframes popIn     { from{opacity:0;transform:scale(0.93);} to{opacity:1;transform:scale(1);} }
+        @keyframes shimmer   { 0%{background-position:-600px 0;} 100%{background-position:600px 0;} }
+        @keyframes bounce    { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
+        @keyframes dropDown  { from{opacity:0;transform:translateY(-8px);} to{opacity:1;transform:translateY(0);} }
+        @keyframes slideUp   { from{opacity:0;transform:translateY(40px) scale(0.97);} to{opacity:1;transform:translateY(0) scale(1);} }
+        @keyframes toastIn   { from{transform:translateY(50px);opacity:0;} to{transform:translateY(0);opacity:1;} }
+        @keyframes priceFlash{ 0%{color:#d7736b;} 40%{color:#e03a20;transform:scale(1.1);} 100%{color:#d7736b;transform:scale(1);} }
+        @keyframes checkPop  { 0%{transform:scale(0) rotate(-20deg);} 70%{transform:scale(1.3) rotate(5deg);} 100%{transform:scale(1) rotate(0);} }
+        @keyframes ripple    { to{transform:scale(4);opacity:0;} }
+
+        .page-entry          { animation: fadeInUp 0.5s ease both; }
+        .page-entry-delay-1  { animation: fadeInUp 0.5s 0.08s ease both; }
+        .page-entry-delay-2  { animation: fadeInUp 0.5s 0.16s ease both; }
+        .page-entry-delay-3  { animation: fadeInUp 0.5s 0.24s ease both; }
+        .page-entry-delay-4  { animation: fadeInUp 0.5s 0.32s ease both; }
+
         /* ===== HEADER ===== */
         .site-header { position: fixed; top: 0; left: 0; right: 0; height: 75px; padding: 0 40px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, #d7736b 0%, #c9605a 100%); box-shadow: 0 6px 20px rgba(215,115,107,0.25); z-index: 1000; }
         .header-logo a { display: flex; align-items: center; }
@@ -22,143 +41,290 @@
         .header-nav { display: flex; gap: 12px; align-items: center; }
         .header-nav a { background: transparent; border: 2px solid white; padding: 8px 18px; border-radius: 25px; font-weight: 500; color: white; transition: all 0.3s; font-size: 14px; font-family: 'Poppins', sans-serif; text-decoration: none; display: flex; align-items: center; gap: 6px; }
         .header-nav a:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
-        .user-nav-btn { background: white !important; border: 2px solid white !important; color: #d7736b !important; font-weight: 700 !important; padding: 9px 20px !important; border-radius: 25px !important; cursor: pointer !important; font-size: 14px !important; font-family: 'Poppins', sans-serif !important; display: flex !important; align-items: center !important; gap: 6px !important; }
-        .user-nav-btn:hover { transform: translateY(-2px) !important; }
+        .user-nav-btn { background: white !important; border: 2px solid white !important; color: #d7736b !important; font-weight: 700 !important; padding: 9px 20px !important; border-radius: 25px !important; cursor: pointer !important; font-size: 14px !important; font-family: 'Poppins', sans-serif !important; display: flex !important; align-items: center !important; gap: 6px !important; transition: all 0.3s !important; }
+        .user-nav-btn:hover { transform: translateY(-2px) !important; box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important; }
         .user-dropdown-wrap { position: relative; }
         .user-dropdown { display: none; position: absolute; top: calc(100% + 10px); right: 0; background: white; border-radius: 14px; box-shadow: 0 12px 35px rgba(0,0,0,0.15); min-width: 180px; overflow: hidden; z-index: 2000; }
         .user-dropdown.open { display: block; animation: dropDown 0.2s ease; }
-        @keyframes dropDown { from{opacity:0;transform:translateY(-8px);} to{opacity:1;transform:translateY(0);} }
         .user-dropdown-header { background: linear-gradient(135deg,#d7736b,#c9605a); padding: 14px 16px; color: white; font-size: 13px; }
         .user-dropdown-header strong { display: block; font-size: 14px; }
         .user-dropdown-header span { font-size: 11px; opacity: 0.85; background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 20px; margin-top: 4px; display: inline-block; }
-        .user-dropdown a, .user-dropdown button { display: block; width: 100%; padding: 11px 16px; text-align: left; border: none; background: none; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 500; color: #555; cursor: pointer; transition: 0.2s; text-decoration: none; }
-        .user-dropdown a:hover, .user-dropdown button:hover { background: #fff5f5; color: #d7736b; }
+        .user-dropdown a, .user-dropdown button { display: block; width: 100%; padding: 11px 16px; text-align: left; border: none; background: none; font-family: 'Poppins', sans-serif; font-size: 13px; font-weight: 500; color: #555; cursor: pointer; transition: all 0.2s; text-decoration: none; }
+        .user-dropdown a:hover, .user-dropdown button:hover { background: #fff5f5; color: #d7736b; padding-left: 22px; }
         .user-dropdown .logout-item { color: #ff6b6b; border-top: 1px solid #f5f5f5; }
 
         /* ===== LAYOUT ===== */
         .page-body { padding: 24px 20px; }
-        .main-wrapper { max-width: 1900px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: auto auto auto; gap: 20px; }
-
-        /* ===== PAGE TITLE ===== */
-        .header-section { grid-column: 1 / -1; background: linear-gradient(135deg, #ffffff 0%, #ffe4f6 100%); padding: 10px; border-radius: 15px; border: 2px solid #d7736b; text-align: center; box-shadow: 0 4px 15px rgba(215,115,107,0.10); }
-        .header-section h1 { color: #d7736b; font-size: 32px; letter-spacing: 3px; text-transform: uppercase; font-weight: 700; }
+        .main-wrapper {
+            max-width: 1900px; margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            grid-template-rows: auto auto;
+            grid-template-areas:
+                "panel  sig    sig"
+                "panel  prev   order";
+            gap: 20px;
+            align-items: start;
+        }
 
         /* ===== CUSTOMIZATION PANEL ===== */
-        .customization-panel { background: linear-gradient(135deg, #ffffff 0%, #fffaf5 100%); padding: 25px; border-radius: 5px; border: 2px solid #f0b9b5; overflow-y: auto; max-height: 625px; box-shadow: 0 4px 15px rgba(215,115,107,0.08); }
-        .section { margin-bottom: 18px; padding-bottom: 15px; border-bottom: 1px solid #f0b9b5; }
-        .section:last-child { border-bottom: none; }
-        .section h3 { color: #d7736b; margin-bottom: 10px; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; }
+        .customization-panel { grid-area: panel; background: linear-gradient(135deg, #ffffff 0%, #fffaf5 100%); padding: 22px; border-radius: 15px; border: 2px solid #f0b9b5; overflow-y: auto; max-height: calc(100vh - 99px); box-shadow: 0 4px 15px rgba(215,115,107,0.08); position: sticky; top: 99px; align-self: start; }
+        .section { margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid #f0b9b5; }
+        .section:last-child { border-bottom: none; margin-bottom: 0; }
+        .section h3 { color: #d7736b; margin-bottom: 10px; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; display: flex; align-items: center; gap: 6px; }
+        .section h3::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg,#f0b9b5,transparent); }
+
+        /* ===== PROGRESS BAR ===== */
+        .progress-wrap { margin-bottom: 14px; }
+        .progress-bar { display: flex; gap: 3px; margin-bottom: 4px; }
+        .progress-step { flex: 1; height: 4px; border-radius: 99px; background: #f0d8d6; transition: background 0.4s; }
+        .progress-step.done { background: linear-gradient(90deg,#d7736b,#c9605a); }
+        .progress-label { font-size: 10px; color: #c08880; font-weight: 500; text-align: right; }
+
+        /* ===== RADIO (size) ===== */
         .option-group { display: flex; gap: 8px; flex-wrap: wrap; }
-        .radio-option { flex: 1; min-width: 70px; display: flex; align-items: center; justify-content: center; padding: 8px; border: 2px solid #f0b9b5; border-radius: 8px; background: #ffffff; cursor: pointer; transition: all 0.3s; color: #d7736b; font-weight: 600; }
-        .radio-option:hover { background: #ffe4f6; border-color: #d7736b; box-shadow: 0 2px 8px rgba(215,115,107,0.15); }
+        .radio-option { flex: 1; min-width: 60px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 6px; border: 2px solid #f0b9b5; border-radius: 10px; background: #ffffff; cursor: pointer; transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1); color: #d7736b; gap: 1px; }
+        .radio-option:hover { border-color: #d7736b; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(215,115,107,0.18); background: #fff5fb; }
         .radio-option input[type="radio"] { display: none; }
-        .radio-option input[type="radio"]:checked + span { font-weight: 700; text-decoration: underline; color: #d7736b; }
-        .radio-option span { font-size: 11px; font-weight: 600; }
-        .dropdown { width: 100%; padding: 10px; border: 2px solid #f0b9b5; border-radius: 8px; font-size: 11px; background: #ffffff; color: #d7736b; cursor: pointer; transition: all 0.3s; font-family: inherit; font-weight: 600; }
-        .dropdown:hover { border-color: #d7736b; background: #ffe4f6; }
-        .dropdown option { background: #ffffff; color: #d7736b; }
-        .checkbox-group { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-        .checkbox-option { display: flex; align-items: center; justify-content: center; padding: 8px; border: 2px solid #f0b9b5; border-radius: 8px; background: #ffffff; cursor: pointer; transition: all 0.3s; color: #d7736b; font-size: 10px; font-weight: 600; text-align: center; min-height: 40px; }
-        .checkbox-option:hover { background: #ffe4f6; border-color: #d7736b; }
-        .checkbox-option input[type="checkbox"] { display: none; }
-        .checkbox-option input[type="checkbox"]:checked + span { text-decoration: underline; color: #d7736b; }
-        textarea { width: 100%; padding: 10px; border: 2px solid #f0b9b5; border-radius: 8px; font-size: 11px; background: #ffffff; color: #d7736b; resize: vertical; min-height: 80px; transition: all 0.3s; font-family: inherit; font-weight: 600; }
-        textarea::placeholder { color: #f0b9b5; }
-        textarea:focus { outline: none; border-color: #d7736b; box-shadow: 0 0 0 3px rgba(215,115,107,0.20); }
-        #charCount { display: block; font-size: 10px; color: #f0b9b5; margin-top: 3px; }
+        .radio-option.selected { background: linear-gradient(135deg,#d7736b,#c9605a); border-color: #c9605a; color: white; transform: translateY(-2px); box-shadow: 0 6px 18px rgba(215,115,107,0.38); }
+        .radio-option.selected .size-sub { color: rgba(255,255,255,0.75); }
+        .size-label { font-size: 13px; font-weight: 700; }
+        .size-sub   { font-size: 9px; font-weight: 500; opacity: 0.75; }
+
+        /* ===== DROPDOWNS ===== */
+        .dropdown { width: 100%; padding: 10px 32px 10px 12px; border: 2px solid #f0b9b5; border-radius: 10px; font-size: 11px; background: #ffffff; color: #d7736b; cursor: pointer; transition: all 0.2s; font-family: inherit; font-weight: 600; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='11' height='7' viewBox='0 0 11 7'%3E%3Cpath d='M1 1l4.5 4.5L10 1' fill='none' stroke='%23d7736b' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 11px center; }
+        .dropdown:hover { border-color: #d7736b; background-color: #fff5fb; }
+        .dropdown:focus { outline: none; border-color: #d7736b; box-shadow: 0 0 0 3px rgba(215,115,107,0.14); }
+        .dropdown option { background: #fff; color: #d7736b; }
+
+        /* ===== COLOR SWATCHES ===== */
+        .color-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .color-swatch { width: 34px; height: 34px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1); position: relative; flex-shrink: 0; }
+        .color-swatch:hover { transform: scale(1.18); }
+        .color-swatch.selected { transform: scale(1.18); box-shadow: 0 0 0 3px rgba(215,115,107,0.4); }
+        .color-swatch.selected::after { content: '\2713'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; animation: checkPop 0.3s ease; }
+        .color-swatch[data-color="white"]     { background: #ffffff; border-color: #f0b9b5; }
+        .color-swatch[data-color="white"].selected { border-color: #d7736b; }
+        .color-swatch[data-color="white"].selected::after { color: #d7736b; }
+        .color-swatch[data-color="pink"]      { background: #ff69b4; border-color: #ff69b4; }
+        .color-swatch[data-color="pink"].selected::after  { color: white; }
+        .color-swatch[data-color="red"]       { background: #c41e3a; border-color: #c41e3a; }
+        .color-swatch[data-color="red"].selected::after   { color: white; }
+        .color-swatch[data-color="chocolate"] { background: #8b4513; border-color: #8b4513; }
+        .color-swatch[data-color="chocolate"].selected::after { color: white; }
+        .color-swatch[data-color="blue"]      { background: #4169e1; border-color: #4169e1; }
+        .color-swatch[data-color="blue"].selected::after  { color: white; }
+        .color-swatch[data-color="purple"]    { background: #9370db; border-color: #9370db; }
+        .color-swatch[data-color="purple"].selected::after { color: white; }
+        .color-swatch[data-color="ivory"]     { background: #fffff0; border-color: #e8e8d0; }
+        .color-swatch[data-color="ivory"].selected { border-color: #d7736b; }
+        .color-swatch[data-color="ivory"].selected::after { color: #d7736b; }
+        .color-swatch[data-color="hot-pink"]  { background: #ff1493; border-color: #ff1493; }
+        .color-swatch[data-color="hot-pink"].selected::after { color: white; }
+        .color-swatch[data-color="coral"]     { background: #ff6b6b; border-color: #ff6b6b; }
+        .color-swatch[data-color="coral"].selected::after { color: white; }
+        .color-swatch[data-color="peach"]     { background: #ffcba4; border-color: #f0b090; }
+        .color-swatch[data-color="peach"].selected { border-color: #d7736b; }
+        .color-swatch[data-color="peach"].selected::after { color: #7a4020; }
+        .color-swatch[data-color="orange"]    { background: #ff8c00; border-color: #ff8c00; }
+        .color-swatch[data-color="orange"].selected::after { color: white; }
+        .color-swatch[data-color="yellow"]    { background: #ffd700; border-color: #e8c000; }
+        .color-swatch[data-color="yellow"].selected { border-color: #d7736b; }
+        .color-swatch[data-color="yellow"].selected::after { color: #7a5a00; }
+        .color-swatch[data-color="mint"]      { background: #98ff98; border-color: #70dd70; }
+        .color-swatch[data-color="mint"].selected { border-color: #d7736b; }
+        .color-swatch[data-color="mint"].selected::after { color: #1a5a1a; }
+        .color-swatch[data-color="sage"]      { background: #8fbc8f; border-color: #6a9a6a; }
+        .color-swatch[data-color="sage"].selected::after { color: white; }
+        .color-swatch[data-color="sky"]       { background: #87ceeb; border-color: #60b0d8; }
+        .color-swatch[data-color="sky"].selected { border-color: #d7736b; }
+        .color-swatch[data-color="sky"].selected::after { color: #1a4a7a; }
+        .color-swatch[data-color="navy"]      { background: #001f5b; border-color: #001f5b; }
+        .color-swatch[data-color="navy"].selected::after { color: white; }
+        .color-swatch[data-color="lavender"]  { background: #e6b8f5; border-color: #cc90e8; }
+        .color-swatch[data-color="lavender"].selected { border-color: #d7736b; }
+        .color-swatch[data-color="lavender"].selected::after { color: #6a1a8a; }
+        .color-swatch[data-color="black"]     { background: #222222; border-color: #111111; }
+        .color-swatch[data-color="black"].selected::after { color: white; }
+        .color-active-label { font-size: 11px; color: #d7736b; font-weight: 700; }
+
+        /* ===== FROSTING TYPE CARDS ===== */
+        .frosting-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .frosting-card { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 8px 8px; border: 2px solid #f0b9b5; border-radius: 12px; background: #ffffff; cursor: pointer; transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1); text-align: center; gap: 1px; position: relative; overflow: hidden; }
+        .frosting-card input[type="radio"] { display: none; }
+        .frosting-card:hover { border-color: #d7736b; transform: translateY(-2px); box-shadow: 0 5px 14px rgba(215,115,107,0.18); background: #fff8fb; }
+        .frosting-card.selected { background: linear-gradient(145deg,#d7736b,#c9605a); border-color: #c9605a; transform: translateY(-2px); box-shadow: 0 6px 18px rgba(215,115,107,0.38); }
+        .frosting-card.selected .frosting-name,.frosting-card.selected .frosting-desc,.frosting-card.selected .frosting-price { color: white; }
+        .frosting-card.selected .frosting-desc { color: rgba(255,255,255,0.78); }
+        .frosting-card.selected .frosting-price { color: rgba(255,255,255,0.88); background: rgba(255,255,255,0.2); }
+        .frosting-icon { font-size: 22px; line-height: 1; margin-bottom: 2px; }
+        .frosting-name { font-size: 11px; font-weight: 700; color: #d7736b; letter-spacing: 0.3px; }
+        .frosting-desc { font-size: 9px; font-weight: 500; color: #b07878; margin-top: 1px; }
+        .frosting-price { font-size: 9px; font-weight: 700; color: #c9605a; margin-top: 3px; background: rgba(215,115,107,0.1); padding: 1px 7px; border-radius: 99px; }
+
+        /* ===== DECORATION PLACEMENT ===== */
+        .dec-hint { font-size: 9px; font-weight: 500; color: #c08880; text-transform: none; letter-spacing: 0; background: rgba(215,115,107,0.1); padding: 2px 7px; border-radius: 99px; margin-left: 4px; vertical-align: middle; }
+        .dec-category { margin-bottom: 10px; }
+        .dec-category:last-child { margin-bottom: 0; }
+        .dec-category-label { font-size: 9px; font-weight: 700; color: #b07878; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; padding-left: 2px; display: flex; align-items: center; gap: 5px; }
+        .dec-category-label::after { content: ''; flex: 1; height: 1px; background: linear-gradient(90deg,#f0b9b5,transparent); }
+        .dec-row { display: flex; gap: 6px; flex-wrap: wrap; }
+        .dec-card { flex: 1; min-width: 62px; cursor: pointer; }
+        .dc-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 9px 6px 7px; border: 2px solid #f0b9b5; border-radius: 10px; background: #ffffff; transition: all 0.22s cubic-bezier(0.34,1.56,0.64,1); gap: 2px; min-height: 66px; }
+        .dec-card:hover .dc-inner { border-color: #d7736b; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(215,115,107,0.18); background: #fff8fb; }
+        .dec-card.active .dc-inner { background: linear-gradient(145deg,#d7736b,#c9605a); border-color: #c9605a; transform: translateY(-2px); box-shadow: 0 6px 18px rgba(215,115,107,0.38); }
+        .dec-card.active .dc-name { color: white; }
+        .dec-card.active .dc-price { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.18); }
+        .dec-card.active .dc-icon { transform: scale(1.18); }
+        .dc-icon  { font-size: 20px; line-height: 1; transition: transform 0.2s; }
+        .dc-name  { font-size: 9px; font-weight: 700; color: #d7736b; text-align: center; letter-spacing: 0.2px; }
+        .dc-price { font-size: 8px; font-weight: 700; color: #c9605a; background: rgba(215,115,107,0.1); padding: 1px 6px; border-radius: 99px; margin-top: 1px; }
+        .dec-place-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 10px; padding: 8px 10px; background: rgba(215,115,107,0.07); border: 1.5px solid #f0b9b5; border-radius: 8px; }
+        #decPlaceMsg { font-size: 10px; color: #b07878; font-weight: 600; flex: 1; }
+        .dec-clear-btn { font-size: 10px; font-weight: 700; color: #d7736b; background: white; border: 1.5px solid #f0b9b5; border-radius: 6px; padding: 3px 9px; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
+        .dec-clear-btn:hover { background: #ffe4f6; border-color: #d7736b; }
+        .dec-counts { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; min-height: 0; }
+        .dec-count-pill { display: flex; align-items: center; gap: 4px; background: white; border: 1.5px solid #f0b9b5; border-radius: 99px; padding: 2px 8px 2px 6px; font-size: 10px; font-weight: 700; color: #d7736b; }
+        .dec-count-pill .pill-remove { cursor: pointer; color: #f0b9b5; font-size: 11px; margin-left: 2px; transition: color 0.15s; }
+        .dec-count-pill .pill-remove:hover { color: #d7736b; }
+        #canvas3d.placing { cursor: crosshair !important; }
+
+        /* ===== TEXTAREA ===== */
+        textarea { width: 100%; padding: 10px 12px; border: 2px solid #f0b9b5; border-radius: 10px; font-size: 11px; background: #ffffff; color: #d7736b; resize: vertical; min-height: 68px; transition: all 0.2s; font-family: inherit; font-weight: 600; }
+        textarea::placeholder { color: #f0b9b5; font-weight: 400; }
+        textarea:focus { outline: none; border-color: #d7736b; box-shadow: 0 0 0 3px rgba(215,115,107,0.13); }
+        .char-row { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
+        .char-bar  { flex: 1; height: 3px; background: #f0d8d6; border-radius: 99px; overflow: hidden; }
+        .char-fill { height: 100%; background: linear-gradient(90deg,#d7736b,#c9605a); border-radius: 99px; width: 0%; transition: width 0.2s; }
+        #charCount { font-size: 10px; color: #c08880; font-weight: 600; white-space: nowrap; }
+
+        /* ===== MESSAGE STYLE CONTROLS ===== */
+        .msg-style-wrap { margin-top: 10px; display: flex; flex-direction: column; gap: 8px; padding: 10px; background: #fff5fb; border: 1.5px solid #f0b9b5; border-radius: 10px; }
+        .msg-style-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .msg-style-label { font-size: 10px; font-weight: 700; color: #b07878; text-transform: uppercase; letter-spacing: 0.8px; min-width: 42px; flex-shrink: 0; }
+        .msg-font-group { display: flex; gap: 5px; flex-wrap: wrap; }
+        .msg-font-btn { padding: 4px 9px; border: 2px solid #f0b9b5; border-radius: 7px; background: white; color: #d7736b; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.2s; }
+        .msg-font-btn:hover { border-color: #d7736b; background: #fff0f5; transform: translateY(-1px); }
+        .msg-font-btn.selected { background: linear-gradient(135deg,#d7736b,#c9605a); border-color: #c9605a; color: white; box-shadow: 0 3px 10px rgba(215,115,107,0.3); }
+        .msg-color-group { display: flex; gap: 6px; flex-wrap: wrap; }
+        .msg-color-btn { width: 24px; height: 24px; border-radius: 50%; border: 3px solid transparent; cursor: pointer; transition: all 0.2s; flex-shrink: 0; }
+        .msg-color-btn:hover { transform: scale(1.2); }
+        .msg-color-btn.selected { box-shadow: 0 0 0 3px rgba(215,115,107,0.5); transform: scale(1.2); }
+        .msg-toggle-btn { width: 30px; height: 30px; border: 2px solid #f0b9b5; border-radius: 7px; background: white; color: #d7736b; font-size: 13px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .msg-toggle-btn:hover { border-color: #d7736b; background: #fff0f5; }
+        .msg-toggle-btn.selected { background: linear-gradient(135deg,#d7736b,#c9605a); border-color: #c9605a; color: white; box-shadow: 0 3px 10px rgba(215,115,107,0.3); }
+        /* D-pad controller */
+        .dpad-wrap { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+        .dpad-row  { display: flex; gap: 2px; }
+        .dpad-btn  { width: 30px; height: 30px; border: 2px solid #f0b9b5; border-radius: 7px; background: white; color: #d7736b; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; user-select: none; -webkit-user-select: none; }
+        .dpad-btn:hover  { border-color: #d7736b; background: #fff0f5; }
+        .dpad-btn:active { background: linear-gradient(135deg,#d7736b,#c9605a); border-color: #c9605a; color: white; transform: scale(0.93); }
+        .dpad-center { font-size: 10px; font-weight: 700; letter-spacing: 0; }
+        .dpad-spacer { width: 30px; height: 30px; }
+        .msg-pos-btn { display: none; } /* keep old class so setMsgPos doesn't break if called */
 
         /* ===== SIGNATURE CAKES ===== */
-        .signature-section { grid-column: 2 / -1; background: linear-gradient(135deg, #ffffff 0%, #fffaf5 100%); height: fit-content; padding: 10px; border-radius: 15px; border: 2px solid #f0b9b5; box-shadow: 0 4px 15px rgba(215,115,107,0.08); }
-        .signature-section h2 { color: #d7736b; font-size: 18px; margin-bottom: 15px; letter-spacing: 2px; text-align: center; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid #f0b9b5; padding-bottom: 10px; }
+        .signature-section { grid-area: sig; background: linear-gradient(135deg, #ffffff 0%, #fffaf5 100%); height: fit-content; padding: 14px; border-radius: 15px; border: 2px solid #f0b9b5; box-shadow: 0 4px 15px rgba(215,115,107,0.08); }
+        .signature-section h2 { color: #d7736b; font-size: 16px; margin-bottom: 14px; letter-spacing: 2px; text-align: center; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid #f0b9b5; padding-bottom: 10px; }
         .signature-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
-        .signature-card { background: #ffffff; border: 2px solid #f0b9b5; border-radius: 12px; padding: 12px; text-align: center; transition: all 0.3s; cursor: pointer; overflow: hidden; }
-        .signature-card:hover { background: #ffe4f6; transform: translateY(-3px); border-color: #d7736b; box-shadow: 0 8px 20px rgba(215,115,107,0.20); }
-        .signature-image { width: 100%; height: 140px; background: linear-gradient(135deg, #fffaf5 0%, #ffe4f6 100%); border: 2px solid #f0b9b5; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; overflow: hidden; }
-        .signature-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s ease; }
-        .signature-card:hover .signature-image img { transform: scale(1.05); }
-        .cake-name { color: #d7736b; font-size: 11px; font-weight: 600; margin-bottom: 5px; text-decoration: underline; }
-        .cake-price { color: #d7736b; font-size: 10px; font-weight: 700; }
+        .signature-card { background: #ffffff; border: 2px solid #f0b9b5; border-radius: 12px; padding: 10px; text-align: center; transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1); cursor: pointer; overflow: hidden; position: relative; }
+        .signature-card::after { content: 'VIEW'; position: absolute; inset: 0; background: linear-gradient(135deg,rgba(215,115,107,0.92),rgba(201,96,90,0.92)); color: white; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; letter-spacing: 2px; opacity: 0; transition: opacity 0.25s; border-radius: 10px; }
+        .signature-card:hover { transform: translateY(-5px); border-color: #d7736b; box-shadow: 0 12px 28px rgba(215,115,107,0.25); }
+        .signature-card:hover::after { opacity: 1; }
+        .signature-image { width: 100%; height: 130px; background: linear-gradient(135deg, #fffaf5 0%, #ffe4f6 100%); border: 2px solid #f0b9b5; border-radius: 8px; margin-bottom: 8px; overflow: hidden; }
+        .signature-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease; }
+        .signature-card:hover .signature-image img { transform: scale(1.1); }
+        .cake-name  { color: #d7736b; font-size: 11px; font-weight: 700; margin-bottom: 3px; }
+        .cake-price { color: #c9605a; font-size: 12px; font-weight: 800; }
 
         /* ===== LIVE PREVIEW ===== */
-        .preview-section { grid-column: 2 / 3; background: linear-gradient(135deg, #ffffff 0%, #fffaf5 100%); padding: 10px; border-radius: 15px; border: 2px solid #f0b9b5; display: flex; flex-direction: column; margin-top: -360px; height: 340px; box-shadow: 0 4px 15px rgba(215,115,107,0.08); }
-        .preview-section h2 { color: #d7736b; font-size: 18px; margin-bottom: 15px; letter-spacing: 2px; text-align: center; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid #f0b9b5; padding-bottom: 10px; }
-        .preview-container { position: relative; width: 100%; height: 280px; border: 2px solid #f0b9b5; border-radius: 15px; background: linear-gradient(135deg, #ffffff 0%, #fffaf5 100%); overflow: hidden; }
-        #canvas3d { width: 100%; height: 100%; }
-        .view-controls { position: absolute; top: 12px; right: 12px; display: flex; gap: 6px; z-index: 10; }
-        .control-btn { padding: 5px 8px; background: #d7736b; color: #ffffff; border: 2px solid #d7736b; border-radius: 6px; cursor: pointer; font-size: 10px; font-weight: 600; transition: all 0.3s; font-family: 'Poppins', sans-serif; }
-        .control-btn:hover { background: #c9605a; border-color: #c9605a; box-shadow: 0 4px 10px rgba(215,115,107,0.30); transform: scale(1.05); }
+        .preview-section { grid-area: prev; background: linear-gradient(135deg, #ffffff 0%, #fffaf5 100%); padding: 10px; border-radius: 15px; border: 2px solid #f0b9b5; display: flex; flex-direction: column; height: 340px; box-shadow: 0 4px 15px rgba(215,115,107,0.08); }
+        .preview-section h2 { color: #d7736b; font-size: 16px; margin-bottom: 8px; letter-spacing: 2px; text-align: center; text-transform: uppercase; font-weight: 700; border-bottom: 2px solid #f0b9b5; padding-bottom: 8px; flex-shrink: 0; }
+        .preview-container { position: relative; flex: 1; border: 2px solid #f0b9b5; border-radius: 12px; overflow: hidden; }
+        #canvas3d { width: 100%; height: 100%; cursor: grab; }
+        #canvas3d:active { cursor: grabbing; }
+        .view-controls { position: absolute; top: 8px; right: 8px; display: flex; gap: 4px; z-index: 10; }
+        .control-btn { padding: 5px 9px; background: rgba(215,115,107,0.88); color: #fff; border: none; border-radius: 7px; cursor: pointer; font-size: 10px; font-weight: 700; transition: all 0.2s; font-family: 'Poppins', sans-serif; backdrop-filter: blur(4px); }
+        .control-btn:hover { background: #c9605a; transform: scale(1.08); box-shadow: 0 3px 10px rgba(215,115,107,0.4); }
+        .control-btn.active { background: #c9605a; box-shadow: 0 0 0 2px white, 0 0 0 4px #d7736b; }
+        .drag-hint { position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%); font-size: 9px; color: rgba(255,255,255,0.6); font-weight: 500; pointer-events: none; white-space: nowrap; transition: opacity 0.5s; }
 
         /* ===== ORDER SUMMARY ===== */
-        .order-panel { grid-column: 3; background: linear-gradient(135deg, #ffffff 0%, #fffaf5 100%); padding: 25px; border-radius: 15px; border: 2px solid #f0b9b5; display: flex; flex-direction: column; justify-content: space-between; margin-top: -360px; height: 340px; box-shadow: 0 4px 15px rgba(215,115,107,0.08); }
-        .order-panel h2 { color: #d7736b; font-size: 16px; margin-bottom: 15px; letter-spacing: 1px; font-style: italic; font-weight: 700; }
+        .order-panel { grid-area: order; background: linear-gradient(135deg, #ffffff 0%, #fffaf5 100%); padding: 18px 20px; border-radius: 15px; border: 2px solid #f0b9b5; display: flex; flex-direction: column; justify-content: space-between; height: 340px; box-shadow: 0 4px 15px rgba(215,115,107,0.08); }
+        .order-panel h2 { color: #d7736b; font-size: 14px; margin-bottom: 8px; letter-spacing: 1px; font-style: italic; font-weight: 700; flex-shrink: 0; }
         .order-items { display: block; flex: 1; overflow-y: auto; }
-        .order-item { display: flex; justify-content: space-between; color: #d7736b; font-size: 13px; padding-bottom: 8px; border-bottom: 1px solid #f0b9b5; }
-        .order-item span:first-child { font-weight: 600; }
-        .order-item span:last-child { font-weight: 700; }
-        .total-section { background: linear-gradient(135deg, #ffe4f6 0%, #fffaf5 100%); padding: 15px; border-radius: 8px; margin: 15px 0; border: 2px solid #f0b9b5; height: 30px; }
-        .total-line { display: flex; justify-content: space-between; color: #d7736b; font-size: 14px; font-weight: 700; letter-spacing: 1px; margin-top: -5px; }
-        .order-button { width: 100%; padding: 14px; background: linear-gradient(135deg, #d7736b 0%, #c9605a 100%); color: #ffffff; border: 2px solid #d7736b; border-radius: 8px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; font-family: 'Poppins', sans-serif; }
-        .order-button:hover { background: linear-gradient(135deg, #c9605a 0%, #b84e47 100%); border-color: #b84e47; transform: translateY(-2px); box-shadow: 0 8px 20px rgba(215,115,107,0.30); }
+        .order-item { display: flex; justify-content: space-between; align-items: center; color: #d7736b; font-size: 12px; padding: 4px 0; border-bottom: 1px dashed #f0d8d6; }
+        .order-item:last-child { border-bottom: none; }
+        .order-item span:first-child { font-weight: 600; color: #b07878; }
+        .order-item span.price-val { font-weight: 700; display: inline-block; transition: transform 0.2s; }
+        .order-item span.price-val.price-flash { animation: priceFlash 0.35s ease; }
+        .total-section { background: linear-gradient(135deg,#ffe4f6,#fff5f5); padding: 9px 13px; border-radius: 10px; margin: 8px 0; border: 2px solid #f0b9b5; flex-shrink: 0; }
+        .total-line { display: flex; justify-content: space-between; align-items: center; color: #d7736b; font-size: 15px; font-weight: 800; letter-spacing: 1px; }
+        .total-line #totalPrice { font-size: 19px; display: inline-block; transition: transform 0.2s; }
+        .total-line #totalPrice.price-flash { animation: priceFlash 0.35s ease; }
+        .order-button { width: 100%; padding: 12px; background: linear-gradient(135deg,#d7736b,#c9605a); color: #fff; border: none; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; transition: all 0.3s; text-transform: uppercase; letter-spacing: 1px; font-family: 'Poppins', sans-serif; position: relative; overflow: hidden; flex-shrink: 0; }
+        .order-button:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(215,115,107,0.42); }
 
         /* ===== SCROLLBARS ===== */
-        .customization-panel::-webkit-scrollbar, .order-items::-webkit-scrollbar { width: 6px; }
-        .customization-panel::-webkit-scrollbar-track, .order-items::-webkit-scrollbar-track { background: #fffaf5; }
+        .customization-panel::-webkit-scrollbar, .order-items::-webkit-scrollbar { width: 5px; }
+        .customization-panel::-webkit-scrollbar-track, .order-items::-webkit-scrollbar-track { background: transparent; }
         .customization-panel::-webkit-scrollbar-thumb, .order-items::-webkit-scrollbar-thumb { background: #f0b9b5; border-radius: 3px; }
         .customization-panel::-webkit-scrollbar-thumb:hover, .order-items::-webkit-scrollbar-thumb:hover { background: #d7736b; }
 
         /* ===== ORDER FORM MODAL ===== */
-        .order-modal-overlay { display: none; position: fixed; inset: 0; z-index: 3000; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); align-items: center; justify-content: center; }
+        .order-modal-overlay { display: none; position: fixed; inset: 0; z-index: 3000; background: rgba(0,0,0,0.5); backdrop-filter: blur(6px); align-items: center; justify-content: center; }
         .order-modal-overlay.active { display: flex; animation: fadeIn 0.25s ease; }
-        @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
         .order-modal { background: white; border-radius: 20px; padding: 36px 40px; width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(215,115,107,0.25); border: 2px solid #ffe4f6; animation: slideUp 0.35s cubic-bezier(0.34,1.56,0.64,1); }
-        @keyframes slideUp { from{opacity:0;transform:translateY(40px) scale(0.97);} to{opacity:1;transform:translateY(0) scale(1);} }
         .order-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #ffe4f6; }
         .order-modal-header h2 { color: #d7736b; font-size: 20px; font-weight: 700; }
-        .order-modal-close { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #f0b9b5; background: white; color: #d7736b; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
-        .order-modal-close:hover { background: #d7736b; color: white; border-color: #d7736b; }
-
-        .order-summary-box { background: linear-gradient(135deg, #ffe4f6, #fffaf5); border: 2px solid #f0b9b5; border-radius: 12px; padding: 16px; margin-bottom: 20px; font-size: 13px; }
+        .order-modal-close { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #f0b9b5; background: white; color: #d7736b; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.25s; }
+        .order-modal-close:hover { background: #d7736b; color: white; border-color: #d7736b; transform: rotate(90deg); }
+        .order-summary-box { background: linear-gradient(135deg,#ffe4f6,#fffaf5); border: 2px solid #f0b9b5; border-radius: 12px; padding: 16px; margin-bottom: 20px; font-size: 13px; }
         .order-summary-box h3 { color: #d7736b; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px; }
         .osb-row { display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid rgba(215,115,107,0.1); }
         .osb-row:last-child { border-bottom: none; font-weight: 700; font-size: 14px; margin-top: 4px; }
         .osb-row span:first-child { color: #999; font-weight: 500; }
-        .osb-row span:last-child { color: #333; font-weight: 600; }
-
+        .osb-row span:last-child  { color: #333; font-weight: 600; }
         .om-field { margin-bottom: 14px; }
         .om-field label { display: block; font-size: 11px; color: #999; text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 5px; }
-        .om-field input, .om-field select, .om-field textarea { width: 100%; padding: 11px 14px; border: 2px solid #f0b9b5; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 13px; color: #333; background: white; transition: border-color 0.2s; min-height: unset; resize: none; }
-        .om-field input:focus, .om-field select:focus, .om-field textarea:focus { outline: none; border-color: #d7736b; }
+        .om-field input, .om-field select, .om-field textarea { width: 100%; padding: 11px 14px; border: 2px solid #f0b9b5; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 13px; color: #333; background: white; transition: all 0.2s; min-height: unset; resize: none; }
+        .om-field input:focus, .om-field select:focus, .om-field textarea:focus { outline: none; border-color: #d7736b; box-shadow: 0 0 0 3px rgba(215,115,107,0.12); }
         .om-field textarea { min-height: 70px; resize: vertical; }
         .om-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .om-actions { display: flex; gap: 12px; margin-top: 20px; }
         .om-cancel { flex: 1; padding: 13px; border: 2px solid #f0b9b5; background: white; color: #d7736b; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.2s; }
-        .om-cancel:hover { background: #ffe4f6; }
-        .om-submit { flex: 2; padding: 13px; background: linear-gradient(135deg, #d7736b, #c9605a); color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.5px; }
+        .om-cancel:hover { background: #ffe4f6; border-color: #d7736b; }
+        .om-submit { flex: 2; padding: 13px; background: linear-gradient(135deg,#d7736b,#c9605a); color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.3s; text-transform: uppercase; letter-spacing: 0.5px; }
         .om-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(215,115,107,0.35); }
         .om-submit:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
 
         /* ===== SUCCESS SCREEN ===== */
         .success-screen { display: none; text-align: center; padding: 20px 0; }
-        .success-screen.active { display: block; animation: fadeIn 0.4s ease; }
-        .success-icon { font-size: 64px; margin-bottom: 16px; animation: bounce 1s ease-in-out infinite; }
-        @keyframes bounce { 0%,100%{transform:translateY(0);} 50%{transform:translateY(-10px);} }
+        .success-screen.active { display: block; animation: popIn 0.4s ease; }
+        .success-icon { font-size: 64px; margin-bottom: 16px; display: block; animation: bounce 1s ease-in-out infinite; }
         .success-screen h2 { color: #d7736b; font-size: 22px; font-weight: 700; margin-bottom: 8px; }
         .success-screen p { color: #999; font-size: 13px; line-height: 1.6; margin-bottom: 6px; }
         .success-screen strong { color: #d7736b; }
-        .success-close { margin-top: 24px; padding: 13px 36px; background: linear-gradient(135deg, #d7736b, #c9605a); color: white; border: none; border-radius: 25px; font-weight: 700; font-size: 14px; cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.3s; }
+        .success-close { margin-top: 24px; padding: 13px 36px; background: linear-gradient(135deg,#d7736b,#c9605a); color: white; border: none; border-radius: 25px; font-weight: 700; font-size: 14px; cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.3s; }
         .success-close:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(215,115,107,0.35); }
 
         /* ===== TOAST ===== */
-        .toast { position: fixed; bottom: 24px; right: 24px; background: linear-gradient(135deg, #4caf50, #388e3c); color: white; padding: 12px 22px; border-radius: 12px; font-size: 13px; font-weight: 600; z-index: 9999; animation: toastIn 0.3s ease; box-shadow: 0 8px 20px rgba(0,0,0,0.2); font-family: 'Poppins', sans-serif; }
-        @keyframes toastIn { from{transform:translateY(50px);opacity:0;} to{transform:translateY(0);opacity:1;} }
+        .toast { position: fixed; bottom: 24px; right: 24px; background: linear-gradient(135deg,#4caf50,#388e3c); color: white; padding: 12px 22px; border-radius: 12px; font-size: 13px; font-weight: 600; z-index: 9999; animation: toastIn 0.3s ease; box-shadow: 0 8px 20px rgba(0,0,0,0.2); font-family: 'Poppins', sans-serif; }
 
         /* ===== RESPONSIVE ===== */
         @media (max-width: 1024px) {
-            .main-wrapper { grid-template-columns: 1fr; }
-            .signature-section, .preview-section, .order-panel { grid-column: 1; margin-top: 0; }
+            .main-wrapper {
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "panel"
+                    "sig"
+                    "prev"
+                    "order";
+            }
             .signature-grid { grid-template-columns: repeat(3, 1fr); }
             .preview-section { height: 300px; }
             .order-panel { height: auto; }
+            .customization-panel { position: static; max-height: none; }
         }
         @media (max-width: 768px) {
             .site-header { padding: 0 15px; height: 70px; }
@@ -169,7 +335,23 @@
             .order-modal { padding: 24px 20px; }
             .om-two-col { grid-template-columns: 1fr; }
         }
-    </style>
+    
+        /* ===== LAYER SELECTOR ===== */
+        .layer-selector { position: absolute; left: 8px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 5px; z-index: 10; }
+        .layer-btn { width: 34px; height: 34px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.5); background: rgba(43,45,58,0.75); color: white; font-size: 10px; font-weight: 700; cursor: pointer; transition: all 0.22s; font-family: 'Poppins',sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1; backdrop-filter: blur(4px); }
+        .layer-btn:hover { background: rgba(215,115,107,0.75); border-color: white; transform: scale(1.08); }
+        .layer-btn.active-layer { background: rgba(215,115,107,0.92); border-color: white; box-shadow: 0 0 0 2px #d7736b, 0 0 12px rgba(215,115,107,0.6); }
+        .layer-btn .lb-num { font-size: 13px; font-weight: 800; }
+        .layer-btn .lb-lbl { font-size: 7px; opacity: 0.8; letter-spacing: 0.5px; }
+        
+        /* ===== ACTIVE LAYER BADGE ===== */
+        .layer-badge-bar { display: none; align-items: center; gap: 8px; padding: 7px 10px; background: linear-gradient(135deg,rgba(215,115,107,0.12),rgba(215,115,107,0.06)); border: 1.5px solid #f0b9b5; border-radius: 8px; margin-bottom: 14px; }
+        .layer-badge-bar.visible { display: flex; }
+        .layer-badge-dot { width: 10px; height: 10px; border-radius: 50%; background: #d7736b; animation: layerPulse 1.1s ease-in-out infinite; flex-shrink: 0; }
+        @keyframes layerPulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.45;transform:scale(0.7);} }
+        .layer-badge-text { font-size: 11px; font-weight: 700; color: #d7736b; }
+        .layer-badge-sub { font-size: 9px; color: #b07878; font-weight: 500; margin-left: auto; }
+        </style>
 </head>
 <body>
 
@@ -212,149 +394,298 @@
 <div class="page-body">
 <div class="main-wrapper">
 
-    <div class="header-section">
-        <h1>&#127874; Customize Your Cake</h1>
-    </div>
-
     <!-- CUSTOMIZATION PANEL -->
-    <div class="customization-panel">
+    <div class="customization-panel page-entry-delay-1">
+
+        <!-- Progress -->
+        <div class="progress-wrap">
+            <div class="progress-bar" id="progressBar">
+                <div class="progress-step done"></div>
+                <div class="progress-step"></div>
+                <div class="progress-step"></div>
+                <div class="progress-step"></div>
+                <div class="progress-step"></div>
+                <div class="progress-step"></div>
+                <div class="progress-step"></div>
+                <div class="progress-step"></div>
+            </div>
+            <div class="progress-label" id="progressLabel">1 of 8 customized</div>
+        </div>
+
+        <!-- ACTIVE LAYER BADGE -->
+        <div class="layer-badge-bar" id="layerBadgeBar">
+            <div class="layer-badge-dot"></div>
+            <span class="layer-badge-text" id="layerBadgeText">Designing Layer 1</span>
+            <span class="layer-badge-sub" id="layerBadgeSub">Changes apply to this layer only</span>
+        </div>
+
+        <!-- SIZE -->
         <section class="section">
-            <h3>CAKE SIZE</h3>
+            <h3>&#127818; Cake Size</h3>
             <div class="option-group">
-                <label class="radio-option"><input type="radio" name="size" value="6" data-price="25" checked><span>6 inch</span></label>
-                <label class="radio-option"><input type="radio" name="size" value="8" data-price="35"><span>8 inch</span></label>
-                <label class="radio-option"><input type="radio" name="size" value="10" data-price="50"><span>10 inch</span></label>
-                <label class="radio-option"><input type="radio" name="size" value="12" data-price="65"><span>12 inch</span></label>
+                <label class="radio-option selected" data-value="6"><input type="radio" name="size" value="6" data-price="25" checked><span class="size-label">6"</span><span class="size-sub">Serves 8</span></label>
+                <label class="radio-option" data-value="8"><input type="radio" name="size" value="8" data-price="35"><span class="size-label">8"</span><span class="size-sub">Serves 16</span></label>
+                <label class="radio-option" data-value="10"><input type="radio" name="size" value="10" data-price="50"><span class="size-label">10"</span><span class="size-sub">Serves 24</span></label>
+                <label class="radio-option" data-value="12"><input type="radio" name="size" value="12" data-price="65"><span class="size-label">12"</span><span class="size-sub">Serves 40</span></label>
             </div>
         </section>
+
+        <!-- LAYERS -->
         <section class="section">
-            <h3>CAKE LAYERS</h3>
+            <h3>&#9889; Cake Layers</h3>
             <select id="layers" class="dropdown">
-                <option value="1" data-price="0">1 Layer</option>
-                <option value="2" data-price="5">2 Layers</option>
-                <option value="3" data-price="10">3 Layers</option>
-                <option value="4" data-price="15">4 Layers</option>
+                <option value="1" data-price="0">1 Layer — Classic</option>
+                <option value="2" data-price="5">2 Layers +&#8369;5</option>
+                <option value="3" data-price="10">3 Layers +&#8369;10</option>
+                <option value="4" data-price="15">4 Layers +&#8369;15</option>
             </select>
         </section>
+
+        <!-- FLAVOR -->
         <section class="section">
-            <h3>CAKE FLAVOR</h3>
+            <h3>&#127850; Cake Flavor</h3>
             <select id="flavor" class="dropdown">
                 <option value="vanilla" data-price="0">Vanilla</option>
-                <option value="chocolate" data-price="2">Chocolate</option>
-                <option value="red-velvet" data-price="3">Red Velvet</option>
-                <option value="carrot" data-price="2.50">Carrot Cake</option>
-                <option value="strawberry" data-price="2">Strawberry</option>
-                <option value="lemon" data-price="1.50">Lemon</option>
+                <option value="chocolate" data-price="2">Chocolate +&#8369;2</option>
+                <option value="red-velvet" data-price="3">Red Velvet +&#8369;3</option>
+                <option value="carrot" data-price="2.50">Carrot Cake +&#8369;2.50</option>
+                <option value="strawberry" data-price="2">Strawberry +&#8369;2</option>
+                <option value="lemon" data-price="1.50">Lemon +&#8369;1.50</option>
             </select>
         </section>
+
+        <!-- FILLING -->
         <section class="section">
-            <h3>FILLING</h3>
+            <h3>&#127859; Filling</h3>
             <select id="filling" class="dropdown">
                 <option value="none" data-price="0">No Filling</option>
-                <option value="vanilla-cream" data-price="3">Vanilla Cream</option>
-                <option value="chocolate-ganache" data-price="5">Chocolate Ganache</option>
-                <option value="strawberry-jam" data-price="4">Strawberry Jam</option>
-                <option value="buttercream" data-price="2.50">Buttercream</option>
-                <option value="nutella" data-price="6">Nutella</option>
+                <optgroup label="Creams">
+                    <option value="vanilla-cream" data-price="3">Vanilla Cream +&#8369;3</option>
+                    <option value="buttercream" data-price="2.50">Buttercream +&#8369;2.50</option>
+                    <option value="cream-cheese-fill" data-price="4">Cream Cheese +&#8369;4</option>
+                    <option value="whipped-cream-fill" data-price="3.50">Whipped Cream +&#8369;3.50</option>
+                    <option value="custard" data-price="4">Custard +&#8369;4</option>
+                    <option value="dulce-de-leche" data-price="5.50">Dulce de Leche +&#8369;5.50</option>
+                </optgroup>
+                <optgroup label="Chocolate">
+                    <option value="chocolate-ganache" data-price="5">Chocolate Ganache +&#8369;5</option>
+                    <option value="nutella" data-price="6">Nutella +&#8369;6</option>
+                    <option value="dark-chocolate-mousse" data-price="6.50">Dark Choco Mousse +&#8369;6.50</option>
+                    <option value="white-chocolate" data-price="5">White Chocolate +&#8369;5</option>
+                </optgroup>
+                <optgroup label="Fruit">
+                    <option value="strawberry-jam" data-price="4">Strawberry Jam +&#8369;4</option>
+                    <option value="mango-curd" data-price="4.50">Mango Curd +&#8369;4.50</option>
+                    <option value="lemon-curd" data-price="4">Lemon Curd +&#8369;4</option>
+                    <option value="raspberry-jam" data-price="4.50">Raspberry Jam +&#8369;4.50</option>
+                    <option value="blueberry-compote" data-price="5">Blueberry Compote +&#8369;5</option>
+                    <option value="passion-fruit" data-price="5.50">Passion Fruit Curd +&#8369;5.50</option>
+                </optgroup>
+                <optgroup label="Special">
+                    <option value="matcha-cream" data-price="5">Matcha Cream +&#8369;5</option>
+                    <option value="salted-caramel" data-price="6">Salted Caramel +&#8369;6</option>
+                    <option value="peanut-butter" data-price="5">Peanut Butter +&#8369;5</option>
+                    <option value="coconut-cream" data-price="4.50">Coconut Cream +&#8369;4.50</option>
+                    <option value="tiramisu-cream" data-price="6.50">Tiramisu Cream +&#8369;6.50</option>
+                </optgroup>
             </select>
         </section>
+
+        <!-- FROSTING -->
         <section class="section">
-            <h3>FROSTING TYPE</h3>
-            <select id="icingType" class="dropdown">
+            <h3>&#127993; Frosting Type</h3>
+            <div class="frosting-grid">
+                <label class="frosting-card selected" data-value="buttercream"><input type="radio" name="icingType" value="buttercream" data-price="0" checked><span class="frosting-icon">&#127856;</span><span class="frosting-name">Buttercream</span><span class="frosting-desc">Soft piped swirls</span><span class="frosting-price">Free</span></label>
+                <label class="frosting-card" data-value="fondant"><input type="radio" name="icingType" value="fondant" data-price="5"><span class="frosting-icon">&#127913;</span><span class="frosting-name">Fondant</span><span class="frosting-desc">Smooth &amp; polished</span><span class="frosting-price">+&#8369;5</span></label>
+                <label class="frosting-card" data-value="ganache"><input type="radio" name="icingType" value="ganache" data-price="4"><span class="frosting-icon">&#127849;</span><span class="frosting-name">Ganache</span><span class="frosting-desc">Rich glossy drip</span><span class="frosting-price">+&#8369;4</span></label>
+                <label class="frosting-card" data-value="cream-cheese"><input type="radio" name="icingType" value="cream-cheese" data-price="3"><span class="frosting-icon">&#129472;</span><span class="frosting-name">Cream Cheese</span><span class="frosting-desc">Rustic &amp; tangy</span><span class="frosting-price">+&#8369;3</span></label>
+            </div>
+            <select id="icingType" style="display:none;">
                 <option value="buttercream" data-price="0">Buttercream</option>
                 <option value="fondant" data-price="5">Fondant</option>
                 <option value="ganache" data-price="4">Ganache</option>
                 <option value="cream-cheese" data-price="3">Cream Cheese</option>
             </select>
         </section>
+
+        <!-- ICING COLOR -->
         <section class="section">
-            <h3>ICING COLOR</h3>
-            <select id="icingColor" class="dropdown">
+            <h3>&#127912; Icing Color</h3>
+            <div class="color-row" style="flex-wrap:wrap;gap:8px 10px;">
+                <button class="color-swatch selected" data-color="white"      title="White"         onclick="selectColor('white',this)"></button>
+                <button class="color-swatch"          data-color="ivory"      title="Ivory"         onclick="selectColor('ivory',this)"></button>
+                <button class="color-swatch"          data-color="pink"       title="Pink"          onclick="selectColor('pink',this)"></button>
+                <button class="color-swatch"          data-color="hot-pink"   title="Hot Pink"      onclick="selectColor('hot-pink',this)"></button>
+                <button class="color-swatch"          data-color="red"        title="Red"           onclick="selectColor('red',this)"></button>
+                <button class="color-swatch"          data-color="coral"      title="Coral"         onclick="selectColor('coral',this)"></button>
+                <button class="color-swatch"          data-color="peach"      title="Peach"         onclick="selectColor('peach',this)"></button>
+                <button class="color-swatch"          data-color="orange"     title="Orange"        onclick="selectColor('orange',this)"></button>
+                <button class="color-swatch"          data-color="yellow"     title="Yellow"        onclick="selectColor('yellow',this)"></button>
+                <button class="color-swatch"          data-color="mint"       title="Mint"          onclick="selectColor('mint',this)"></button>
+                <button class="color-swatch"          data-color="sage"       title="Sage Green"    onclick="selectColor('sage',this)"></button>
+                <button class="color-swatch"          data-color="sky"        title="Sky Blue"      onclick="selectColor('sky',this)"></button>
+                <button class="color-swatch"          data-color="blue"       title="Blue"          onclick="selectColor('blue',this)"></button>
+                <button class="color-swatch"          data-color="navy"       title="Navy"          onclick="selectColor('navy',this)"></button>
+                <button class="color-swatch"          data-color="lavender"   title="Lavender"      onclick="selectColor('lavender',this)"></button>
+                <button class="color-swatch"          data-color="purple"     title="Purple"        onclick="selectColor('purple',this)"></button>
+                <button class="color-swatch"          data-color="chocolate"  title="Brown"         onclick="selectColor('chocolate',this)"></button>
+                <button class="color-swatch"          data-color="black"      title="Black"         onclick="selectColor('black',this)"></button>
+            </div>
+            <div style="margin-top:5px;"><span class="color-active-label" id="colorLabel">White</span></div>
+            <select id="icingColor" style="display:none;">
                 <option value="white">White</option>
+                <option value="ivory">Ivory</option>
                 <option value="pink">Pink</option>
+                <option value="hot-pink">Hot Pink</option>
                 <option value="red">Red</option>
-                <option value="chocolate">Brown</option>
+                <option value="coral">Coral</option>
+                <option value="peach">Peach</option>
+                <option value="orange">Orange</option>
+                <option value="yellow">Yellow</option>
+                <option value="mint">Mint</option>
+                <option value="sage">Sage Green</option>
+                <option value="sky">Sky Blue</option>
                 <option value="blue">Blue</option>
+                <option value="navy">Navy</option>
+                <option value="lavender">Lavender</option>
                 <option value="purple">Purple</option>
+                <option value="chocolate">Brown</option>
+                <option value="black">Black</option>
             </select>
         </section>
+
+        <!-- DECORATIONS -->
         <section class="section">
-            <h3>DECORATIONS</h3>
-            <div class="checkbox-group">
-                <label class="checkbox-option"><input type="checkbox" name="topping" value="sprinkles" data-price="1"><span>Sprinkles</span></label>
-                <label class="checkbox-option"><input type="checkbox" name="topping" value="berries" data-price="3"><span>Berries</span></label>
-                <label class="checkbox-option"><input type="checkbox" name="topping" value="chocolate-chips" data-price="1.50"><span>Chocolate</span></label>
-                <label class="checkbox-option"><input type="checkbox" name="topping" value="candies" data-price="5"><span>Candies</span></label>
-                <label class="checkbox-option"><input type="checkbox" name="topping" value="nuts" data-price="2"><span>Nuts</span></label>
-                <label class="checkbox-option"><input type="checkbox" name="topping" value="edible-flowers" data-price="4"><span>Edible Flowers</span></label>
-                <label class="checkbox-option"><input type="checkbox" name="topping" value="candles" data-price="3"><span>Candles</span></label>
-                <label class="checkbox-option"><input type="checkbox" name="topping" value="macarons" data-price="6"><span>Macarons</span></label>
-                <label class="checkbox-option"><input type="checkbox" name="topping" value="whipped-cream" data-price="2.50"><span>Whipped Cream</span></label>
+            <h3>&#10024; Decorations <span class="dec-hint">click cake to place</span></h3>
+            <div class="dec-category">
+                <div class="dec-category-label">&#127826; Fruits &amp; Toppings</div>
+                <div class="dec-row">
+                    <div class="dec-card" data-type="sprinkles" data-price="1" onclick="selectDecType('sprinkles',this)"><div class="dc-inner"><span class="dc-icon">&#127881;</span><span class="dc-name">Sprinkles</span><span class="dc-price">+&#8369;1</span></div></div>
+                    <div class="dec-card" data-type="berries" data-price="3" onclick="selectDecType('berries',this)"><div class="dc-inner"><span class="dc-icon">&#127827;</span><span class="dc-name">Berries</span><span class="dc-price">+&#8369;3</span></div></div>
+                    <div class="dec-card" data-type="chocolate-chips" data-price="1.50" onclick="selectDecType('chocolate-chips',this)"><div class="dc-inner"><span class="dc-icon">&#127849;</span><span class="dc-name">Choco Chips</span><span class="dc-price">+&#8369;1.50</span></div></div>
+                    <div class="dec-card" data-type="nuts" data-price="2" onclick="selectDecType('nuts',this)"><div class="dc-inner"><span class="dc-icon">&#129359;</span><span class="dc-name">Nuts</span><span class="dc-price">+&#8369;2</span></div></div>
+                </div>
             </div>
+            <div class="dec-category">
+                <div class="dec-category-label">&#127804; Artisan &amp; Sweet</div>
+                <div class="dec-row">
+                    <div class="dec-card" data-type="edible-flowers" data-price="4" onclick="selectDecType('edible-flowers',this)"><div class="dc-inner"><span class="dc-icon">&#127804;</span><span class="dc-name">Flowers</span><span class="dc-price">+&#8369;4</span></div></div>
+                    <div class="dec-card" data-type="macarons" data-price="6" onclick="selectDecType('macarons',this)"><div class="dc-inner"><span class="dc-icon">&#127848;</span><span class="dc-name">Macarons</span><span class="dc-price">+&#8369;6</span></div></div>
+                    <div class="dec-card" data-type="candies" data-price="5" onclick="selectDecType('candies',this)"><div class="dc-inner"><span class="dc-icon">&#127844;</span><span class="dc-name">Candies</span><span class="dc-price">+&#8369;5</span></div></div>
+                    <div class="dec-card" data-type="whipped-cream" data-price="2.50" onclick="selectDecType('whipped-cream',this)"><div class="dc-inner"><span class="dc-icon">&#129442;</span><span class="dc-name">Whip Cream</span><span class="dc-price">+&#8369;2.50</span></div></div>
+                </div>
+            </div>
+            <div class="dec-place-bar">
+                <span id="decPlaceMsg">&#8592; Select a decoration, then click the cake to place it</span>
+                <button class="dec-clear-btn" onclick="clearAllDecorations()">&#128465; Clear all</button>
+            </div>
+            <div class="dec-counts" id="decCounts"></div>
         </section>
+
+        <!-- MESSAGE -->
         <section class="section">
-            <h3>MESSAGE ON CAKE</h3>
-            <textarea id="message" placeholder="Type your message..." maxlength="50"></textarea>
-            <small id="charCount">0/50</small>
+            <h3>&#128140; Message on Cake</h3>
+            <textarea id="message" placeholder="e.g. Happy Birthday! &#127874;" maxlength="50"></textarea>
+            <div class="char-row">
+                <div class="char-bar"><div class="char-fill" id="charBarFill"></div></div>
+                <small id="charCount">0 / 50</small>
+            </div>
+            <div class="msg-style-wrap" id="msgStyleWrap">
+                <div class="msg-style-row">
+                    <span class="msg-style-label">Font</span>
+                    <div class="msg-font-group">
+                        <button class="msg-font-btn selected" data-font="Arial" onclick="setMsgFont('Arial',this)" style="font-family:Arial,sans-serif">Aa</button>
+                        <button class="msg-font-btn" data-font="Georgia" onclick="setMsgFont('Georgia',this)" style="font-family:Georgia,serif">Aa</button>
+                        <button class="msg-font-btn" data-font="Courier New" onclick="setMsgFont('Courier New',this)" style="font-family:'Courier New',monospace">Aa</button>
+                        <button class="msg-font-btn" data-font="Impact" onclick="setMsgFont('Impact',this)" style="font-family:Impact,sans-serif">Aa</button>
+                        <button class="msg-font-btn" data-font="Comic Sans MS" onclick="setMsgFont('Comic Sans MS',this)" style="font-family:'Comic Sans MS',cursive">Aa</button>
+                        <button class="msg-font-btn" data-font="Brush Script MT" onclick="setMsgFont('Brush Script MT',this)" style="font-family:'Brush Script MT',cursive">Aa</button>
+                    </div>
+                </div>
+                <div class="msg-style-row">
+                    <span class="msg-style-label">Color</span>
+                    <div class="msg-color-group">
+                        <button class="msg-color-btn selected" data-color="#c9605a" onclick="setMsgColor('#c9605a',this)" style="background:#c9605a;" title="Coral"></button>
+                        <button class="msg-color-btn" data-color="#ffffff" onclick="setMsgColor('#ffffff',this)" style="background:#ffffff;border:2px solid #f0b9b5;" title="White"></button>
+                        <button class="msg-color-btn" data-color="#333333" onclick="setMsgColor('#333333',this)" style="background:#333333;" title="Black"></button>
+                        <button class="msg-color-btn" data-color="#d4a017" onclick="setMsgColor('#d4a017',this)" style="background:#d4a017;" title="Gold"></button>
+                        <button class="msg-color-btn" data-color="#4169e1" onclick="setMsgColor('#4169e1',this)" style="background:#4169e1;" title="Blue"></button>
+                        <button class="msg-color-btn" data-color="#2e7d32" onclick="setMsgColor('#2e7d32',this)" style="background:#2e7d32;" title="Green"></button>
+                        <button class="msg-color-btn" data-color="#9c27b0" onclick="setMsgColor('#9c27b0',this)" style="background:#9c27b0;" title="Purple"></button>
+                    </div>
+                </div>
+                <div class="msg-style-row" style="gap:8px;flex-wrap:wrap;">
+                    <span class="msg-style-label">Style</span>
+                    <button class="msg-toggle-btn selected" id="msgBoldBtn" onclick="toggleMsgStyle('bold',this)" title="Bold"><b>B</b></button>
+                    <button class="msg-toggle-btn" id="msgItalicBtn" onclick="toggleMsgStyle('italic',this)" title="Italic"><i>I</i></button>
+                    <span class="msg-style-label" style="margin-left:6px;">Move</span>
+                    <div class="dpad-wrap">
+                        <div class="dpad-row">
+                            <div class="dpad-spacer"></div>
+                            <button class="dpad-btn" id="dpadUp"    title="Move up"    onmousedown="startDpad('up')"    onmouseup="stopDpad()" onmouseleave="stopDpad()" ontouchstart="startDpad('up')"    ontouchend="stopDpad()">&#9650;</button>
+                            <div class="dpad-spacer"></div>
+                        </div>
+                        <div class="dpad-row">
+                            <button class="dpad-btn" id="dpadLeft"  title="Move left"  onmousedown="startDpad('left')"  onmouseup="stopDpad()" onmouseleave="stopDpad()" ontouchstart="startDpad('left')"  ontouchend="stopDpad()">&#9664;</button>
+                            <button class="dpad-btn dpad-center" id="dpadCenter" title="Reset position" onclick="resetMsgPos()">&#9632;</button>
+                            <button class="dpad-btn" id="dpadRight" title="Move right" onmousedown="startDpad('right')" onmouseup="stopDpad()" onmouseleave="stopDpad()" ontouchstart="startDpad('right')" ontouchend="stopDpad()">&#9654;</button>
+                        </div>
+                        <div class="dpad-row">
+                            <div class="dpad-spacer"></div>
+                            <button class="dpad-btn" id="dpadDown"  title="Move down"  onmousedown="startDpad('down')"  onmouseup="stopDpad()" onmouseleave="stopDpad()" ontouchstart="startDpad('down')"  ontouchend="stopDpad()">&#9660;</button>
+                            <div class="dpad-spacer"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </section>
     </div>
 
     <!-- SIGNATURE CAKES -->
-    <div class="signature-section">
-        <h2>SIGNATURE CAKES</h2>
+    <div class="signature-section page-entry-delay-2">
+        <h2>&#9733; Signature Cakes</h2>
         <div class="signature-grid">
-            <div class="signature-card">
-                <div class="signature-image"><img src="{% static 'creake/images/cakes/cake1.jpg' %}" alt="Berry Delight"></div>
-                <p class="cake-name">Berry Delight</p><p class="cake-price">&#8369;500</p>
-            </div>
-            <div class="signature-card">
-                <div class="signature-image"><img src="{% static 'creake/images/cakes/cake2.jpg' %}" alt="Lemon Bliss"></div>
-                <p class="cake-name">Lemon Bliss</p><p class="cake-price">&#8369;550</p>
-            </div>
-            <div class="signature-card">
-                <div class="signature-image"><img src="{% static 'creake/images/cakes/cake3.jpg' %}" alt="Matcha Dream"></div>
-                <p class="cake-name">Matcha Dream</p><p class="cake-price">&#8369;580</p>
-            </div>
-            <div class="signature-card">
-                <div class="signature-image"><img src="{% static 'creake/images/cakes/cake4.jpg' %}" alt="Red Velvet Romance"></div>
-                <p class="cake-name">Red Velvet Romance</p><p class="cake-price">&#8369;520</p>
-            </div>
-            <div class="signature-card">
-                <div class="signature-image"><img src="{% static 'creake/images/cakes/cake5.jpg' %}" alt="Classic Vanilla"></div>
-                <p class="cake-name">Classic Vanilla</p><p class="cake-price">&#8369;450</p>
-            </div>
+            <div class="signature-card"><div class="signature-image"><img src="{% static 'creake/images/cakes/cake1.jpg' %}" alt="Berry Delight"></div><p class="cake-name">Berry Delight</p><p class="cake-price">&#8369;500</p></div>
+            <div class="signature-card"><div class="signature-image"><img src="{% static 'creake/images/cakes/cake2.jpg' %}" alt="Lemon Bliss"></div><p class="cake-name">Lemon Bliss</p><p class="cake-price">&#8369;550</p></div>
+            <div class="signature-card"><div class="signature-image"><img src="{% static 'creake/images/cakes/cake3.jpg' %}" alt="Matcha Dream"></div><p class="cake-name">Matcha Dream</p><p class="cake-price">&#8369;580</p></div>
+            <div class="signature-card"><div class="signature-image"><img src="{% static 'creake/images/cakes/cake4.jpg' %}" alt="Red Velvet Romance"></div><p class="cake-name">Red Velvet Romance</p><p class="cake-price">&#8369;520</p></div>
+            <div class="signature-card"><div class="signature-image"><img src="{% static 'creake/images/cakes/cake5.jpg' %}" alt="Classic Vanilla"></div><p class="cake-name">Classic Vanilla</p><p class="cake-price">&#8369;450</p></div>
         </div>
     </div>
 
     <!-- LIVE PREVIEW -->
-    <div class="preview-section">
-        <h2>LIVE PREVIEW</h2>
+    <div class="preview-section page-entry-delay-3">
+        <h2>&#127910; Live Preview</h2>
         <div class="preview-container">
             <div id="canvas3d"></div>
+            <!-- Layer selector (shown when layers > 1) -->
+            <div class="layer-selector" id="layerSelector" style="display:none;"></div>
             <div class="view-controls">
-                <button id="zoomInBtn" class="control-btn">&#128269;+</button>
-                <button id="zoomOutBtn" class="control-btn">&#128269;-</button>
-                <button id="rotateBtn" class="control-btn">&#8635;</button>
+                <button id="zoomInBtn" class="control-btn" title="Zoom In">&#128269;+</button>
+                <button id="zoomOutBtn" class="control-btn" title="Zoom Out">&#128269;-</button>
+                <button id="rotateBtn" class="control-btn" title="Toggle auto-rotate">&#8635;</button>
+                <button id="topViewBtn" class="control-btn" title="Top view">&#9650; Top</button>
             </div>
+            <div class="drag-hint" id="dragHint">&#8592; drag to rotate &#8594;</div>
         </div>
     </div>
 
     <!-- ORDER SUMMARY -->
-    <div class="order-panel">
+    <div class="order-panel page-entry-delay-4">
         <h2>&#128203; Order Summary</h2>
         <div class="order-items">
-            <div class="order-item"><span>Cake Size</span><span id="priceBase">&#8369;25</span></div>
-            <div class="order-item"><span>Cake Layers</span><span id="priceLayers">&#8369;0</span></div>
-            <div class="order-item"><span>Cake Flavor</span><span id="priceFlavor">&#8369;0</span></div>
-            <div class="order-item"><span>Filling</span><span id="priceFilling">&#8369;0</span></div>
-            <div class="order-item"><span>Frosting Type</span><span id="priceIcing">&#8369;0</span></div>
-            <div class="order-item"><span>Message</span><span id="priceMessage">&#8369;0</span></div>
-            <div class="order-item"><span>Decorations</span><span id="priceToppings">&#8369;0</span></div>
+            <div class="order-item"><span>Cake Size</span><span id="priceBase" class="price-val">&#8369;25</span></div>
+            <div class="order-item"><span>Layers</span><span id="priceLayers" class="price-val">&#8369;0</span></div>
+            <div class="order-item"><span>Flavor</span><span id="priceFlavor" class="price-val">&#8369;0</span></div>
+            <div class="order-item"><span>Filling</span><span id="priceFilling" class="price-val">&#8369;0</span></div>
+            <div class="order-item"><span>Frosting</span><span id="priceIcing" class="price-val">&#8369;0</span></div>
+            <div class="order-item"><span>Message</span><span id="priceMessage" class="price-val">&#8369;0</span></div>
+            <div class="order-item"><span>Decorations</span><span id="priceToppings" class="price-val">&#8369;0</span></div>
         </div>
         <div class="total-section">
-            <div class="total-line"><span>TOTAL:</span><span id="totalPrice">&#8369;25</span></div>
+            <div class="total-line"><span>TOTAL</span><span id="totalPrice">&#8369;25</span></div>
         </div>
-        <button id="confirmOrder" class="order-button">&#127874; ORDER NOW</button>
+        <button id="confirmOrder" class="order-button">&#127874; Order Now</button>
     </div>
 
 </div>
@@ -363,15 +694,11 @@
 <!-- ========== ORDER FORM MODAL ========== -->
 <div class="order-modal-overlay" id="orderModalOverlay">
     <div class="order-modal">
-
-        <!-- FORM VIEW -->
         <div id="orderFormView">
             <div class="order-modal-header">
                 <h2>&#128230; Complete Your Order</h2>
                 <button class="order-modal-close" onclick="closeOrderModal()">&#10005;</button>
             </div>
-
-            <!-- Mini summary -->
             <div class="order-summary-box">
                 <h3>&#127874; Your Custom Cake</h3>
                 <div id="modalSummaryRows"></div>
@@ -379,8 +706,6 @@
                     <span>Total</span><span id="modalTotal" style="color:#d7736b;font-size:15px;">&#8369;0</span>
                 </div>
             </div>
-
-            <!-- Delivery & contact form -->
             <form id="orderForm">
                 {% csrf_token %}
                 <div class="om-two-col">
@@ -395,25 +720,8 @@
                     <div class="om-field"><label>Zip Code</label><input type="text" id="omZip" placeholder="1000" required></div>
                 </div>
                 <div class="om-two-col">
-                    <div class="om-field">
-                        <label>Delivery Type</label>
-                        <select id="omDelivery" required>
-                            <option value="">Select delivery</option>
-                            <option value="standard">Standard (&#8369;50)</option>
-                            <option value="express">Express (&#8369;150)</option>
-                            <option value="sameday">Same Day (&#8369;300)</option>
-                        </select>
-                    </div>
-                    <div class="om-field">
-                        <label>Payment Method</label>
-                        <select id="omPayment" required>
-                            <option value="">Select payment</option>
-                            <option value="credit">&#128179; Credit Card</option>
-                            <option value="debit">&#128179; Debit Card</option>
-                            <option value="gcash">&#128241; GCash</option>
-                            <option value="cod">&#128181; Cash on Delivery</option>
-                        </select>
-                    </div>
+                    <div class="om-field"><label>Delivery Type</label><select id="omDelivery" required><option value="">Select delivery</option><option value="standard">Standard (&#8369;50)</option><option value="express">Express (&#8369;150)</option><option value="sameday">Same Day (&#8369;300)</option></select></div>
+                    <div class="om-field"><label>Payment Method</label><select id="omPayment" required><option value="">Select payment</option><option value="credit">&#128179; Credit Card</option><option value="debit">&#128179; Debit Card</option><option value="gcash">&#128241; GCash</option><option value="cod">&#128181; Cash on Delivery</option></select></div>
                 </div>
                 <div class="om-field"><label>Special Instructions (Optional)</label><textarea id="omNotes" placeholder="Any special requests for your cake..."></textarea></div>
                 <div class="om-actions">
@@ -422,278 +730,618 @@
                 </div>
             </form>
         </div>
-
-        <!-- SUCCESS VIEW -->
         <div class="success-screen" id="orderSuccessView">
-            <div class="success-icon">&#127882;</div>
+            <span class="success-icon">&#127882;</span>
             <h2>Order Placed! &#127874;</h2>
             <p>Thank you, <strong id="successName">there</strong>!</p>
             <p>Your custom cake order has been received.<br>A confirmation has been sent to <strong id="successEmail"></strong>.</p>
             <p style="margin-top:12px;font-size:12px;color:#bbb;">Our team will contact you shortly to confirm your order.</p>
             <button class="success-close" onclick="finishOrder()">&#127968; Back to Home</button>
         </div>
-
     </div>
 </div>
 
 <script>
-    // ── Dropdown ──────────────────────────────────────────────────────
-    function toggleDropdown() {
-        var d = document.getElementById('userDropdown');
-        if (d) d.classList.toggle('open');
-    }
-    document.addEventListener('click', function(e) {
-        var w = document.querySelector('.user-dropdown-wrap');
-        if (w && !w.contains(e.target)) {
-            var d = document.getElementById('userDropdown');
-            if (d) d.classList.remove('open');
-        }
+// ── Dropdown ──────────────────────────────────────────────────────────────────
+function toggleDropdown(){var d=document.getElementById('userDropdown');if(d)d.classList.toggle('open');}
+document.addEventListener('click',function(e){var w=document.querySelector('.user-dropdown-wrap');if(w&&!w.contains(e.target)){var d=document.getElementById('userDropdown');if(d)d.classList.remove('open');}});
+
+// ── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg,color){var t=document.createElement('div');t.className='toast';t.innerHTML=msg;if(color)t.style.background=color;document.body.appendChild(t);setTimeout(function(){t.style.transition='opacity 0.3s,transform 0.3s';t.style.opacity='0';t.style.transform='translateY(20px)';setTimeout(function(){t.remove();},300);},2900);}
+
+// ── Color swatch ──────────────────────────────────────────────────────────────
+var colorNames={'white':'White','ivory':'Ivory','pink':'Pink','hot-pink':'Hot Pink','red':'Red','coral':'Coral','peach':'Peach','orange':'Orange','yellow':'Yellow','mint':'Mint','sage':'Sage','sky':'Sky Blue','blue':'Blue','navy':'Navy','lavender':'Lavender','purple':'Purple','chocolate':'Brown','black':'Black'};
+function selectColor(color,btn){
+    document.querySelectorAll('.color-swatch').forEach(function(s){s.classList.remove('selected');});
+    btn.classList.add('selected');
+    document.getElementById('icingColor').value=color;
+    document.getElementById('colorLabel').textContent=colorNames[color]||color;
+    document.getElementById('icingColor').dispatchEvent(new Event('change'));
+}
+
+// ── Radio size visual ─────────────────────────────────────────────────────────
+document.querySelectorAll('.radio-option').forEach(function(label){
+    label.addEventListener('click',function(){
+        document.querySelectorAll('.radio-option').forEach(function(l){l.classList.remove('selected');});
+        this.classList.add('selected');
     });
+});
 
-    // ── Toast ─────────────────────────────────────────────────────────
-    function showToast(msg, color) {
-        var t = document.createElement('div');
-        t.className = 'toast';
-        t.textContent = msg;
-        if (color) t.style.background = color;
-        document.body.appendChild(t);
-        setTimeout(function() { t.remove(); }, 3200);
-    }
-
-    // ── Order Modal ───────────────────────────────────────────────────
-    function openOrderModal() {
-        var rows = document.getElementById('modalSummaryRows');
-        rows.innerHTML = '';
-        var items = [
-            ['Cake Size', document.getElementById('priceBase').textContent],
-            ['Layers',    document.getElementById('priceLayers').textContent],
-            ['Flavor',    document.getElementById('priceFlavor').textContent],
-            ['Filling',   document.getElementById('priceFilling').textContent],
-            ['Frosting',  document.getElementById('priceIcing').textContent],
-            ['Decorations', document.getElementById('priceToppings').textContent],
-            ['Message',   document.getElementById('priceMessage').textContent],
-        ];
-        items.forEach(function(item) {
-            var row = document.createElement('div');
-            row.className = 'osb-row';
-            row.innerHTML = '<span>' + item[0] + '</span><span>' + item[1] + '</span>';
-            rows.appendChild(row);
-        });
-        document.getElementById('modalTotal').textContent = document.getElementById('totalPrice').textContent;
-        document.getElementById('orderSuccessView').classList.remove('active');
-        document.getElementById('orderFormView').style.display = 'block';
-        document.getElementById('orderModalOverlay').classList.add('active');
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeOrderModal() {
-        document.getElementById('orderModalOverlay').classList.remove('active');
-        document.body.style.overflow = '';
-    }
-
-    document.getElementById('orderModalOverlay').addEventListener('click', function(e) {
-        if (e.target === this) closeOrderModal();
+// ── Frosting card visual ──────────────────────────────────────────────────────
+document.querySelectorAll('.frosting-card').forEach(function(card){
+    card.addEventListener('click',function(){
+        document.querySelectorAll('.frosting-card').forEach(function(c){c.classList.remove('selected');});
+        this.classList.add('selected');
+        var sel=document.getElementById('icingType');
+        sel.value=this.dataset.value;
+        sel.dispatchEvent(new Event('change'));
     });
+});
 
-    // ── Form Submit ───────────────────────────────────────────────────
-    document.getElementById('orderForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        var btn = document.getElementById('omSubmitBtn');
-        btn.disabled = true;
-        btn.textContent = 'Placing order...';
+// ── Decoration placement ──────────────────────────────────────────────────────
+var _activeDecBtn=null;
+function selectDecType(type,btn){
+    if(_activeDecBtn){_activeDecBtn.classList.remove('active');}
+    if(_activeDecBtn===btn){
+        _activeDecBtn=null;
+        customizer.activeDecType=null;
+        document.getElementById('canvas3d').classList.remove('placing');
+        document.getElementById('decPlaceMsg').textContent='\u2190 Select a decoration, then click the cake to place it';
+        return;
+    }
+    _activeDecBtn=btn;
+    btn.classList.add('active');
+    customizer.activeDecType=type;
+    customizer.activeDecPrice=parseFloat(btn.dataset.price);
+    document.getElementById('canvas3d').classList.add('placing');
+    var name=btn.querySelector('.dc-name').textContent;
+    document.getElementById('decPlaceMsg').textContent='\u2713 '+name+' selected \u2014 click the cake to place';
+}
+function clearAllDecorations(){
+    customizer.placedDecorations=[];
+    customizer.rebuildDecorations();
+    customizer.updatePrice();
+    customizer.updatePlacementUI();
+}
+function removeLastOf(type){
+    var arr=customizer.placedDecorations;
+    for(var i=arr.length-1;i>=0;i--){if(arr[i].type===type){arr.splice(i,1);break;}}
+    customizer.rebuildDecorations();
+    customizer.updatePrice();
+    customizer.updatePlacementUI();
+}
 
-        var csrfToken = this.querySelector('[name=csrfmiddlewaretoken]').value;
-        var payload = {
-            first_name:     document.getElementById('omFirstName').value,
-            last_name:      document.getElementById('omLastName').value,
-            email:          document.getElementById('omEmail').value,
-            phone:          document.getElementById('omPhone').value,
-            address:        document.getElementById('omAddress').value,
-            city:           document.getElementById('omCity').value,
-            zip_code:       document.getElementById('omZip').value,
-            delivery_type:  document.getElementById('omDelivery').value,
-            payment_method: document.getElementById('omPayment').value,
-            notes:          document.getElementById('omNotes').value,
-            cake_size:      customizer.customization.size,
-            cake_layers:    customizer.customization.layers,
-            cake_flavor:    customizer.customization.flavor,
-            filling:        customizer.customization.filling,
-            icing_type:     customizer.customization.icingType,
-            icing_color:    customizer.customization.icingColor,
-            toppings:       customizer.customization.toppings,
-            cake_message:   customizer.customization.message,
-            total_price:    customizer.getTotalPrice(),
-            cart: [{
-                name: 'Custom Cake (' + customizer.customization.flavor + ', ' + customizer.customization.size + '")',
-                price: customizer.getTotalPrice(),
-                quantity: 1
-            }]
+// ── Progress bar ──────────────────────────────────────────────────────────────
+function updateProgress(){
+    var done=0;
+    if(document.querySelector('input[name="size"]:checked'))done++;
+    if(document.getElementById('layers').value!=='1')done++;
+    if(document.getElementById('flavor').value!=='vanilla')done++;
+    if(document.getElementById('filling').value!=='none')done++;
+    if(document.getElementById('icingType').value!=='buttercream')done++;
+    if(document.getElementById('icingColor').value!=='white')done++;
+    if(customizer&&customizer.placedDecorations&&customizer.placedDecorations.length>0)done++;
+    if(document.getElementById('message').value.length>0)done++;
+    document.querySelectorAll('.progress-step').forEach(function(s,i){s.classList.toggle('done',i<done);});
+    document.getElementById('progressLabel').textContent=done+' of 8 customized';
+}
+['layers','flavor','filling','icingType','icingColor'].forEach(function(id){document.getElementById(id).addEventListener('change',updateProgress);});
+document.querySelectorAll('input[name="size"]').forEach(function(r){r.addEventListener('change',updateProgress);});
+document.getElementById('message').addEventListener('input',updateProgress);
+
+// ── Char counter ──────────────────────────────────────────────────────────────
+document.getElementById('message').addEventListener('input',function(){
+    var l=this.value.length;
+    document.getElementById('charCount').textContent=l+' / 50';
+    document.getElementById('charBarFill').style.width=(l/50*100)+'%';
+});
+
+// ── Message style helpers ─────────────────────────────────────────────────────
+function setMsgFont(font,btn){customizer.msgStyle.font=font;document.querySelectorAll('.msg-font-btn').forEach(function(b){b.classList.remove('selected');});btn.classList.add('selected');customizer.updateMessageOnly();}
+function setMsgColor(color,btn){customizer.msgStyle.color=color;document.querySelectorAll('.msg-color-btn').forEach(function(b){b.classList.remove('selected');});btn.classList.add('selected');customizer.updateMessageOnly();}
+function toggleMsgStyle(prop,btn){if(prop==='bold'){customizer.msgStyle.bold=!customizer.msgStyle.bold;btn.classList.toggle('selected',customizer.msgStyle.bold);}else if(prop==='italic'){customizer.msgStyle.italic=!customizer.msgStyle.italic;btn.classList.toggle('selected',customizer.msgStyle.italic);}customizer.updateMessageOnly();}
+// D-pad message position
+var _dpadTimer=null;
+var _dpadInterval=null;
+var _dpadStep=0.04; // fraction of canvas (0..1) per tick
+function _moveMsgPos(dir){
+    var s=customizer.msgStyle;
+    if(!s.offsetX)s.offsetX=0;
+    if(!s.offsetY)s.offsetY=0;
+    if(dir==='up')   s.offsetY=Math.max(-0.42,s.offsetY-_dpadStep);
+    if(dir==='down') s.offsetY=Math.min( 0.42,s.offsetY+_dpadStep);
+    if(dir==='left') s.offsetX=Math.max(-0.42,s.offsetX-_dpadStep);
+    if(dir==='right')s.offsetX=Math.min( 0.42,s.offsetX+_dpadStep);
+    customizer.updateMessageOnly();
+}
+function startDpad(dir){
+    stopDpad();
+    _moveMsgPos(dir); // immediate first move
+    _dpadTimer=setTimeout(function(){
+        _dpadInterval=setInterval(function(){_moveMsgPos(dir);},80);
+    },300); // start repeating after 300ms hold
+}
+function stopDpad(){
+    if(_dpadTimer)  {clearTimeout(_dpadTimer);_dpadTimer=null;}
+    if(_dpadInterval){clearInterval(_dpadInterval);_dpadInterval=null;}
+}
+function resetMsgPos(){
+    customizer.msgStyle.offsetX=0;
+    customizer.msgStyle.offsetY=0;
+    customizer.updateMessageOnly();
+}
+// keep old setMsgPos as no-op so nothing breaks
+function setMsgPos(pos,btn){}
+
+// ── Order Modal ───────────────────────────────────────────────────────────────
+function openOrderModal(){
+    var rows=document.getElementById('modalSummaryRows');rows.innerHTML='';
+    var decTotal=(customizer.placedDecorations||[]).reduce(function(a,d){return a+d.price;},0);
+    [['Cake Size',document.getElementById('priceBase').textContent],
+     ['Layers',document.getElementById('priceLayers').textContent],
+     ['Flavor',document.getElementById('priceFlavor').textContent],
+     ['Filling',document.getElementById('priceFilling').textContent],
+     ['Frosting',document.getElementById('priceIcing').textContent],
+     ['Decorations','\u20B1'+decTotal.toFixed(0)],
+     ['Message',document.getElementById('priceMessage').textContent]
+    ].forEach(function(item){var row=document.createElement('div');row.className='osb-row';row.innerHTML='<span>'+item[0]+'</span><span>'+item[1]+'</span>';rows.appendChild(row);});
+    document.getElementById('modalTotal').textContent=document.getElementById('totalPrice').textContent;
+    document.getElementById('orderSuccessView').classList.remove('active');
+    document.getElementById('orderFormView').style.display='block';
+    document.getElementById('orderModalOverlay').classList.add('active');
+    document.body.style.overflow='hidden';
+}
+function closeOrderModal(){document.getElementById('orderModalOverlay').classList.remove('active');document.body.style.overflow='';}
+document.getElementById('orderModalOverlay').addEventListener('click',function(e){if(e.target===this)closeOrderModal();});
+
+// ── Form submit ───────────────────────────────────────────────────────────────
+document.getElementById('orderForm').addEventListener('submit',function(e){
+    e.preventDefault();
+    var btn=document.getElementById('omSubmitBtn');btn.disabled=true;btn.textContent='Placing order...';
+    var csrfToken=this.querySelector('[name=csrfmiddlewaretoken]').value;
+    var decTypes=[...new Set((customizer.placedDecorations||[]).map(function(d){return d.type;}))];
+    var payload={first_name:document.getElementById('omFirstName').value,last_name:document.getElementById('omLastName').value,email:document.getElementById('omEmail').value,phone:document.getElementById('omPhone').value,address:document.getElementById('omAddress').value,city:document.getElementById('omCity').value,zip_code:document.getElementById('omZip').value,delivery_type:document.getElementById('omDelivery').value,payment_method:document.getElementById('omPayment').value,notes:document.getElementById('omNotes').value,cake_size:customizer.customization.size,cake_layers:customizer.customization.layers,cake_flavor:customizer.customization.flavor,filling:customizer.customization.filling,icing_type:customizer.customization.icingType,icing_color:customizer.customization.icingColor,toppings:decTypes,cake_message:customizer.customization.message,total_price:customizer.getTotalPrice(),cart:[{name:'Custom Cake ('+customizer.customization.flavor+', '+customizer.customization.size+'")',price:customizer.getTotalPrice(),quantity:1}]};
+    fetch("{% url 'creake:customize_order' %}",{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':csrfToken},body:JSON.stringify(payload)})
+    .then(function(res){return res.json();})
+    .then(function(data){if(data.success){document.getElementById('orderFormView').style.display='none';document.getElementById('successName').textContent=payload.first_name;document.getElementById('successEmail').textContent=payload.email;document.getElementById('orderSuccessView').classList.add('active');}else{showToast('Error: '+(data.error||'Something went wrong.'),'linear-gradient(135deg,#f44336,#d32f2f)');btn.disabled=false;btn.textContent='\u2705 Place Order';}})
+    .catch(function(){showToast('Network error. Please try again.','linear-gradient(135deg,#f44336,#d32f2f)');btn.disabled=false;btn.textContent='\u2705 Place Order';});
+});
+
+// ── Finish / reset ────────────────────────────────────────────────────────────
+function finishOrder(){
+    closeOrderModal();
+    document.querySelectorAll('input[name="size"]').forEach(function(r){r.checked=r.value==='6';});
+    document.querySelectorAll('.radio-option').forEach(function(l){l.classList.toggle('selected',l.dataset.value==='6');});
+    ['layers','flavor','filling','icingType'].forEach(function(id){document.getElementById(id).selectedIndex=0;});
+    document.getElementById('icingColor').value='white';
+    document.querySelectorAll('.color-swatch').forEach(function(s){s.classList.toggle('selected',s.dataset.color==='white');});
+    document.getElementById('colorLabel').textContent='White';
+    document.querySelectorAll('.frosting-card').forEach(function(c){c.classList.toggle('selected',c.dataset.value==='buttercream');});
+    customizer.layerSettings=customizer._defaultLayerSettings(1);
+    customizer.activeLayer=0;
+    document.getElementById('layerBadgeBar').classList.remove('visible');
+    // Clear decorations
+    customizer.placedDecorations=[];
+    customizer.activeDecType=null;
+    if(_activeDecBtn){_activeDecBtn.classList.remove('active');_activeDecBtn=null;}
+    document.getElementById('canvas3d').classList.remove('placing');
+    document.getElementById('decPlaceMsg').textContent='\u2190 Select a decoration, then click the cake to place it';
+    document.getElementById('decCounts').innerHTML='';
+    document.getElementById('message').value='';
+    document.getElementById('charCount').textContent='0 / 50';
+    document.getElementById('charBarFill').style.width='0%';
+    updateProgress();
+    customizer=new CakeCustomizer();
+    showToast('\uD83C\uDF89 Order placed! Ready for your next creation.');
+    window.scrollTo({top:0,behavior:'smooth'});
+}
+document.getElementById('confirmOrder').addEventListener('click',openOrderModal);
+
+// ── 3D CAKE CUSTOMIZER ────────────────────────────────────────────────────────
+var customizer;
+class CakeCustomizer{
+    constructor(){
+        this.scene=null;this.camera=null;this.renderer=null;this.cakeGroup=null;
+        this.autoRotate=true;this.isTopView=false;this.savedCameraPos=null;
+        this.isDragging=false;this.prevMouse={x:0,y:0};
+        this.placedDecorations=[];this.activeDecType=null;this.activeDecPrice=0;
+        this.activeLayer=0;          // 0-based index of currently selected layer
+        this.layerMeshGroups=[];      // [THREE.Group] one per layer, for blink
+        this._blinkT=0;               // animation clock for blink sine wave
+        this.raycaster=new THREE.Raycaster();
+        this.prices={base:25,filling:0,icing:0,message:0,layers:0};
+        this.customization={size:'6',layers:1,message:''};
+        // Per-layer settings — each layer has its own flavor, filling, icingType, icingColor
+        this.layerSettings=this._defaultLayerSettings(1);
+        this.fillingColors={
+            'none':null,
+            // Creams
+            'vanilla-cream':0xf5e6d3,'buttercream':0xffe4c4,'cream-cheese-fill':0xfff8f0,
+            'whipped-cream-fill':0xffffff,'custard':0xffe680,'dulce-de-leche':0xc8813a,
+            // Chocolate
+            'chocolate-ganache':0x3d2817,'nutella':0x5c3d1f,
+            'dark-chocolate-mousse':0x2a1a0a,'white-chocolate':0xf5e8d0,
+            // Fruit
+            'strawberry-jam':0xff6b9d,'mango-curd':0xffb347,'lemon-curd':0xfff44f,
+            'raspberry-jam':0xc0392b,'blueberry-compote':0x4a235a,'passion-fruit':0xffcc00,
+            // Special
+            'matcha-cream':0x7daa5a,'salted-caramel':0xb8692a,'peanut-butter':0xd4882a,
+            'coconut-cream':0xf8f4e8,'tiramisu-cream':0x8b6241
         };
-
-        fetch("{% url 'creake:customize_order' %}", {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
-            body: JSON.stringify(payload)
-        })
-        .then(function(res) { return res.json(); })
-        .then(function(data) {
-            if (data.success) {
-                document.getElementById('orderFormView').style.display = 'none';
-                document.getElementById('successName').textContent = payload.first_name;
-                document.getElementById('successEmail').textContent = payload.email;
-                document.getElementById('orderSuccessView').classList.add('active');
-            } else {
-                showToast('Error: ' + (data.error || 'Something went wrong.'), 'linear-gradient(135deg,#f44336,#d32f2f)');
-                btn.disabled = false;
-                btn.textContent = '✅ Place Order';
-            }
-        })
-        .catch(function() {
-            showToast('Network error. Please try again.', 'linear-gradient(135deg,#f44336,#d32f2f)');
-            btn.disabled = false;
-            btn.textContent = '✅ Place Order';
+        this.msgStyle={font:'Arial',color:'#c9605a',bold:true,italic:false,offsetX:0,offsetY:0};
+        this.init();this.setupEventListeners();this.updatePrice();
+    }
+    init(){
+        const container=document.getElementById('canvas3d');
+        while(container.firstChild)container.removeChild(container.firstChild);
+        const w=container.clientWidth,h=container.clientHeight;
+        this.scene=new THREE.Scene();
+        this.scene.background=new THREE.Color(0x2b2d3a);
+        this.scene.fog=new THREE.Fog(0x2b2d3a,10,26);
+        this.camera=new THREE.PerspectiveCamera(55,w/h,0.1,100);
+        this.camera.position.set(0,1.6,2.4);this.camera.lookAt(0,0.2,0);
+        this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:false,powerPreference:'high-performance'});
+        this.renderer.setSize(w,h);this.renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+        this.renderer.shadowMap.enabled=true;this.renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+        this.renderer.outputEncoding=THREE.sRGBEncoding||3001;
+        this.renderer.toneMapping=THREE.ACESFilmicToneMapping||4;
+        this.renderer.toneMappingExposure=1.05;
+        container.appendChild(this.renderer.domElement);
+        const hemi=new THREE.HemisphereLight(0xfff3e0,0xd4c4b0,0.7);this.scene.add(hemi);
+        const key=new THREE.DirectionalLight(0xfff8f0,1.4);key.position.set(3,7,4);key.castShadow=true;
+        key.shadow.mapSize.width=2048;key.shadow.mapSize.height=2048;
+        key.shadow.camera.near=0.5;key.shadow.camera.far=20;
+        key.shadow.camera.left=-4;key.shadow.camera.right=4;
+        key.shadow.camera.top=4;key.shadow.camera.bottom=-4;
+        key.shadow.bias=-0.0005;this.scene.add(key);
+        const fill=new THREE.DirectionalLight(0xdde8ff,0.45);fill.position.set(-4,3,-2);this.scene.add(fill);
+        const rim=new THREE.DirectionalLight(0xffcc88,0.3);rim.position.set(0,4,-5);this.scene.add(rim);
+        const under=new THREE.DirectionalLight(0xffe0c0,0.12);under.position.set(0,-3,2);this.scene.add(under);
+        const standTop=new THREE.Mesh(new THREE.CylinderGeometry(2.75,2.75,0.12,80),new THREE.MeshStandardMaterial({color:0xe8e0d8,roughness:0.22,metalness:0.12}));
+        standTop.position.y=-0.79;standTop.receiveShadow=true;standTop.castShadow=false;this.scene.add(standTop);
+        const col=new THREE.Mesh(new THREE.CylinderGeometry(0.38,0.52,0.38,40),new THREE.MeshStandardMaterial({color:0xfafafa,roughness:0.2,metalness:0.08}));col.position.y=-1.04;this.scene.add(col);
+        const colBase=new THREE.Mesh(new THREE.CylinderGeometry(0.9,0.95,0.1,40),new THREE.MeshStandardMaterial({color:0xf5f0ea,roughness:0.22,metalness:0.08}));colBase.position.y=-1.28;this.scene.add(colBase);
+        const table=new THREE.Mesh(new THREE.PlaneGeometry(12,12),new THREE.MeshStandardMaterial({color:0x3a3c4a,roughness:0.8,metalness:0.0}));table.rotation.x=-Math.PI/2;table.position.y=-1.35;table.receiveShadow=true;this.scene.add(table);
+        this.cakeGroup=new THREE.Group();this.scene.add(this.cakeGroup);
+        this.updateCake3D();
+        window.addEventListener('resize',()=>this.onWindowResize());
+        const cvs=this.renderer.domElement;
+        cvs.addEventListener('mousedown',(e)=>{this.isDragging=false;this._dragStartX=e.clientX;this._dragStartY=e.clientY;});
+        cvs.addEventListener('mousemove',(e)=>{
+            if(e.buttons===0)return;
+            const dx=e.clientX-this._dragStartX,dy=e.clientY-this._dragStartY;
+            if(Math.abs(dx)>3||Math.abs(dy)>3){this.isDragging=true;}
+            if(this.isDragging){this.cakeGroup.rotation.y+=dx*0.012;this._dragStartX=e.clientX;this._dragStartY=e.clientY;this.autoRotate=false;document.getElementById('rotateBtn').style.opacity='0.5';document.getElementById('dragHint').style.opacity='0';}
         });
-    });
-
-    // ── Reset after success ───────────────────────────────────────────
-    function finishOrder() {
-        closeOrderModal();
-        // Reset all form controls
-        document.querySelectorAll('input[name="size"]').forEach(function(r) { r.checked = r.value === '6'; });
-        document.getElementById('layers').selectedIndex = 0;
-        document.getElementById('flavor').selectedIndex = 0;
-        document.getElementById('filling').selectedIndex = 0;
-        document.getElementById('icingType').selectedIndex = 0;
-        document.getElementById('icingColor').selectedIndex = 0;
-        document.querySelectorAll('input[name="topping"]').forEach(function(c) { c.checked = false; });
-        document.getElementById('message').value = '';
-        document.getElementById('charCount').textContent = '0/50';
-        // Re-init 3D customizer
-        customizer = new CakeCustomizer();
-        showToast('🎉 Order placed! Ready for your next creation.');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        cvs.addEventListener('mouseup',(e)=>{
+            if(!this.isDragging&&this.activeDecType){
+                const rect=cvs.getBoundingClientRect();
+                const mouse=new THREE.Vector2(((e.clientX-rect.left)/rect.width)*2-1,-((e.clientY-rect.top)/rect.height)*2+1);
+                this.raycaster.setFromCamera(mouse,this.camera);
+                const meshes=[];this.cakeGroup.traverse(o=>{if(o.isMesh)meshes.push(o);});
+                const hits=this.raycaster.intersectObjects(meshes,false);
+                if(hits.length>0){
+                    const local=this.cakeGroup.worldToLocal(hits[0].point.clone());
+                    // Get the top surface Y of the active layer
+                    const nl=this.customization.layers;
+                    const lh=0.4;
+                    const layerY=-0.5+(this.activeLayer*(lh+0.15))+lh/2+0.24;
+                    this.placedDecorations.push({type:this.activeDecType,x:local.x,z:local.z,price:this.activeDecPrice,layer:this.activeLayer,layerY:layerY});
+                    this.rebuildDecorations();this.updatePrice();this.updatePlacementUI();updateProgress();
+                    showToast('\u2713 '+this.activeDecType+' on layer '+(this.activeLayer+1));
+                }
+            }
+            this.isDragging=false;
+        });
+        cvs.addEventListener('mouseleave',()=>{this.isDragging=false;});
+        cvs.addEventListener('touchstart',(e)=>{this._dragStartX=e.touches[0].clientX;this._dragStartY=e.touches[0].clientY;this.isDragging=false;},{passive:true});
+        cvs.addEventListener('touchmove',(e)=>{const dx=e.touches[0].clientX-this._dragStartX;this.cakeGroup.rotation.y+=dx*0.012;this._dragStartX=e.touches[0].clientX;this.isDragging=true;this.autoRotate=false;},{passive:true});
+        cvs.addEventListener('touchend',()=>{this.isDragging=false;});
+        this.animate();
+    }
+    setupEventListeners(){
+        document.querySelectorAll('input[name="size"]').forEach(i=>i.addEventListener('change',e=>{this.customization.size=e.target.value;this.prices.base=parseFloat(e.target.dataset.price);this.updateCake3D();this.updatePrice();}));
+        document.getElementById('layers').addEventListener('change',e=>{const n=parseInt(e.target.value);this.customization.layers=n;this.prices.layers=(n-1)*5;this._ensureLayerSettings(n);if(this.activeLayer>=n)this.activeLayer=n-1;this.updateCake3D();this.updatePrice();});
+        document.getElementById('flavor').addEventListener('change',e=>{const opt=e.target.options[e.target.selectedIndex];this._setls('flavor',e.target.value,{flavorPrice:parseFloat(opt.dataset.price)});});
+        document.getElementById('filling').addEventListener('change',e=>{const opt=e.target.options[e.target.selectedIndex];this._setls('filling',e.target.value,{fillingPrice:parseFloat(opt.dataset.price)});});
+        document.getElementById('icingType').addEventListener('change',e=>{const opt=e.target.options[e.target.selectedIndex];this._setls('icingType',e.target.value,{icingPrice:parseFloat(opt.dataset.price)});});
+        document.getElementById('icingColor').addEventListener('change',e=>{this._setls('icingColor',e.target.value);});
+        document.getElementById('message').addEventListener('input',e=>{this.customization.message=e.target.value;this.prices.message=e.target.value.length>0?5:0;this.updateMessageOnly();this.updatePrice();});
+        document.getElementById('zoomInBtn').addEventListener('click',()=>{this.camera.position.multiplyScalar(0.85);this.camera.updateProjectionMatrix();});
+        document.getElementById('zoomOutBtn').addEventListener('click',()=>{this.camera.position.multiplyScalar(1.15);this.camera.updateProjectionMatrix();});
+        document.getElementById('rotateBtn').addEventListener('click',()=>{this.autoRotate=!this.autoRotate;document.getElementById('rotateBtn').style.opacity=this.autoRotate?'1':'0.5';});
+        document.getElementById('topViewBtn').addEventListener('click',()=>{
+            this.isTopView=!this.isTopView;const btn=document.getElementById('topViewBtn');
+            if(this.isTopView){this.savedCameraPos=this.camera.position.clone();this.camera.position.set(0,4.5,0.001);this.camera.lookAt(0,0,0);this.autoRotate=false;document.getElementById('rotateBtn').style.opacity='0.5';btn.classList.add('active');}
+            else{if(this.savedCameraPos)this.camera.position.copy(this.savedCameraPos);else this.camera.position.set(0,1.5,2.2);this.camera.lookAt(0,0.3,0);btn.classList.remove('active');}
+            this.camera.updateProjectionMatrix();
+        });
     }
 
-    document.getElementById('confirmOrder').addEventListener('click', openOrderModal);
-
-    // ── 3D CAKE CUSTOMIZER ────────────────────────────────────────────
-    var customizer;
-
-    class CakeCustomizer {
-        constructor() {
-            this.scene=null;this.camera=null;this.renderer=null;this.cakeGroup=null;this.autoRotate=true;
-            this.prices={base:25,flavor:0,filling:0,icing:0,toppings:[],message:0,layers:0};
-            this.customization={size:'6',flavor:'vanilla',filling:'none',icingType:'buttercream',icingColor:'white',layers:1,toppings:[],message:''};
-            this.fillingColors={'none':null,'vanilla-cream':0xf5e6d3,'chocolate-ganache':0x3d2817,'strawberry-jam':0xff69b4,'buttercream':0xffe4c4,'nutella':0x5c3d1f};
-            this.decorationSettings={
-                sprinkles:{count:25,colors:[0xff6b6b,0x4ecdc4,0xffe66d,0xff6348,0x95e1d3],size:0.3,height:0.15},
-                berries:{count:10,colors:[0xff6b6b,0xff1744,0x8b4789],radius:0.18,height:0.2},
-                candies:{count:8,colors:[0xff69b4,0x4169e1,0xffb347,0x98fb98,0xff6b9d,0xffd700],radius:0.2,height:0.25},
-                'chocolate-chips':{count:25,color:0x3d2817,size:0.1,height:0.15},
-                nuts:{count:12,colors:[0x8b6f47,0xa0826d,0x9d8b7e],radius:0.15,height:0.12,scaleY:1.2},
-                'edible-flowers':{count:6,colors:[0xff69b4,0xff1493,0xda70d6,0xff69b4],size:0.25,height:0.3},
-                candles:{count:5,stickColors:[0xffccff,0xffe4ff,0xffd4ff],flameColor:0xffa500,stickHeight:0.4,flameHeight:0.3,topHeight:0.4},
-                macarons:{count:8,colors:[0xff69b4,0x4169e1,0xffb347,0x98fb98,0xff6b9d,0xda70d6,0xffd700,0xff1493],radius:0.22,height:0.35,scaleY:0.7},
-                'whipped-cream':{count:12,color:0xffffff,swirls:true,height:0.25}
-            };
-            this.init();this.setupEventListeners();this.updatePrice();
-        }
-
-        init() {
-            const container=document.getElementById('canvas3d');
-            while(container.firstChild)container.removeChild(container.firstChild);
-            const w=container.clientWidth,h=container.clientHeight;
-            this.scene=new THREE.Scene();this.scene.background=new THREE.Color(0xffffff);
-            this.camera=new THREE.PerspectiveCamera(60,w/h,0.1,1000);
-            this.camera.position.set(0,1.5,2.2);this.camera.lookAt(0,0.3,0);
-            this.renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
-            this.renderer.setSize(w,h);this.renderer.setPixelRatio(window.devicePixelRatio);
-            this.renderer.shadowMap.enabled=true;container.appendChild(this.renderer.domElement);
-            this.scene.add(new THREE.AmbientLight(0xffffff,0.7));
-            const dl=new THREE.DirectionalLight(0xffffff,1.0);dl.position.set(5,8,5);dl.castShadow=true;this.scene.add(dl);
-            const base=new THREE.Mesh(new THREE.CylinderGeometry(2.5,2.5,0.15,64),new THREE.MeshStandardMaterial({color:0xf0f0f0,roughness:0.6,metalness:0.1}));
-            base.position.y=-0.8;base.receiveShadow=true;this.scene.add(base);
-            this.cakeGroup=new THREE.Group();this.scene.add(this.cakeGroup);
-            this.updateCake3D();window.addEventListener('resize',()=>this.onWindowResize());this.animate();
-        }
-
-        setupEventListeners() {
-            document.querySelectorAll('input[name="size"]').forEach(i=>i.addEventListener('change',e=>{this.customization.size=e.target.value;this.prices.base=parseFloat(e.target.dataset.price);this.updateCake3D();this.updatePrice();}));
-            document.getElementById('layers').addEventListener('change',e=>{this.customization.layers=parseInt(e.target.value);this.prices.layers=(parseInt(e.target.value)-1)*5;this.updateCake3D();this.updatePrice();});
-            document.getElementById('flavor').addEventListener('change',e=>{this.customization.flavor=e.target.value;this.prices.flavor=parseFloat(e.target.options[e.target.selectedIndex].dataset.price);this.updateCake3D();this.updatePrice();});
-            document.getElementById('filling').addEventListener('change',e=>{this.customization.filling=e.target.value;this.prices.filling=parseFloat(e.target.options[e.target.selectedIndex].dataset.price);this.updateCake3D();this.updatePrice();});
-            document.getElementById('icingType').addEventListener('change',e=>{this.customization.icingType=e.target.value;this.prices.icing=parseFloat(e.target.options[e.target.selectedIndex].dataset.price);this.updateCake3D();this.updatePrice();});
-            document.getElementById('icingColor').addEventListener('change',e=>{this.customization.icingColor=e.target.value;this.updateCake3D();});
-            document.querySelectorAll('input[name="topping"]').forEach(i=>i.addEventListener('change',e=>{
-                if(e.target.checked){this.customization.toppings.push(e.target.value);this.prices.toppings.push(parseFloat(e.target.dataset.price));}
-                else{const idx=this.customization.toppings.indexOf(e.target.value);if(idx>-1){this.customization.toppings.splice(idx,1);this.prices.toppings.splice(idx,1);}}
-                this.updateCake3D();this.updatePrice();
-            }));
-            document.getElementById('message').addEventListener('input',e=>{this.customization.message=e.target.value;document.getElementById('charCount').textContent=`${e.target.value.length}/50`;this.prices.message=e.target.value.length>0?5:0;this.updateCake3D();this.updatePrice();});
-            document.getElementById('zoomInBtn').addEventListener('click',()=>{this.camera.position.multiplyScalar(0.85);this.camera.updateProjectionMatrix();});
-            document.getElementById('zoomOutBtn').addEventListener('click',()=>{this.camera.position.multiplyScalar(1.15);this.camera.updateProjectionMatrix();});
-            document.getElementById('rotateBtn').addEventListener('click',()=>{this.autoRotate=!this.autoRotate;document.getElementById('rotateBtn').style.opacity=this.autoRotate?'1':'0.5';});
-        }
-
-        createCakeLayer(radius,height,yPos,cakeColor,fillingColor=null){
-            const g=new THREE.Group();
-            const cake=new THREE.Mesh(new THREE.CylinderGeometry(radius,radius,height,64,32),new THREE.MeshStandardMaterial({map:this.createCakeTexture(cakeColor),roughness:0.85,metalness:0.05}));
-            cake.position.y=yPos;cake.castShadow=true;cake.receiveShadow=true;g.add(cake);
-            const ti=new THREE.Mesh(new THREE.CylinderGeometry(radius+0.08,radius+0.08,0.15,64),new THREE.MeshStandardMaterial({map:this.createIcingTexture(this.getIcingColor(this.customization.icingColor)),roughness:0.4,metalness:0.15}));
-            ti.position.y=yPos+height/2+0.08;ti.castShadow=true;g.add(ti);
-            if(fillingColor&&this.customization.layers>1){const fi=new THREE.Mesh(new THREE.CylinderGeometry(radius+0.09,radius+0.09,0.08,64),new THREE.MeshStandardMaterial({color:fillingColor,roughness:0.6,metalness:0}));fi.position.y=yPos+height/2+0.12;g.add(fi);}
-            return g;
-        }
-
-        createCakeTexture(c){const cv=document.createElement('canvas');cv.width=512;cv.height=512;const ctx=cv.getContext('2d'),rgb=this.hexToRgb(c);ctx.fillStyle=`rgb(${rgb.r},${rgb.g},${rgb.b})`;ctx.fillRect(0,0,512,512);for(let i=0;i<400;i++){const x=Math.random()*512,y=Math.random()*512;ctx.fillStyle=Math.random()>0.5?`rgba(${Math.max(0,rgb.r-40)},${Math.max(0,rgb.g-40)},${Math.max(0,rgb.b-40)},0.4)`:`rgba(${Math.min(255,rgb.r+40)},${Math.min(255,rgb.g+40)},${Math.min(255,rgb.b+40)},0.4)`;ctx.fillRect(x,y,Math.random()*12,Math.random()*12);}return new THREE.CanvasTexture(cv);}
-        createIcingTexture(c){const cv=document.createElement('canvas');cv.width=512;cv.height=512;const ctx=cv.getContext('2d'),rgb=this.hexToRgb(c);ctx.fillStyle=`rgb(${rgb.r},${rgb.g},${rgb.b})`;ctx.fillRect(0,0,512,512);for(let i=0;i<150;i++){const x=Math.random()*512,y=Math.random()*512;ctx.fillStyle=Math.random()>0.5?`rgba(255,255,255,0.2)`:`rgba(0,0,0,0.15)`;ctx.beginPath();ctx.arc(x,y,Math.random()*50,0,Math.PI*2);ctx.fill();}return new THREE.CanvasTexture(cv);}
-
-        updateCake3D(){
-            while(this.cakeGroup.children.length>0)this.cakeGroup.remove(this.cakeGroup.children[0]);
-            const sm={'6':1.8,'8':2.2,'10':2.8,'12':3.2},r=sm[this.customization.size],lh=0.4,nl=this.customization.layers;
-            const fc={'vanilla':0xf5d76e,'chocolate':0x6b4423,'red-velvet':0xc41e3a,'carrot':0xff8c00,'strawberry':0xff6b9d,'lemon':0xffff66};
-            let th=0;
-            for(let i=0;i<nl;i++){const lr=r-(i*0.25),yp=-0.5+(i*(lh+0.15)),l=this.createCakeLayer(lr,lh,yp,fc[this.customization.flavor],this.fillingColors[this.customization.filling]);this.cakeGroup.add(l);th=yp+lh/2;}
-            this.addToppings(r,th);
-            if(this.customization.message)this.addMessage(r,th);
-        }
-
-        addToppings(r,h){this.customization.toppings.forEach(t=>{switch(t){case'sprinkles':this.addSprinkles(r,h);break;case'berries':this.addBerries(r,h);break;case'chocolate-chips':this.addChocolateChips(r,h);break;case'candies':this.addCandies(r,h);break;case'nuts':this.addNuts(r,h);break;case'edible-flowers':this.addFlowers(r,h);break;case'candles':this.addCandles(r,h);break;case'macarons':this.addMacarons(r,h);break;case'whipped-cream':this.addWhippedCream(r,h);break;}});}
-
-        addMessage(r,h){const cv=document.createElement('canvas');cv.width=1024;cv.height=256;const ctx=cv.getContext('2d'),rgb=this.hexToRgb(this.getIcingColor(this.customization.icingColor));ctx.fillStyle=`rgb(${rgb.r},${rgb.g},${rgb.b})`;ctx.fillRect(0,0,1024,256);ctx.strokeStyle='#ddd';ctx.lineWidth=3;ctx.strokeRect(10,10,1004,236);ctx.fillStyle='#c9605a';ctx.font='bold 70px Arial,sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='rgba(0,0,0,0.3)';ctx.shadowBlur=8;ctx.fillText(this.customization.message,512,128);const m=new THREE.Mesh(new THREE.PlaneGeometry(r*1.6,0.4),new THREE.MeshStandardMaterial({map:new THREE.CanvasTexture(cv),roughness:0.5,metalness:0.1}));m.position.y=h+0.3;m.position.z=0.01;this.cakeGroup.add(m);}
-
-        addSprinkles(r,h){const s=this.decorationSettings.sprinkles;for(let i=0;i<s.count;i++){const a=Math.random()*Math.PI*2,d=Math.random()*r*0.9,sp=new THREE.Mesh(new THREE.CylinderGeometry(0.05,0.05,s.size,16),new THREE.MeshStandardMaterial({color:s.colors[Math.floor(Math.random()*s.colors.length)],roughness:0.4}));sp.position.set(Math.cos(a)*d,h+s.height,Math.sin(a)*d);sp.rotation.z=Math.random()*Math.PI*2;sp.castShadow=true;this.cakeGroup.add(sp);}}
-        addBerries(r,h){const s=this.decorationSettings.berries,bg=new THREE.SphereGeometry(s.radius,32,32);for(let i=0;i<s.count;i++){const a=(i/s.count)*Math.PI*2,b=new THREE.Mesh(bg,new THREE.MeshStandardMaterial({color:s.colors[Math.floor(Math.random()*s.colors.length)],roughness:0.5}));b.position.set(Math.cos(a)*r*0.75,h+s.height,Math.sin(a)*r*0.75);b.castShadow=true;this.cakeGroup.add(b);}}
-        addCandies(r,h){const s=this.decorationSettings.candies,cg=new THREE.SphereGeometry(s.radius,32,32);for(let i=0;i<s.count;i++){const a=(i/s.count)*Math.PI*2,c=new THREE.Mesh(cg,new THREE.MeshStandardMaterial({color:s.colors[i%s.colors.length],roughness:0.3,metalness:0.1}));c.position.set(Math.cos(a)*r*0.8,h+s.height,Math.sin(a)*r*0.8);c.castShadow=true;this.cakeGroup.add(c);}}
-        addChocolateChips(r,h){const s=this.decorationSettings['chocolate-chips'];for(let i=0;i<s.count;i++){const a=Math.random()*Math.PI*2,d=Math.random()*r*0.9,c=new THREE.Mesh(new THREE.BoxGeometry(s.size,0.07,s.size),new THREE.MeshStandardMaterial({color:s.color,roughness:0.7}));c.position.set(Math.cos(a)*d,h+s.height,Math.sin(a)*d);c.rotation.set(Math.random()*Math.PI,Math.random()*Math.PI,Math.random()*Math.PI);c.castShadow=true;this.cakeGroup.add(c);}}
-        addNuts(r,h){const s=this.decorationSettings.nuts,ng=new THREE.SphereGeometry(s.radius,16,16);for(let i=0;i<s.count;i++){const a=Math.random()*Math.PI*2,d=Math.random()*r*0.85,n=new THREE.Mesh(ng,new THREE.MeshStandardMaterial({color:s.colors[Math.floor(Math.random()*s.colors.length)],roughness:0.8}));n.position.set(Math.cos(a)*d,h+s.height,Math.sin(a)*d);n.scale.set(0.9,s.scaleY,0.9);n.castShadow=true;this.cakeGroup.add(n);}}
-        addFlowers(r,h){const s=this.decorationSettings['edible-flowers'];for(let i=0;i<s.count;i++){const a=(i/s.count)*Math.PI*2,f=new THREE.Mesh(new THREE.SphereGeometry(s.size,16,16),new THREE.MeshStandardMaterial({color:s.colors[i%s.colors.length],roughness:0.6,metalness:0.05}));f.position.set(Math.cos(a)*r*0.7,h+s.height,Math.sin(a)*r*0.7);f.scale.set(1,0.6,1);f.castShadow=true;this.cakeGroup.add(f);}}
-        addCandles(r,h){const s=this.decorationSettings.candles;for(let i=0;i<s.count;i++){const a=(i/s.count)*Math.PI*2,d=r*0.65,st=new THREE.Mesh(new THREE.CylinderGeometry(0.06,0.06,s.stickHeight,16),new THREE.MeshStandardMaterial({color:s.stickColors[Math.floor(Math.random()*s.stickColors.length)],roughness:0.4}));st.position.set(Math.cos(a)*d,h+s.topHeight,Math.sin(a)*d);st.castShadow=true;this.cakeGroup.add(st);const fl=new THREE.Mesh(new THREE.ConeGeometry(0.1,s.flameHeight,16),new THREE.MeshStandardMaterial({color:s.flameColor,emissive:0xff6600,emissiveIntensity:0.8}));fl.position.set(Math.cos(a)*d,h+s.topHeight+s.stickHeight/2+0.15,Math.sin(a)*d);fl.castShadow=true;this.cakeGroup.add(fl);}}
-        addMacarons(r,h){const s=this.decorationSettings.macarons,mg=new THREE.SphereGeometry(s.radius,32,32);for(let i=0;i<s.count;i++){const a=(i/s.count)*Math.PI*2,m=new THREE.Mesh(mg,new THREE.MeshStandardMaterial({color:s.colors[i%s.colors.length],roughness:0.3}));m.position.set(Math.cos(a)*r*0.8,h+s.height,Math.sin(a)*r*0.8);m.scale.set(1.2,s.scaleY,1.2);m.castShadow=true;this.cakeGroup.add(m);}}
-        addWhippedCream(r,h){const s=this.decorationSettings['whipped-cream'];for(let i=0;i<s.count;i++){const a=(i/s.count)*Math.PI*2,d=r*0.7+Math.random()*0.3,w=new THREE.Mesh(new THREE.SphereGeometry(0.12,16,16),new THREE.MeshStandardMaterial({color:s.color,roughness:0.3,metalness:0}));w.position.set(Math.cos(a)*d,h+s.height,Math.sin(a)*d);w.scale.set(1,0.5,1);w.castShadow=true;this.cakeGroup.add(w);}}
-
-        hexToRgb(hex){const r=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec('#'+hex.toString(16).padStart(6,'0'));return r?{r:parseInt(r[1],16),g:parseInt(r[2],16),b:parseInt(r[3],16)}:{r:245,g:215,b:110};}
-        getIcingColor(c){return{'white':0xffffff,'pink':0xff69b4,'red':0xc41e3a,'chocolate':0x8b4513,'blue':0x4169e1,'purple':0x9370db}[c]||0xffffff;}
-
-        updatePrice(){
-            const total=this.prices.base+this.prices.flavor+this.prices.filling+this.prices.icing+this.prices.layers+this.prices.toppings.reduce((a,b)=>a+b,0)+this.prices.message;
-            document.getElementById('priceBase').textContent=`₱${this.prices.base.toFixed(0)}`;
-            document.getElementById('priceFlavor').textContent=`₱${this.prices.flavor.toFixed(0)}`;
-            document.getElementById('priceFilling').textContent=`₱${this.prices.filling.toFixed(0)}`;
-            document.getElementById('priceIcing').textContent=`₱${this.prices.icing.toFixed(0)}`;
-            document.getElementById('priceLayers').textContent=`₱${this.prices.layers.toFixed(0)}`;
-            document.getElementById('priceToppings').textContent=`₱${this.prices.toppings.reduce((a,b)=>a+b,0).toFixed(0)}`;
-            document.getElementById('priceMessage').textContent=`₱${this.prices.message.toFixed(0)}`;
-            document.getElementById('totalPrice').textContent=`₱${total.toFixed(0)}`;
-        }
-        getTotalPrice(){return this.prices.base+this.prices.flavor+this.prices.filling+this.prices.icing+this.prices.layers+this.prices.toppings.reduce((a,b)=>a+b,0)+this.prices.message;}
-        animate(){requestAnimationFrame(()=>this.animate());if(this.cakeGroup&&this.autoRotate)this.cakeGroup.rotation.y+=0.004;this.renderer.render(this.scene,this.camera);}
-        onWindowResize(){const c=document.getElementById('canvas3d'),w=c.clientWidth,h=c.clientHeight;this.camera.aspect=w/h;this.camera.updateProjectionMatrix();this.renderer.setSize(w,h);}
+    // ── Layer settings helpers ───────────────────────────────────────────────
+    _defaultLayerSettings(n){
+        const defaults=[];
+        for(let i=0;i<n;i++) defaults.push({flavor:'vanilla',filling:'none',icingType:'buttercream',icingColor:'white',flavorPrice:0,fillingPrice:0,icingPrice:0});
+        return defaults;
+    }
+    _ensureLayerSettings(n){
+        while(this.layerSettings.length<n) this.layerSettings.push({flavor:'vanilla',filling:'none',icingType:'buttercream',icingColor:'white',flavorPrice:0,fillingPrice:0,icingPrice:0});
+        this.layerSettings.length=n; // trim if shrunk
+    }
+    // Read active layer setting
+    _ls(key){ return this.layerSettings[this.activeLayer][key]; }
+    // Write to active layer setting and redraw
+    _setls(key,val,extra){
+        this.layerSettings[this.activeLayer][key]=val;
+        if(extra)Object.assign(this.layerSettings[this.activeLayer],extra);
+        this.updateCake3D();this.updatePrice();
+    }
+    // Sync UI controls to reflect the currently active layer's settings
+    syncUIToLayer(){
+        const s=this.layerSettings[this.activeLayer];
+        // Flavor
+        document.getElementById('flavor').value=s.flavor;
+        // Filling
+        document.getElementById('filling').value=s.filling;
+        // Frosting type
+        document.getElementById('icingType').value=s.icingType;
+        document.querySelectorAll('.frosting-card').forEach(c=>c.classList.toggle('selected',c.dataset.value===s.icingType));
+        // Icing color
+        document.getElementById('icingColor').value=s.icingColor;
+        document.querySelectorAll('.color-swatch').forEach(sw=>sw.classList.toggle('selected',sw.dataset.color===s.icingColor));
+        const colorNames={'white':'White','ivory':'Ivory','pink':'Pink','hot-pink':'Hot Pink','red':'Red','coral':'Coral','peach':'Peach','orange':'Orange','yellow':'Yellow','mint':'Mint','sage':'Sage','sky':'Sky Blue','blue':'Blue','navy':'Navy','lavender':'Lavender','purple':'Purple','chocolate':'Brown','black':'Black'};
+        document.getElementById('colorLabel').textContent=colorNames[s.icingColor]||s.icingColor;
+        // Badge
+        const nl=this.customization.layers;
+        const badge=document.getElementById('layerBadgeBar');
+        badge.classList.toggle('visible',nl>1);
+        document.getElementById('layerBadgeText').textContent='Designing Layer '+(this.activeLayer+1)+' of '+nl;
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
-        customizer = new CakeCustomizer();
-    });
+    // ── Textures ──────────────────────────────────────────────────────────────
+    createCakeTexture(hexColor){
+        const S=512,cv=document.createElement('canvas');cv.width=S;cv.height=S;
+        const ctx=cv.getContext('2d'),rgb=this.hexToRgb(hexColor);
+        ctx.fillStyle=`rgb(${rgb.r},${rgb.g},${rgb.b})`;ctx.fillRect(0,0,S,S);
+        for(let i=0;i<22;i++){const x=Math.random()*S,y=Math.random()*S,rad=30+Math.random()*70;const light=Math.random()>0.5;const g=ctx.createRadialGradient(x,y,0,x,y,rad);const dr=light?40:-35,dg=light?35:-28,db=light?25:-20;g.addColorStop(0,`rgba(${Math.min(255,Math.max(0,rgb.r+dr))},${Math.min(255,Math.max(0,rgb.g+dg))},${Math.min(255,Math.max(0,rgb.b+db))},0.22)`);g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(0,0,S,S);}
+        for(let i=0;i<2200;i++){const x=Math.random()*S,y=Math.random()*S,r=0.6+Math.random()*2.2;ctx.fillStyle=`rgba(${Math.max(0,rgb.r-70)},${Math.max(0,rgb.g-60)},${Math.max(0,rgb.b-50)},${0.18+Math.random()*0.32})`;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();ctx.fillStyle=`rgba(${Math.min(255,rgb.r+55)},${Math.min(255,rgb.g+45)},${Math.min(255,rgb.b+35)},0.12)`;ctx.beginPath();ctx.arc(x+r*0.4,y-r*0.4,r*0.7,0,Math.PI*2);ctx.fill();}
+        for(let i=0;i<12;i++){const x=Math.random()*S,w2=1.5+Math.random()*3;const g=ctx.createLinearGradient(x,0,x+w2,S);g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(0.3,`rgba(${Math.max(0,rgb.r-40)},${Math.max(0,rgb.g-34)},${Math.max(0,rgb.b-28)},0.14)`);g.addColorStop(0.7,`rgba(${Math.max(0,rgb.r-40)},${Math.max(0,rgb.g-34)},${Math.max(0,rgb.b-28)},0.14)`);g.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=g;ctx.fillRect(x,0,w2,S);}
+        const vg=ctx.createRadialGradient(S/2,S/2,S*0.25,S/2,S/2,S*0.72);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,`rgba(${Math.max(0,rgb.r-80)},${Math.max(0,rgb.g-65)},${Math.max(0,rgb.b-50)},0.38)`);ctx.fillStyle=vg;ctx.fillRect(0,0,S,S);
+        const t=new THREE.CanvasTexture(cv);t.anisotropy=4;return t;
+    }
+    createIcingTexture(hexColor){
+        const S=512,cv=document.createElement('canvas');cv.width=S;cv.height=S;
+        const ctx=cv.getContext('2d'),rgb=this.hexToRgb(hexColor);
+        ctx.fillStyle=`rgb(${rgb.r},${rgb.g},${rgb.b})`;ctx.fillRect(0,0,S,S);
+        ctx.globalAlpha=0.06;
+        for(let i=0;i<200;i++){const x=Math.random()*S,y2=Math.random()*S,len=8+Math.random()*40,ang=Math.random()*Math.PI;ctx.strokeStyle=Math.random()>0.5?`rgb(${Math.min(255,rgb.r+30)},${Math.min(255,rgb.g+25)},${Math.min(255,rgb.b+20)})`:  `rgb(${Math.max(0,rgb.r-25)},${Math.max(0,rgb.g-20)},${Math.max(0,rgb.b-15)})`;ctx.lineWidth=1.5+Math.random()*2;ctx.beginPath();ctx.moveTo(x,y2);ctx.lineTo(x+Math.cos(ang)*len,y2+Math.sin(ang)*len);ctx.stroke();}
+        ctx.globalAlpha=1;
+        for(let i=0;i<4;i++){const x=80+Math.random()*350,y=60+Math.random()*300,rx=18+Math.random()*55,ry=8+Math.random()*22,ang=Math.random()*Math.PI;const g=ctx.createRadialGradient(x,y,0,x,y,Math.max(rx,ry));g.addColorStop(0,`rgba(255,255,255,${0.28+Math.random()*0.22})`);g.addColorStop(0.5,`rgba(255,255,255,${0.08+Math.random()*0.1})`);g.addColorStop(1,'rgba(255,255,255,0)');ctx.save();ctx.translate(x,y);ctx.rotate(ang);ctx.scale(rx/Math.max(rx,ry),ry/Math.max(rx,ry));ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,Math.max(rx,ry),0,Math.PI*2);ctx.fill();ctx.restore();}
+        for(let i=0;i<60;i++){const x=Math.random()*S,y=Math.random()*S,r=0.8+Math.random()*2.2;ctx.fillStyle=`rgba(${Math.max(0,rgb.r-45)},${Math.max(0,rgb.g-38)},${Math.max(0,rgb.b-30)},0.22)`;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill();}
+        const vg=ctx.createRadialGradient(S/2,S/2,S*0.3,S/2,S/2,S*0.7);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,0.1)');ctx.fillStyle=vg;ctx.fillRect(0,0,S,S);
+        const t=new THREE.CanvasTexture(cv);t.anisotropy=4;return t;
+    }
+    createButtercreamSleeveTex(hexColor,height){
+        const W=512,H=512,cv=document.createElement('canvas');cv.width=W;cv.height=H;
+        const ctx=cv.getContext('2d'),rgb=this.hexToRgb(hexColor);
+        ctx.fillStyle=`rgb(${rgb.r},${rgb.g},${rgb.b})`;ctx.fillRect(0,0,W,H);
+        const ridgeH=Math.round(H*0.09);
+        for(let y=0;y<H;y+=ridgeH){const g1=ctx.createLinearGradient(0,y,0,y+ridgeH);g1.addColorStop(0,'rgba(255,255,255,0.0)');g1.addColorStop(0.18,'rgba(255,255,255,0.22)');g1.addColorStop(0.45,'rgba(255,255,255,0.06)');g1.addColorStop(0.72,'rgba(0,0,0,0.10)');g1.addColorStop(1.0,'rgba(0,0,0,0.18)');ctx.fillStyle=g1;ctx.fillRect(0,y,W,ridgeH);}
+        ctx.globalAlpha=0.05;
+        for(let i=0;i<120;i++){const x=Math.random()*W,y2=Math.random()*H,len=6+Math.random()*28,ang=Math.random()*Math.PI;ctx.strokeStyle=Math.random()>0.5?`rgb(${Math.min(255,rgb.r+30)},${Math.min(255,rgb.g+25)},${Math.min(255,rgb.b+20)})`:`rgb(${Math.max(0,rgb.r-25)},${Math.max(0,rgb.g-20)},${Math.max(0,rgb.b-15)})`;ctx.lineWidth=1.5+Math.random()*2;ctx.beginPath();ctx.moveTo(x,y2);ctx.lineTo(x+Math.cos(ang)*len,y2+Math.sin(ang)*len);ctx.stroke();}
+        ctx.globalAlpha=1;
+        const t=new THREE.CanvasTexture(cv);t.anisotropy=4;return t;
+    }
+
+    // ── Cake layer builder ────────────────────────────────────────────────────
+    createCakeLayer(radius,height,yPos,layerIdx){
+        const ls=this.layerSettings[layerIdx]||this.layerSettings[0];
+        const fc={'vanilla':0xb0b0b0,'chocolate':0x6b4423,'red-velvet':0xc41e3a,'carrot':0xff8c00,'strawberry':0xff6b9d,'lemon':0xffff66};
+        const cakeColor=fc[ls.flavor]||0xb0b0b0;
+        const fillingColor=this.fillingColors[ls.filling]||null;
+        const g=new THREE.Group();
+        const cake=new THREE.Mesh(new THREE.CylinderGeometry(radius,radius,height,64,1),new THREE.MeshStandardMaterial({map:this.createCakeTexture(cakeColor),roughness:0.9,metalness:0.0}));
+        cake.position.y=yPos;cake.castShadow=true;cake.receiveShadow=true;g.add(cake);
+        const iType=ls.icingType;
+        const icingCol=this.getIcingColor(ls.icingColor);
+        if(iType==='fondant'){
+            const sleeve=new THREE.Mesh(new THREE.CylinderGeometry(radius+0.07,radius+0.07,height+0.06,64,1,true),new THREE.MeshStandardMaterial({map:this.createIcingTexture(icingCol),roughness:0.25,metalness:0.05}));sleeve.position.y=yPos;sleeve.castShadow=true;g.add(sleeve);
+            const cap=new THREE.Mesh(new THREE.CircleGeometry(radius+0.07,64),new THREE.MeshStandardMaterial({map:this.createIcingTexture(icingCol),roughness:0.25,metalness:0.05}));cap.rotation.x=-Math.PI/2;cap.position.y=yPos+height/2+0.03;g.add(cap);
+        } else if(iType==='ganache'){
+            const darkCol=this.customization.icingColor==='white'?0x2a1800:icingCol;
+            const sleeve=new THREE.Mesh(new THREE.CylinderGeometry(radius+0.06,radius+0.06,height+0.04,64,1,true),new THREE.MeshStandardMaterial({color:darkCol,roughness:0.12,metalness:0.15}));sleeve.position.y=yPos;g.add(sleeve);
+            const cap=new THREE.Mesh(new THREE.CircleGeometry(radius+0.06,64),new THREE.MeshStandardMaterial({color:darkCol,roughness:0.12,metalness:0.15}));cap.rotation.x=-Math.PI/2;cap.position.y=yPos+height/2+0.02;g.add(cap);
+            const dripGeo=new THREE.SphereGeometry(0.08,12,8);const dripMat=new THREE.MeshStandardMaterial({color:darkCol,roughness:0.12,metalness:0.15});
+            for(let i=0;i<20;i++){const a=(i/20)*Math.PI*2,dr=new THREE.Mesh(dripGeo,dripMat);const dropY=yPos+height/2-(Math.random()*height*0.6);dr.position.set(Math.cos(a)*(radius+0.06),dropY,Math.sin(a)*(radius+0.06));dr.scale.set(1,1.4+Math.random()*1.2,1);dr.castShadow=true;g.add(dr);}
+        } else if(iType==='cream-cheese'){
+            const sleeve=new THREE.Mesh(new THREE.CylinderGeometry(radius+0.1,radius+0.1,height+0.08,64,1,true),new THREE.MeshStandardMaterial({color:icingCol,roughness:0.65,metalness:0.0}));sleeve.position.y=yPos;g.add(sleeve);
+            const cap=new THREE.Mesh(new THREE.CircleGeometry(radius+0.1,64),new THREE.MeshStandardMaterial({color:icingCol,roughness:0.65,metalness:0.0}));cap.rotation.x=-Math.PI/2;cap.position.y=yPos+height/2+0.04;g.add(cap);
+            for(let i=0;i<16;i++){const rg=new THREE.Mesh(new THREE.BoxGeometry(radius*1.6+Math.random()*0.4,0.04,0.06+Math.random()*0.06),new THREE.MeshStandardMaterial({color:icingCol,roughness:0.7}));rg.position.set((Math.random()-0.5)*radius*0.6,yPos+height/2+0.05,(Math.random()-0.5)*radius*0.6);rg.rotation.y=Math.random()*Math.PI;g.add(rg);}
+        } else {
+            const sleeve=new THREE.Mesh(new THREE.CylinderGeometry(radius+0.09,radius+0.09,height+0.06,64,1,true),new THREE.MeshStandardMaterial({map:this.createButtercreamSleeveTex(icingCol,height),roughness:0.52,metalness:0.03}));sleeve.position.y=yPos;g.add(sleeve);
+            const top=new THREE.Mesh(new THREE.CircleGeometry(radius+0.09,64),new THREE.MeshStandardMaterial({map:this.createIcingTexture(icingCol),roughness:0.48,metalness:0.04}));top.rotation.x=-Math.PI/2;top.position.y=yPos+height/2+0.03;g.add(top);
+        }
+        if(fillingColor&&this.customization.layers>1){const fi=new THREE.Mesh(new THREE.CylinderGeometry(radius+0.02,radius+0.02,0.1,64,1,true),new THREE.MeshStandardMaterial({color:fillingColor,roughness:0.5,metalness:0}));fi.position.y=yPos+height/2+0.05;g.add(fi);}
+        return g;
+    }
+
+    // ── Cake rebuild ──────────────────────────────────────────────────────────
+    updateCake3D(){
+        while(this.cakeGroup.children.length>0)this.cakeGroup.remove(this.cakeGroup.children[0]);
+        this.msgMesh=null;
+        const sm={'6':1.8,'8':2.2,'10':2.8,'12':3.2},r=sm[this.customization.size],lh=0.4,nl=this.customization.layers;
+        let th=0;
+        this._ensureLayerSettings(nl);
+        this.layerMeshGroups=[];
+        for(let i=0;i<nl;i++){
+            const lr=r-(i*0.25),yp=-0.5+(i*(lh+0.15));
+            const l=this.createCakeLayer(lr,lh,yp,i);
+            l.userData.layerIndex=i;
+            this.layerMeshGroups.push(l);
+            this.cakeGroup.add(l);
+            th=yp+lh/2;
+        }
+        this.topY=th+0.24;this.topR=r;
+        // Clamp activeLayer to valid range after layer count may have changed
+        if(this.activeLayer>=nl)this.activeLayer=nl-1;
+        this.rebuildDecorations();
+        this.addMessage(this.customization.message);
+        this._updateLayerSelectorUI(nl);
+        this.syncUIToLayer();
+    }
+
+    // ── Layer selector UI ────────────────────────────────────────────────────
+    _updateLayerSelectorUI(numLayers){
+        const sel=document.getElementById('layerSelector');
+        if(numLayers<=1){sel.style.display='none';return;}
+        sel.style.display='flex';
+        sel.innerHTML='';
+        // Build buttons bottom→top (layer 0 = bottom, visually at bottom of stack)
+        for(let i=numLayers-1;i>=0;i--){
+            const btn=document.createElement('button');
+            btn.className='layer-btn'+(i===this.activeLayer?' active-layer':'');
+            btn.innerHTML=`<span class="lb-num">${i+1}</span><span class="lb-lbl">LAYER</span>`;
+            btn.title=`Design layer ${i+1}`;
+            btn.addEventListener('click',()=>{
+                this.activeLayer=i;
+                this._blinkT=0;
+                document.querySelectorAll('.layer-btn').forEach((b,idx)=>{
+                    const layerIdx=numLayers-1-idx;
+                    b.classList.toggle('active-layer',layerIdx===i);
+                });
+                this.syncUIToLayer();
+                showToast('Now designing Layer '+(i+1));
+            });
+            sel.appendChild(btn);
+        }
+    }
+
+    // ── Decoration placement ──────────────────────────────────────────────────
+    rebuildDecorations(){
+        const toRemove=[];this.cakeGroup.traverse(o=>{if(o.userData&&o.userData.isDecoration)toRemove.push(o);});toRemove.forEach(o=>this.cakeGroup.remove(o));
+        const h=this.topY||0;
+        if(!this.placedDecorations)return;
+        this.placedDecorations.forEach(d=>{
+            const g=new THREE.Group();g.userData.isDecoration=true;
+            // Use stored layerY if available, else fall back to topY
+            const h2=(d.layerY!==undefined)?d.layerY:h;
+            switch(d.type){
+                case'sprinkles':this._placeSprinkle(g,d.x,h2,d.z);break;
+                case'berries':this._placeBerry(g,d.x,h2,d.z);break;
+                case'chocolate-chips':this._placeChip(g,d.x,h2,d.z);break;
+                case'nuts':this._placeNut(g,d.x,h2,d.z);break;
+                case'edible-flowers':this._placeFlower(g,d.x,h2,d.z);break;
+                case'macarons':this._placeMacaron(g,d.x,h2,d.z);break;
+                case'candies':this._placeCandy(g,d.x,h2,d.z);break;
+                case'whipped-cream':this._placeWhip(g,d.x,h2,d.z);break;
+            }
+            this.cakeGroup.add(g);
+        });
+    }
+    _placeSprinkle(g,x,h,z){const colors=[0xff4757,0x2ed573,0x1e90ff,0xffa502,0xff6b81,0xeccc68,0xa29bfe,0xff7f50];const sp=new THREE.Mesh(new THREE.CylinderGeometry(0.045,0.045,0.22,10),new THREE.MeshStandardMaterial({color:colors[Math.floor(Math.random()*colors.length)],roughness:0.3,metalness:0.08}));sp.position.set(x,h+0.06,z);sp.rotation.x=Math.PI/2+(Math.random()-0.5)*0.4;sp.rotation.y=Math.random()*Math.PI*2;sp.castShadow=true;g.add(sp);}
+    _placeBerry(g,x,h,z){const cols=[0xcc1a1a,0xe02020,0xb81515];const berry=new THREE.Mesh(new THREE.SphereGeometry(0.2,16,12),new THREE.MeshStandardMaterial({color:cols[Math.floor(Math.random()*cols.length)],roughness:0.45,metalness:0.05}));berry.scale.set(1,1.18,1);berry.position.set(x,h+0.18,z);berry.castShadow=true;g.add(berry);for(let s=0;s<6;s++){const sa=Math.random()*Math.PI*2,sd=0.14+Math.random()*0.05;const seed=new THREE.Mesh(new THREE.SphereGeometry(0.018,6,6),new THREE.MeshStandardMaterial({color:0xffd700,roughness:0.6}));seed.position.set(x+Math.cos(sa)*sd,h+0.2,z+Math.sin(sa)*sd);g.add(seed);}for(let l=0;l<4;l++){const la=(l/4)*Math.PI*2;const leaf=new THREE.Mesh(new THREE.SphereGeometry(0.07,6,6),new THREE.MeshStandardMaterial({color:0x2d8a2d,roughness:0.7}));leaf.scale.set(0.4,0.2,1.2);leaf.position.set(x+Math.cos(la)*0.1,h+0.38,z+Math.sin(la)*0.1);leaf.rotation.y=la;g.add(leaf);}}
+    _placeChip(g,x,h,z){const chip=new THREE.Mesh(new THREE.SphereGeometry(0.1,10,8),new THREE.MeshStandardMaterial({color:0x3b1a08,roughness:0.62,metalness:0.06}));chip.scale.set(1,0.65,1);chip.position.set(x,h+0.07,z);chip.castShadow=true;g.add(chip);const base=new THREE.Mesh(new THREE.CircleGeometry(0.09,10),new THREE.MeshStandardMaterial({color:0x2a1206,roughness:0.7}));base.rotation.x=-Math.PI/2;base.position.set(x,h+0.04,z);g.add(base);}
+    _placeNut(g,x,h,z){const nutCols=[0x8b5e2a,0x9c6b35,0x7a5020];const nut=new THREE.Mesh(new THREE.SphereGeometry(0.18,10,8),new THREE.MeshStandardMaterial({color:nutCols[Math.floor(Math.random()*nutCols.length)],roughness:0.85,metalness:0.02}));nut.scale.set(1+Math.random()*0.3,0.7+Math.random()*0.3,1+Math.random()*0.2);nut.position.set(x,h+0.13,z);nut.rotation.y=Math.random()*Math.PI;nut.castShadow=true;g.add(nut);const crack=new THREE.Mesh(new THREE.BoxGeometry(0.28,0.03,0.03),new THREE.MeshStandardMaterial({color:0x4a2800,roughness:0.9}));crack.position.set(x,h+0.2,z);crack.rotation.y=Math.random()*Math.PI;g.add(crack);}
+    _placeFlower(g,x,h,z){const flowerCols=[[0xff69b4,0xffcce0],[0xda70d6,0xf0c0f0],[0xff8c00,0xffd080],[0xff4560,0xffb0b0],[0x9b59b6,0xd7b8f0]];const fc=flowerCols[Math.floor(Math.random()*flowerCols.length)];for(let p=0;p<5;p++){const pa=(p/5)*Math.PI*2;const petal=new THREE.Mesh(new THREE.SphereGeometry(0.16,10,8),new THREE.MeshStandardMaterial({color:fc[0],roughness:0.55,metalness:0.04}));petal.scale.set(0.55,0.2,1.15);petal.position.set(x+Math.cos(pa)*0.2,h+0.12,z+Math.sin(pa)*0.2);petal.rotation.y=pa;g.add(petal);}const centre=new THREE.Mesh(new THREE.SphereGeometry(0.1,12,10),new THREE.MeshStandardMaterial({color:0xffee44,roughness:0.4,metalness:0.05}));centre.scale.set(1,0.55,1);centre.position.set(x,h+0.16,z);centre.castShadow=true;g.add(centre);}
+    _placeMacaron(g,x,h,z){const macColors=[0xffb3c6,0xb3d9ff,0xb3ffcc,0xffd9b3,0xd9b3ff,0xffb3b3,0xb3fff0,0xfffbb3];const col=macColors[Math.floor(Math.random()*macColors.length)];const shellMat=new THREE.MeshStandardMaterial({color:col,roughness:0.3,metalness:0.06});const bot=new THREE.Mesh(new THREE.SphereGeometry(0.24,20,12),shellMat);bot.scale.set(1,0.45,1);bot.position.set(x,h+0.1,z);bot.castShadow=true;g.add(bot);const cream=new THREE.Mesh(new THREE.TorusGeometry(0.18,0.055,8,24),new THREE.MeshStandardMaterial({color:0xfffde8,roughness:0.55}));cream.rotation.x=Math.PI/2;cream.position.set(x,h+0.2,z);g.add(cream);const top=new THREE.Mesh(new THREE.SphereGeometry(0.24,20,12),shellMat);top.scale.set(1,0.45,1);top.position.set(x,h+0.3,z);top.castShadow=true;g.add(top);}
+    _placeCandy(g,x,h,z){const colors=[0xff3b3b,0x3b7fff,0xffcc00,0x3bcc3b,0xff9500,0xcc44cc,0x00bbcc];const col=colors[Math.floor(Math.random()*colors.length)];const candy=new THREE.Mesh(new THREE.SphereGeometry(0.22,24,16),new THREE.MeshStandardMaterial({color:col,roughness:0.22,metalness:0.18}));candy.scale.set(1,0.55,1);candy.position.set(x,h+0.11,z);candy.castShadow=true;g.add(candy);const ring=new THREE.Mesh(new THREE.TorusGeometry(0.1,0.018,6,24),new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.3,metalness:0.1}));ring.rotation.x=Math.PI/2;ring.position.set(x,h+0.18,z);g.add(ring);}
+    _placeWhip(g,x,h,z){const mat=new THREE.MeshStandardMaterial({color:0xffffff,roughness:0.28,metalness:0.0});[{rad:0.14,tube:0.055,y:h+0.1},{rad:0.09,tube:0.045,y:h+0.18},{rad:0.05,tube:0.035,y:h+0.25}].forEach(t=>{const ring=new THREE.Mesh(new THREE.TorusGeometry(t.rad,t.tube,10,24),mat);ring.rotation.x=Math.PI/2;ring.position.set(x,t.y,z);ring.castShadow=true;g.add(ring);});const tip=new THREE.Mesh(new THREE.ConeGeometry(0.03,0.09,8),mat);tip.position.set(x,h+0.32,z);g.add(tip);}
+
+    // ── Placement UI ──────────────────────────────────────────────────────────
+    updatePlacementUI(){
+        const counts={};(this.placedDecorations||[]).forEach(d=>{counts[d.type]=(counts[d.type]||0)+1;});
+        const el=document.getElementById('decCounts');el.innerHTML='';
+        const labels={'sprinkles':'Sprinkles','berries':'Berries','chocolate-chips':'Choco Chips','nuts':'Nuts','edible-flowers':'Flowers','macarons':'Macarons','candies':'Candies','whipped-cream':'Whip Cream'};
+        const icons={'sprinkles':'&#127881;','berries':'&#127827;','chocolate-chips':'&#127849;','nuts':'&#129359;','edible-flowers':'&#127804;','macarons':'&#127848;','candies':'&#127844;','whipped-cream':'&#129442;'};
+        Object.entries(counts).forEach(([type,n])=>{
+            const pill=document.createElement('div');pill.className='dec-count-pill';
+            pill.innerHTML=`<span>${icons[type]||''} ${labels[type]||type}</span><span style="background:rgba(215,115,107,0.12);padding:1px 6px;border-radius:99px;margin-left:2px;">${n}</span><span class="pill-remove" onclick="removeLastOf('${type}')" title="Remove one">&#10005;</span>`;
+            el.appendChild(pill);
+        });
+    }
+
+    // ── Message ───────────────────────────────────────────────────────────────
+    _msgCanvas(text){
+        const size=512,cv=document.createElement('canvas');cv.width=size;cv.height=size;
+        const ctx=cv.getContext('2d');ctx.clearRect(0,0,size,size);
+        if(!text||!text.trim())return cv;
+        const st=this.msgStyle||{font:'Arial',color:'#c9605a',bold:true,italic:false,pos:'center'};
+        const weight=st.bold?'bold':'normal';const style=st.italic?'italic':'normal';
+        const fs=62;const fontStr=`${style} ${weight} ${fs}px "${st.font}",sans-serif`;
+        ctx.font=fontStr;const maxW=size*0.82;const lineH=fs*1.22;
+        const words=text.split(' ');const lines=[];let current='';
+        for(let i=0;i<words.length;i++){const test=current?current+' '+words[i]:words[i];if(ctx.measureText(test).width<=maxW){current=test;}else{if(current)lines.push(current);let word=words[i];while(ctx.measureText(word).width>maxW){let cut=word.length-1;while(cut>1&&ctx.measureText(word.slice(0,cut)).width>maxW)cut--;lines.push(word.slice(0,cut));word=word.slice(cut);}current=word;}}
+        if(current)lines.push(current);
+        // offsetX/offsetY are fractions: 0 = centre, ±0.5 = edge
+        const ox=(st.offsetX||0)*size;
+        const oy=(st.offsetY||0)*size;
+        const cx=size/2+ox, cy=size/2+oy;
+        const totalH=lines.length*lineH;const startY=cy-totalH/2+lineH/2;
+        ctx.font=fontStr;ctx.textAlign='center';ctx.textBaseline='middle';
+        ctx.shadowColor='rgba(0,0,0,0.28)';ctx.shadowBlur=7;ctx.fillStyle=st.color;
+        lines.forEach((line,i)=>{ctx.fillText(line,cx,startY+i*lineH);});
+        return cv;
+    }
+    addMessage(text){
+        if(this.msgMesh){this.cakeGroup.remove(this.msgMesh);this.msgMesh=null;}
+        if(!text||!text.trim())return;
+        const r=this.topR||1.8,yTop=this.topY||0;
+        const geo=new THREE.CircleGeometry(r*0.88,64);
+        const mat=new THREE.MeshStandardMaterial({map:new THREE.CanvasTexture(this._msgCanvas(text)),transparent:true,roughness:0.35,metalness:0.05,depthWrite:false});
+        this.msgMesh=new THREE.Mesh(geo,mat);this.msgMesh.rotation.x=-Math.PI/2;this.msgMesh.position.set(0,yTop,0);this.cakeGroup.add(this.msgMesh);
+    }
+    updateMessageOnly(){if(this.msgMesh&&this.msgMesh.material){this.msgMesh.material.map.dispose();this.msgMesh.material.map=new THREE.CanvasTexture(this._msgCanvas(this.customization.message));this.msgMesh.material.needsUpdate=true;}else{this.addMessage(this.customization.message);}}
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    hexToRgb(hex){const r=/^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec('#'+hex.toString(16).padStart(6,'0'));return r?{r:parseInt(r[1],16),g:parseInt(r[2],16),b:parseInt(r[3],16)}:{r:245,g:215,b:110};}
+    getIcingColor(c){return{'white':0xffffff,'ivory':0xfffff0,'pink':0xff69b4,'hot-pink':0xff1493,'red':0xc41e3a,'coral':0xff6b6b,'peach':0xffcba4,'orange':0xff8c00,'yellow':0xffd700,'mint':0x98ff98,'sage':0x8fbc8f,'sky':0x87ceeb,'blue':0x4169e1,'navy':0x001f5b,'lavender':0xe6b8f5,'purple':0x9370db,'chocolate':0x8b4513,'black':0x222222}[c]||0xffffff;}
+    updatePrice(){
+        const decTotal=(this.placedDecorations||[]).reduce((a,d)=>a+d.price,0);
+        // Sum per-layer prices
+        const flavorTotal=(this.layerSettings||[]).reduce((a,l)=>a+(l.flavorPrice||0),0);
+        const fillingTotal=(this.layerSettings||[]).reduce((a,l)=>a+(l.fillingPrice||0),0);
+        const icingTotal=(this.layerSettings||[]).reduce((a,l)=>a+(l.icingPrice||0),0);
+        const total=this.prices.base+flavorTotal+fillingTotal+icingTotal+this.prices.layers+decTotal+this.prices.message;
+        const flash=(id,val)=>{const el=document.getElementById(id);el.textContent='₱'+val.toFixed(0);el.classList.remove('price-flash');void el.offsetWidth;el.classList.add('price-flash');};
+        flash('priceBase',this.prices.base);
+        flash('priceFlavor',flavorTotal);
+        flash('priceFilling',fillingTotal);
+        flash('priceIcing',icingTotal);
+        flash('priceLayers',this.prices.layers);
+        flash('priceToppings',decTotal);
+        flash('priceMessage',this.prices.message);
+        const te=document.getElementById('totalPrice');te.textContent='₱'+total.toFixed(0);te.classList.remove('price-flash');void te.offsetWidth;te.classList.add('price-flash');
+    }
+    getTotalPrice(){const decTotal=(this.placedDecorations||[]).reduce((a,d)=>a+d.price,0);const flavorTotal=(this.layerSettings||[]).reduce((a,l)=>a+(l.flavorPrice||0),0);const fillingTotal=(this.layerSettings||[]).reduce((a,l)=>a+(l.fillingPrice||0),0);const icingTotal=(this.layerSettings||[]).reduce((a,l)=>a+(l.icingPrice||0),0);return this.prices.base+flavorTotal+fillingTotal+icingTotal+this.prices.layers+decTotal+this.prices.message;}
+    animate(){
+        requestAnimationFrame(()=>this.animate());
+        if(this.cakeGroup&&this.autoRotate)this.cakeGroup.rotation.y+=0.004;
+        // Blink active layer: pulse emissive on all meshes in the active group
+        if(this.layerMeshGroups&&this.layerMeshGroups.length>1){
+            this._blinkT=(this._blinkT||0)+0.05;
+            const pulse=0.5+0.5*Math.sin(this._blinkT*3.5); // 0..1 sine
+            this.layerMeshGroups.forEach((grp,idx)=>{
+                grp.traverse(obj=>{
+                    if(!obj.isMesh||!obj.material)return;
+                    if(idx===this.activeLayer){
+                        obj.material.emissive=new THREE.Color(0xd7736b);
+                        obj.material.emissiveIntensity=pulse*0.35;
+                    } else {
+                        obj.material.emissive=new THREE.Color(0x000000);
+                        obj.material.emissiveIntensity=0;
+                    }
+                });
+            });
+        }
+        this.renderer.render(this.scene,this.camera);
+    }
+    onWindowResize(){const c=document.getElementById('canvas3d'),w=c.clientWidth,h=c.clientHeight;this.camera.aspect=w/h;this.camera.updateProjectionMatrix();this.renderer.setSize(w,h);}
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+    customizer=new CakeCustomizer();
+    updateProgress();
+});
 </script>
 </body>
 </html>

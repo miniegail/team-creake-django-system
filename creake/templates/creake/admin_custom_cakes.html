@@ -36,8 +36,13 @@
     <tr>
       <td><strong style="color:var(--coral);">#{{ cake.id }}</strong></td>
       <td>
-        <div style="font-weight:600;">{{ cake.user.get_full_name|default:cake.user.username|default:"Guest" }}</div>
-        <div style="font-size:11px;color:var(--text-muted);">{{ cake.user.email|default:"—" }}</div>
+        {% if cake.user %}
+          <div style="font-weight:600;">{{ cake.user.get_full_name|default:cake.user.username }}</div>
+          <div style="font-size:11px;color:var(--text-muted);">{{ cake.user.email|default:"—" }}</div>
+        {% else %}
+          <div style="font-weight:600;">Guest</div>
+          <div style="font-size:11px;color:var(--text-muted);">—</div>
+        {% endif %}
       </td>
       <td style="font-weight:600;">{{ cake.cake_name }}</td>
       <td style="font-size:11px;color:var(--text-muted);max-width:200px;">

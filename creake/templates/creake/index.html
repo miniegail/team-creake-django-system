@@ -1,4 +1,3 @@
-Try AI directly in your favorite apps … Use Gemini to generate drafts and refine content, plus get Gemini Pro with access to Google's next-gen AI for ₱1,100 ₱0 for 1 month
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
@@ -312,13 +311,12 @@ var cakesData = [
     category: "{{ cake.category|escapejs }}",
     desc:     "{{ cake.description|escapejs }}",
     price:    {{ cake.price }},
-    img:      "{% static 'creake/images/' %}{{ cake.image }}",
+    img:      "{% if cake.image %}{{ cake.image.url }}{% else %}{% static 'creake/images/cakes/cake1.jpg' %}{% endif %}",
     badge:    "{{ cake.badge|default:''|escapejs }}",
     rating:   {{ cake.rating|default:0 }},
     reviews:  {{ cake.review_count|default:0 }},
     new:      {{ cake.is_new|yesno:"true,false" }}
   }
-  
   {% if not forloop.last %},{% endif %}
   {% empty %}
   {name:"Chocolate Fudge",category:"chocolate",desc:"Rich chocolate cake",price:500,img:"{% static 'creake/images/cakes/cake1.jpg' %}",badge:"Best Seller",rating:4.8,reviews:324,new:false},
