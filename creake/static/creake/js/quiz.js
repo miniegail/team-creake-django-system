@@ -1,5 +1,3 @@
-
-
 var qzStep = 0;
 var qzAnswers = {};
 var qzDir = 'right';

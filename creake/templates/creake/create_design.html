@@ -1,0 +1,62 @@
+{% extends 'creake/base_dashboard.html' %}
+{% block title %}Create Design{% endblock %}
+{% block nav_designs %}active{% endblock %}
+
+{% block content %}
+
+<div>
+  <div class="section-title">&#127912; Create New Design</div>
+  <div class="section-sub">Design your custom cake and save it for later.</div>
+</div>
+
+<div style="max-width:540px;">
+  <div class="profile-card">
+    <form method="post" action="{% url 'creake:create_design' %}">
+      {% csrf_token %}
+
+      <div class="pf-field">
+        <label>Design Name</label>
+        <input type="text" name="name" placeholder="e.g. My Birthday Cake" required>
+      </div>
+
+      <div class="pf-field">
+        <label>Emoji / Icon</label>
+        <select name="emoji">
+          <option value="🎂">🎂 Birthday Cake</option>
+          <option value="🍰">🍰 Slice of Cake</option>
+          <option value="🧁">🧁 Cupcake</option>
+          <option value="🍫">🍫 Chocolate</option>
+          <option value="🍓">🍓 Strawberry</option>
+          <option value="🌸">🌸 Floral</option>
+          <option value="⭐">⭐ Special</option>
+          <option value="❤️">❤️ Romance</option>
+        </select>
+      </div>
+
+      <div class="pf-field">
+        <label>Number of Layers</label>
+        <select name="layers">
+          <option value="1">1 Layer</option>
+          <option value="2" selected>2 Layers</option>
+          <option value="3">3 Layers</option>
+          <option value="4">4 Layers</option>
+        </select>
+      </div>
+
+      <div class="pf-field">
+        <label>Description (Optional)</label>
+        <textarea name="description" placeholder="Describe your cake design..."></textarea>
+      </div>
+
+      <div style="display:flex;gap:12px;margin-top:20px;">
+        <a href="{% url 'creake:my_designs' %}"
+           style="flex:1;padding:11px;border:2px solid #f0b9b5;background:white;color:var(--coral);border-radius:10px;font-weight:700;font-size:13px;text-align:center;text-decoration:none;">
+          Cancel
+        </a>
+        <button type="submit" class="pf-save" style="flex:2;">&#127912; Save Design</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

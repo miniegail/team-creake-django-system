@@ -1,0 +1,45 @@
+{% extends 'creake/base_dashboard.html' %}
+{% block title %}Wishlist{% endblock %}
+{% block nav_wishlist %}active{% endblock %}
+
+{% block content %}
+
+<div>
+  <div class="section-title">My Wishlist</div>
+  <div class="section-sub">Cakes you&rsquo;ve saved for later &mdash; order anytime.</div>
+</div>
+
+{% if wishlist_items %}
+<div class="wishlist-grid">
+  {% for item in wishlist_items %}
+  <div class="wish-card">
+    <div class="wish-img {{ item.thumb_class|default:'' }}">
+      {% if item.image %}
+        <img src="{{ item.image.url }}" alt="{{ item.cake_name }}" style="width:100%;height:100%;object-fit:cover;">
+      {% else %}
+        {{ item.emoji|default:"&#127874;" }}
+      {% endif %}
+    </div>
+    <button class="wish-remove" onclick="removeWish(this)" title="Remove from wishlist">&#128148;</button>
+    <div class="wish-info">
+      <h4>{{ item.cake_name }}</h4>
+      <div class="wish-price">&#8369;{{ item.price }}</div>
+      <form method="post" action="{% url 'creake:add_to_cart' item.cake_id %}">
+        {% csrf_token %}
+        <button type="submit" class="wish-btn">&#128722; Add to Cart</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="empty-state">
+  <div style="font-size:48px;margin-bottom:16px;">&#128150;</div>
+  <h3 style="color:var(--coral);margin-bottom:8px;">Your Wishlist is Empty</h3>
+  <p style="color:var(--text-muted);font-size:13px;margin-bottom:20px;">Save cakes you love and come back to order them anytime.</p>
+  <a href="{% url 'creake:index' %}#main-content" style="background:linear-gradient(135deg,var(--coral),var(--coral-dark));color:white;padding:12px 28px;border-radius:25px;text-decoration:none;font-weight:700;font-size:13px;">&#127874; Browse Cakes</a>
+</div>
+{% endif %}
+
+{% endblock %}

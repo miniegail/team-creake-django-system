@@ -1,0 +1,178 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CREAKE Admin — {% block title %}Dashboard{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;0,900;1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'creake/css/dashboard.css' %}">
+<style>
+  /* ===== ADMIN OVERRIDES ===== */
+  .db-side { background: linear-gradient(170deg, #2d2d2d 0%, #1a1a1a 60%, #111 100%) !important; }
+  .nav-item.active { background: white; color: #2d2d2d !important; }
+  .side-badge { background: linear-gradient(135deg, #d7736b, #c9605a) !important; }
+  .admin-crown { font-size: 28px; margin-bottom: 6px; }
+
+  /* ===== ADMIN TABLE ===== */
+  .admin-table { width: 100%; border-collapse: collapse; background: white; border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); }
+  .admin-table th { background: linear-gradient(135deg, #2d2d2d, #1a1a1a); color: white; padding: 13px 16px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; text-align: left; }
+  .admin-table td { padding: 13px 16px; font-size: 13px; border-bottom: 1px solid rgba(0,0,0,0.05); vertical-align: middle; }
+  .admin-table tr:last-child td { border-bottom: none; }
+  .admin-table tr:hover td { background: #fffaf5; }
+
+  /* ===== STATUS BADGES ===== */
+  .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+  .badge-pending  { background: #fff3e0; color: #e65100; }
+  .badge-paid     { background: #e3f2fd; color: #1565c0; }
+  .badge-baking   { background: #fce4ec; color: #c62828; }
+  .badge-delivery { background: #e8f5e9; color: #2e7d32; }
+  .badge-delivered{ background: #e8f5e9; color: #1b5e20; }
+  .badge-cancelled{ background: #ffebee; color: #b71c1c; }
+  .badge-pending-approval { background: #fff8e1; color: #f57f17; }
+  .badge-approved { background: #e8f5e9; color: #2e7d32; }
+  .badge-rejected { background: #ffebee; color: #b71c1c; }
+
+  /* ===== ACTION BUTTONS ===== */
+  .btn-action { padding: 6px 14px; border-radius: 8px; font-size: 11px; font-weight: 700; cursor: pointer; border: none; font-family: 'Poppins', sans-serif; transition: all 0.2s; }
+  .btn-approve { background: #e8f5e9; color: #2e7d32; }
+  .btn-approve:hover { background: #2e7d32; color: white; }
+  .btn-reject  { background: #ffebee; color: #c62828; }
+  .btn-reject:hover  { background: #c62828; color: white; }
+  .btn-edit    { background: #e3f2fd; color: #1565c0; }
+  .btn-edit:hover    { background: #1565c0; color: white; }
+  .btn-delete  { background: #ffebee; color: #c62828; }
+  .btn-delete:hover  { background: #c62828; color: white; }
+  .btn-view    { background: #f3e5f5; color: #6a1b9a; }
+  .btn-view:hover    { background: #6a1b9a; color: white; }
+  .btn-primary { background: linear-gradient(135deg, #d7736b, #c9605a); color: white; padding: 10px 22px; border-radius: 10px; font-size: 13px; font-weight: 700; border: none; cursor: pointer; font-family: 'Poppins', sans-serif; transition: all 0.2s; }
+  .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+
+  /* ===== STATUS SELECT ===== */
+  .status-select { padding: 5px 10px; border: 2px solid #f0b9b5; border-radius: 8px; font-size: 11px; font-weight: 600; font-family: 'Poppins', sans-serif; color: #333; cursor: pointer; background: white; }
+  .status-select:focus { outline: none; border-color: #d7736b; }
+
+  /* ===== ADMIN FORM ===== */
+  .admin-form-card { background: white; border-radius: 14px; padding: 28px; box-shadow: var(--shadow); }
+  .af-field { margin-bottom: 16px; }
+  .af-field label { display: block; font-size: 11px; color: var(--text-muted); text-transform: uppercase; font-weight: 600; letter-spacing: 0.5px; margin-bottom: 5px; }
+  .af-field input, .af-field select, .af-field textarea { width: 100%; padding: 10px 14px; border: 2px solid #f0b9b5; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 13px; color: #333; background: white; transition: border-color 0.2s; }
+  .af-field input:focus, .af-field select:focus, .af-field textarea:focus { outline: none; border-color: #d7736b; }
+  .af-field textarea { min-height: 80px; resize: vertical; }
+  .af-two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+
+  /* ===== SEARCH BAR ===== */
+  .admin-search { padding: 10px 16px; border: 2px solid #f0b9b5; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 13px; width: 280px; transition: border-color 0.2s; }
+  .admin-search:focus { outline: none; border-color: #d7736b; }
+
+  /* ===== TOAST ===== */
+  .toast { position: fixed; bottom: 24px; right: 24px; background: linear-gradient(135deg, #4caf50, #388e3c); color: white; padding: 12px 22px; border-radius: 12px; font-size: 13px; font-weight: 600; z-index: 9999; animation: toastIn 0.3s ease; box-shadow: 0 8px 20px rgba(0,0,0,0.2); font-family: 'Poppins', sans-serif; }
+  @keyframes toastIn { from{transform:translateY(50px);opacity:0;} to{transform:translateY(0);opacity:1;} }
+
+  /* ===== EMPTY STATE ===== */
+  .admin-empty { text-align: center; padding: 60px 20px; color: var(--text-muted); }
+  .admin-empty .empty-icon { font-size: 48px; margin-bottom: 12px; }
+
+  /* ===== MODAL ===== */
+  .admin-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 3000; align-items: center; justify-content: center; }
+  .admin-modal-overlay.active { display: flex; }
+  .admin-modal { background: white; border-radius: 16px; padding: 28px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; box-shadow: 0 24px 60px rgba(0,0,0,0.2); }
+  .admin-modal h3 { font-size: 16px; font-weight: 700; color: #333; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 2px solid #f0f0f0; }
+</style>
+{% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-logo">
+    <a href="{% url 'creake:index' %}">
+      <img src="{% static 'creake/images/creaked.png' %}" alt="CREAKE">
+    </a>
+  </div>
+  <nav class="header-nav">
+    <a href="{% url 'creake:index' %}">&#127968; Home</a>
+    <a href="{% url 'creake:index' %}#main-content">&#127874; Browse</a>
+    <div class="user-dropdown-wrap">
+      <button class="user-nav-btn" onclick="toggleDropdown()">
+        &#128737;&#65039; {{ request.user.first_name|default:request.user.username }} &#9660;
+      </button>
+      <div class="user-dropdown" id="userDropdown">
+        <div class="user-dropdown-header">
+          <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+          <span>&#128737;&#65039; Admin</span>
+        </div>
+        <a href="{% url 'creake:admin_dashboard' %}">&#128202; Admin Panel</a>
+        <form method="post" action="{% url 'creake:logout' %}" style="margin:0;">
+          {% csrf_token %}
+          <button type="submit" class="logout-item">&#128682; Log Out</button>
+        </form>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<div class="db-page">
+  <aside class="db-side">
+    <div class="side-avatar">
+      <div class="admin-crown">&#128081;</div>
+      <h3>{{ request.user.get_full_name|default:request.user.username }}</h3>
+      <span>{{ request.user.email }}</span>
+      <div class="side-badge">&#128737;&#65039; Administrator</div>
+    </div>
+    <nav class="side-nav">
+      <a class="nav-item {% block nav_dashboard %}{% endblock %}" href="{% url 'creake:admin_dashboard' %}">
+        <span class="nav-icon">&#128202;</span> Dashboard
+      </a>
+      <a class="nav-item {% block nav_orders %}{% endblock %}" href="{% url 'creake:admin_orders' %}">
+        <span class="nav-icon">&#128230;</span> All Orders
+        <span class="nav-badge">{{ pending_orders_count|default:"" }}</span>
+      </a>
+      <a class="nav-item {% block nav_custom_cakes %}{% endblock %}" href="{% url 'creake:admin_custom_cakes' %}">
+        <span class="nav-icon">&#127912;</span> Custom Cakes
+        <span class="nav-badge">{{ pending_custom_count|default:"" }}</span>
+      </a>
+      <a class="nav-item {% block nav_cakes %}{% endblock %}" href="{% url 'creake:admin_cakes' %}">
+        <span class="nav-icon">&#127874;</span> Manage Cakes
+      </a>
+      <a class="nav-item {% block nav_users %}{% endblock %}" href="{% url 'creake:admin_users' %}">
+        <span class="nav-icon">&#128100;</span> Users
+      </a>
+    </nav>
+    <div class="side-bottom">
+      <form method="post" action="{% url 'creake:logout' %}" style="margin:0;">
+        {% csrf_token %}
+        <button type="submit" class="side-logout">&#128682; Log Out</button>
+      </form>
+    </div>
+  </aside>
+
+  <main class="db-main">
+    <div class="db-body">
+      {% if messages %}
+        {% for message in messages %}
+        <div class="alert-success" style="{% if 'error' in message.tags %}background:#ffebee;color:#c62828;{% endif %}">
+          {{ message }}
+        </div>
+        {% endfor %}
+      {% endif %}
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</div>
+
+<script src="{% static 'creake/js/dashboard.js' %}"></script>
+<script>
+function showToast(msg, color) {
+  var t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  if (color) t.style.background = color;
+  document.body.appendChild(t);
+  setTimeout(function() { t.remove(); }, 3000);
+}
+</script>
+{% block extra_js %}{% endblock %}
+</body>
+</html>

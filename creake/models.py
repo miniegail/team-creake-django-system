@@ -9,7 +9,7 @@ class Cake(models.Model):
         ('strawberry', 'Strawberry'),
         ('redvelvet', 'Red Velvet'),
     ]
-    
+
     name = models.CharField(max_length=100)
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
     description = models.TextField()
@@ -21,11 +21,9 @@ class Cake(models.Model):
     is_new = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    
-    
     class Meta:
         ordering = ['-created_at']
-    
+
     def __str__(self):
         return self.name
 
@@ -38,10 +36,15 @@ class Order(models.Model):
         ('out_for_delivery', 'Out for Delivery'),
         ('delivered', 'Delivered'),
         ('cancelled', 'Cancelled'),
-        
     ]
-    
- 
+
+    CUSTOM_STATUS_CHOICES = [
+        ('none', 'Not a Custom Cake'),
+        ('pending', 'Pending Approval'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+
     user       = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     cake_name  = models.CharField(max_length=100, default='')
     quantity   = models.IntegerField(default=1)
@@ -49,32 +52,30 @@ class Order(models.Model):
     address    = models.TextField(default='')
     city       = models.CharField(max_length=100, default='')
     zip_code   = models.CharField(max_length=20, default='')
-    status     = models.CharField(max_length=50, default='pending')
-    created_at = models.DateTimeField(auto_now_add=True)
-    
-    
-    # Address info
-    
-    phone = models.CharField(max_length=20)
-    
+    status     = models.CharField(max_length=50, default='pending', choices=STATUS_CHOICES)
+    phone      = models.CharField(max_length=20)
+
+    # Custom cake fields
+    is_custom_cake  = models.BooleanField(default=False)
+    custom_status   = models.CharField(max_length=20, choices=CUSTOM_STATUS_CHOICES, default='none')
+
     # Tracking
-   
-    paid_at = models.DateTimeField(null=True, blank=True)
-    baking_at = models.DateTimeField(null=True, blank=True)
-    delivered_at = models.DateTimeField(null=True, blank=True)
-    rider_name = models.CharField(max_length=100, blank=True, null=True)
+    created_at        = models.DateTimeField(auto_now_add=True)
+    paid_at           = models.DateTimeField(null=True, blank=True)
+    baking_at         = models.DateTimeField(null=True, blank=True)
+    delivered_at      = models.DateTimeField(null=True, blank=True)
+    rider_name        = models.CharField(max_length=100, blank=True, null=True)
     estimated_arrival = models.CharField(max_length=100, blank=True, null=True)
-    
-    # Quiz tracking
-    step = models.IntegerField(default=0)
+    step              = models.IntegerField(default=0)
     special_instructions = models.TextField(blank=True, null=True)
-    
+
     class Meta:
         ordering = ['-created_at']
-    
+
     def __str__(self):
-        return f"Order #{self.id} - {self.user.username}"
-    
+        user_str = self.user.username if self.user else "Guest"
+        return f"Order #{self.id} - {user_str}"
+
     def get_status_display(self):
         return dict(self.STATUS_CHOICES).get(self.status, 'Unknown')
 
@@ -88,10 +89,10 @@ class CakeDesign(models.Model):
     badge = models.CharField(max_length=50, blank=True, null=True)
     thumb_class = models.CharField(max_length=20, default='custom')
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         ordering = ['-created_at']
-    
+
     def __str__(self):
         return f"{self.user.username} - {self.name}"
 
@@ -100,11 +101,11 @@ class Wishlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wishlist')
     cake = models.ForeignKey(Cake, on_delete=models.CASCADE)
     added_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         unique_together = ('user', 'cake')
         ordering = ['-added_at']
-    
+
     def __str__(self):
         return f"{self.user.username} - {self.cake.name}"
 
@@ -114,31 +115,30 @@ class UserProfile(models.Model):
     phone = models.CharField(max_length=20, blank=True, null=True)
     birthday = models.DateField(blank=True, null=True)
     favourite_cake = models.ForeignKey(Cake, on_delete=models.SET_NULL, blank=True, null=True)
-    
-    # Notification preferences
-    notif_orders = models.BooleanField(default=True)
-    notif_promos = models.BooleanField(default=True)
+
+    notif_orders   = models.BooleanField(default=True)
+    notif_promos   = models.BooleanField(default=True)
     notif_arrivals = models.BooleanField(default=True)
-    notif_quiz = models.BooleanField(default=True)
-    
+    notif_quiz     = models.BooleanField(default=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
+
     def __str__(self):
         return f"{self.user.username}'s Profile"
 
 
 class Address(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addresses')
-    label = models.CharField(max_length=50, default='Home')
-    street = models.CharField(max_length=255)
-    city = models.CharField(max_length=100)
+    user     = models.ForeignKey(User, on_delete=models.CASCADE, related_name='addresses')
+    label    = models.CharField(max_length=50, default='Home')
+    street   = models.CharField(max_length=255)
+    city     = models.CharField(max_length=100)
     zip_code = models.CharField(max_length=10)
     is_default = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
         ordering = ['-is_default', '-created_at']
-    
+
     def __str__(self):
         return f"{self.user.username} - {self.label}"

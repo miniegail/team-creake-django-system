@@ -1,0 +1,83 @@
+{% extends 'creake/base_admin.html' %}
+{% block title %}Custom Cakes{% endblock %}
+{% block nav_custom_cakes %}active{% endblock %}
+
+{% block content %}
+
+<div>
+  <div class="section-title">&#127912; Custom Cake Submissions</div>
+  <div class="section-sub">Review custom cakes submitted by users. Approve to add to the Browse catalogue, or reject.</div>
+</div>
+
+<!-- FILTER TABS -->
+<div style="display:flex;gap:8px;flex-wrap:wrap;">
+  <a href="?status=all"      style="padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;{% if current_status == 'all' %}background:var(--coral);color:white;{% else %}background:white;color:var(--text-muted);border:1.5px solid #f0b9b5;{% endif %}">All</a>
+  <a href="?status=pending"  style="padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;{% if current_status == 'pending' %}background:#f57f17;color:white;{% else %}background:white;color:var(--text-muted);border:1.5px solid #f0b9b5;{% endif %}">&#9679; Pending Approval</a>
+  <a href="?status=approved" style="padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;{% if current_status == 'approved' %}background:#2e7d32;color:white;{% else %}background:white;color:var(--text-muted);border:1.5px solid #f0b9b5;{% endif %}">&#10003; Approved</a>
+  <a href="?status=rejected" style="padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;{% if current_status == 'rejected' %}background:#c62828;color:white;{% else %}background:white;color:var(--text-muted);border:1.5px solid #f0b9b5;{% endif %}">&#10007; Rejected</a>
+</div>
+
+{% if custom_cakes %}
+<table class="admin-table">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Submitted By</th>
+      <th>Cake Name</th>
+      <th>Details</th>
+      <th>Total</th>
+      <th>Date</th>
+      <th>Status</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for cake in custom_cakes %}
+    <tr>
+      <td><strong style="color:var(--coral);">#{{ cake.id }}</strong></td>
+      <td>
+        <div style="font-weight:600;">{{ cake.user.get_full_name|default:cake.user.username|default:"Guest" }}</div>
+        <div style="font-size:11px;color:var(--text-muted);">{{ cake.user.email|default:"—" }}</div>
+      </td>
+      <td style="font-weight:600;">{{ cake.cake_name }}</td>
+      <td style="font-size:11px;color:var(--text-muted);max-width:200px;">
+        {{ cake.special_instructions|truncatechars:80|default:"—" }}
+      </td>
+      <td><strong style="color:var(--blue-dark);">&#8369;{{ cake.total }}</strong></td>
+      <td style="color:var(--text-muted);font-size:12px;">{{ cake.created_at|date:"M d, Y" }}</td>
+      <td>
+        <span class="badge
+          {% if cake.custom_status == 'pending' %}badge-pending-approval
+          {% elif cake.custom_status == 'approved' %}badge-approved
+          {% elif cake.custom_status == 'rejected' %}badge-rejected
+          {% endif %}">
+          {{ cake.custom_status|capfirst|default:"Pending" }}
+        </span>
+      </td>
+      <td style="display:flex;gap:6px;flex-wrap:wrap;">
+        <a href="{% url 'creake:admin_order_detail' cake.id %}" class="btn-action btn-view">View</a>
+        {% if cake.custom_status != 'approved' %}
+        <form method="post" action="{% url 'creake:admin_approve_custom_cake' cake.id %}" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn-action btn-approve">&#10003; Approve</button>
+        </form>
+        {% endif %}
+        {% if cake.custom_status != 'rejected' %}
+        <form method="post" action="{% url 'creake:admin_reject_custom_cake' cake.id %}" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn-action btn-reject">&#10007; Reject</button>
+        </form>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="admin-empty">
+  <div class="empty-icon">&#127912;</div>
+  <p>No custom cake submissions found.</p>
+</div>
+{% endif %}
+
+{% endblock %}

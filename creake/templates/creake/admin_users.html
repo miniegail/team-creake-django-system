@@ -1,0 +1,77 @@
+{% extends 'creake/base_admin.html' %}
+{% block title %}Users{% endblock %}
+{% block nav_users %}active{% endblock %}
+
+{% block content %}
+
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+  <div>
+    <div class="section-title">&#128100; All Users</div>
+    <div class="section-sub">{{ total_users }} registered user{{ total_users|pluralize }} on CREAKE.</div>
+  </div>
+  <input type="text" class="admin-search" placeholder="&#128269; Search users..." oninput="filterTable(this.value)">
+</div>
+
+{% if users %}
+<table class="admin-table" id="usersTable">
+  <thead>
+    <tr>
+      <th>User</th>
+      <th>Email</th>
+      <th>Phone</th>
+      <th>Joined</th>
+      <th>Orders</th>
+      <th>Total Spent</th>
+      <th>Role</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for u in users %}
+    <tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--coral),var(--coral-dark));display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:13px;flex-shrink:0;">
+            {% if u.first_name %}{{ u.first_name|first|upper }}{% else %}{{ u.username|first|upper }}{% endif %}
+          </div>
+          <div>
+            <div style="font-weight:600;font-size:13px;">
+              {% if u.get_full_name %}{{ u.get_full_name }}{% else %}{{ u.username }}{% endif %}
+            </div>
+            <div style="font-size:11px;color:var(--text-muted);">@{{ u.username }}</div>
+          </div>
+        </div>
+      </td>
+      <td style="font-size:13px;">{{ u.email }}</td>
+      <td style="font-size:13px;color:var(--text-muted);">
+        {% if u.profile %}{{ u.profile.phone|default:"—" }}{% else %}—{% endif %}
+      </td>
+      <td style="font-size:12px;color:var(--text-muted);">{{ u.date_joined|date:"M d, Y" }}</td>
+      <td style="text-align:center;font-weight:700;">{{ u.order_count|default:"0" }}</td>
+      <td><strong style="color:var(--blue-dark);">&#8369;{{ u.total_spent|default:"0" }}</strong></td>
+      <td>
+        {% if u.is_staff %}
+        <span class="badge badge-paid">&#128737; Admin</span>
+        {% else %}
+        <span class="badge badge-approved">&#128100; User</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="admin-empty">
+  <div class="empty-icon">&#128100;</div>
+  <p>No users found.</p>
+</div>
+{% endif %}
+
+<script>
+function filterTable(q) {
+  q = q.toLowerCase();
+  document.querySelectorAll('#usersTable tbody tr').forEach(function(row) {
+    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}

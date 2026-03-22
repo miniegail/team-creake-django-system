@@ -1,0 +1,178 @@
+{% extends 'creake/base_admin.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block content %}
+
+<div>
+  <div class="section-title">&#128202; Admin Dashboard</div>
+  <div class="section-sub">Welcome back, {{ request.user.first_name|default:"Admin" }}! Here's what's happening today.</div>
+</div>
+
+<!-- STATS ROW -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-icon">&#128230;</div>
+    <div class="stat-label">Total Orders</div>
+    <div class="stat-value">{{ total_orders }}</div>
+    <div class="stat-sub">All time</div>
+  </div>
+  <div class="stat-card blue">
+    <div class="stat-icon">&#9200;</div>
+    <div class="stat-label">Pending Orders</div>
+    <div class="stat-value">{{ pending_orders }}</div>
+    <div class="stat-sub">Need attention</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-icon">&#127874;</div>
+    <div class="stat-label">Total Cakes</div>
+    <div class="stat-value">{{ total_cakes }}</div>
+    <div class="stat-sub">In catalogue</div>
+  </div>
+  <div class="stat-card purple">
+    <div class="stat-icon">&#128100;</div>
+    <div class="stat-label">Total Users</div>
+    <div class="stat-value">{{ total_users }}</div>
+    <div class="stat-sub">Registered</div>
+  </div>
+</div>
+
+<!-- SECOND STATS ROW -->
+<div class="stats-row" style="margin-top:0;">
+  <div class="stat-card" style="border-left: 4px solid #f57f17;">
+    <div class="stat-icon">&#127912;</div>
+    <div class="stat-label">Custom Cakes Pending</div>
+    <div class="stat-value" style="color:#f57f17;">{{ pending_custom }}</div>
+    <div class="stat-sub">Awaiting approval</div>
+  </div>
+  <div class="stat-card green">
+    <div class="stat-icon">&#9989;</div>
+    <div class="stat-label">Delivered Today</div>
+    <div class="stat-value">{{ delivered_today }}</div>
+    <div class="stat-sub">Completed</div>
+  </div>
+  <div class="stat-card blue">
+    <div class="stat-icon">&#128666;</div>
+    <div class="stat-label">Out for Delivery</div>
+    <div class="stat-value">{{ out_for_delivery }}</div>
+    <div class="stat-sub">On the way</div>
+  </div>
+  <div class="stat-card purple">
+    <div class="stat-icon">&#8369;</div>
+    <div class="stat-label">Total Revenue</div>
+    <div class="stat-value" style="font-size:18px;">&#8369;{{ total_revenue }}</div>
+    <div class="stat-sub">All delivered orders</div>
+  </div>
+</div>
+
+<!-- RECENT ORDERS -->
+<div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <div class="section-title">&#128203; Recent Orders</div>
+    <a href="{% url 'creake:admin_orders' %}" style="font-size:12px;color:var(--coral);font-weight:600;text-decoration:none;">View All →</a>
+  </div>
+  {% if recent_orders %}
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>Order ID</th>
+        <th>Customer</th>
+        <th>Cake</th>
+        <th>Total</th>
+        <th>Status</th>
+        <th>Date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in recent_orders %}
+      <tr>
+        <td><strong style="color:var(--coral);">#{{ order.id }}</strong></td>
+        <td>
+          {% if order.user %}
+            {% if order.user.get_full_name %}
+              {{ order.user.get_full_name }}
+            {% else %}
+              {{ order.user.username }}
+            {% endif %}
+          {% else %}
+            Guest
+          {% endif %}
+        </td>
+        <td>{{ order.cake_name }}</td>
+        <td><strong style="color:var(--blue-dark);">&#8369;{{ order.total }}</strong></td>
+        <td>
+          <span class="badge
+            {% if order.status == 'pending' %}badge-pending
+            {% elif order.status == 'paid' %}badge-paid
+            {% elif order.status == 'baking' %}badge-baking
+            {% elif order.status == 'out_for_delivery' %}badge-delivery
+            {% elif order.status == 'delivered' %}badge-delivered
+            {% elif order.status == 'cancelled' %}badge-cancelled
+            {% endif %}">
+            {{ order.get_status_display }}
+          </span>
+        </td>
+        <td style="color:var(--text-muted);font-size:12px;">{{ order.created_at|date:"M d, Y" }}</td>
+        <td>
+          <a href="{% url 'creake:admin_order_detail' order.id %}" class="btn-action btn-view">View</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="admin-empty">
+    <div class="empty-icon">&#128230;</div>
+    <p>No orders yet.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- PENDING CUSTOM CAKES -->
+{% if pending_custom_list %}
+<div>
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+    <div class="section-title">&#127912; Custom Cakes Awaiting Approval</div>
+    <a href="{% url 'creake:admin_custom_cakes' %}" style="font-size:12px;color:var(--coral);font-weight:600;text-decoration:none;">View All →</a>
+  </div>
+  <table class="admin-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Submitted By</th>
+        <th>Cake Name</th>
+        <th>Total</th>
+        <th>Date</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for order in pending_custom_list %}
+      <tr>
+        <td><strong style="color:var(--coral);">#{{ order.id }}</strong></td>
+        <td>
+          {% if order.user %}
+            {% if order.user.get_full_name %}
+              {{ order.user.get_full_name }}
+            {% else %}
+              {{ order.user.username }}
+            {% endif %}
+          {% else %}
+            Guest
+          {% endif %}
+        </td>
+        <td>{{ order.cake_name }}</td>
+        <td><strong style="color:var(--blue-dark);">&#8369;{{ order.total }}</strong></td>
+        <td style="color:var(--text-muted);font-size:12px;">{{ order.created_at|date:"M d, Y" }}</td>
+        <td>
+          <a href="{% url 'creake:admin_order_detail' order.id %}" class="btn-action btn-view">Review</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+
+{% endblock %}

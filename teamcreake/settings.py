@@ -79,3 +79,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'creake:login'
 LOGIN_REDIRECT_URL = 'creake:delivery'
 LOGOUT_REDIRECT_URL = 'creake:index'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'your-gmail@gmail.com'
+EMAIL_HOST_PASSWORD = 'your-app-password'
+DEFAULT_FROM_EMAIL = 'CREAKE <your-gmail@gmail.com>'
+ADMIN_EMAIL = 'your-admin@gmail.com'

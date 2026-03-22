@@ -1,0 +1,114 @@
+{% extends 'creake/base_admin.html' %}
+{% block title %}All Orders{% endblock %}
+{% block nav_orders %}active{% endblock %}
+
+{% block content %}
+
+<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+  <div>
+    <div class="section-title">&#128230; All Orders</div>
+    <div class="section-sub">View and manage every order placed on CREAKE.</div>
+  </div>
+  <input type="text" class="admin-search" placeholder="&#128269; Search by customer or cake..." oninput="filterTable(this.value)">
+</div>
+
+<!-- FILTER TABS -->
+<div style="display:flex;gap:8px;flex-wrap:wrap;">
+  {% for label, value, count in status_tabs %}
+  <a href="?status={{ value }}"
+     style="padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;transition:all 0.2s;
+            {% if current_status == value %}background:var(--coral);color:white;{% else %}background:white;color:var(--text-muted);border:1.5px solid #f0b9b5;{% endif %}">
+    {{ label }} {% if count %}<span style="opacity:0.75;">({{ count }})</span>{% endif %}
+  </a>
+  {% endfor %}
+</div>
+
+{% if orders %}
+<table class="admin-table" id="ordersTable">
+  <thead>
+    <tr>
+      <th>Order ID</th>
+      <th>Customer</th>
+      <th>Cake</th>
+      <th>Qty</th>
+      <th>Total</th>
+      <th>Date</th>
+      <th>Status</th>
+      <th>Update</th>
+      <th>Details</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for order in orders %}
+    <tr>
+      <td><strong style="color:var(--coral);">#{{ order.id }}</strong></td>
+      <td>
+        <div style="font-weight:600;font-size:13px;">
+          {% if order.user %}
+            {% if order.user.get_full_name %}{{ order.user.get_full_name }}{% else %}{{ order.user.username }}{% endif %}
+          {% else %}
+            Guest
+          {% endif %}
+        </div>
+        <div style="font-size:11px;color:var(--text-muted);">
+          {% if order.user %}{{ order.user.email }}{% else %}—{% endif %}
+        </div>
+      </td>
+      <td style="max-width:180px;">
+        <div style="font-weight:600;">{{ order.cake_name }}</div>
+        {% if order.special_instructions %}
+        <div style="font-size:10px;color:var(--text-muted);margin-top:2px;">{{ order.special_instructions|truncatechars:50 }}</div>
+        {% endif %}
+      </td>
+      <td style="text-align:center;">{{ order.quantity }}</td>
+      <td><strong style="color:var(--blue-dark);">&#8369;{{ order.total }}</strong></td>
+      <td style="color:var(--text-muted);font-size:12px;">{{ order.created_at|date:"M d, Y" }}</td>
+      <td>
+        <span class="badge
+          {% if order.status == 'pending' %}badge-pending
+          {% elif order.status == 'paid' %}badge-paid
+          {% elif order.status == 'baking' %}badge-baking
+          {% elif order.status == 'out_for_delivery' %}badge-delivery
+          {% elif order.status == 'delivered' %}badge-delivered
+          {% elif order.status == 'cancelled' %}badge-cancelled
+          {% endif %}">
+          {{ order.get_status_display }}
+        </span>
+      </td>
+      <td>
+        <form method="post" action="{% url 'creake:admin_update_order_status' order.id %}" style="display:flex;gap:6px;align-items:center;">
+          {% csrf_token %}
+          <select name="status" class="status-select">
+            <option value="pending"          {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+            <option value="paid"             {% if order.status == 'paid' %}selected{% endif %}>Paid</option>
+            <option value="baking"           {% if order.status == 'baking' %}selected{% endif %}>Baking</option>
+            <option value="out_for_delivery" {% if order.status == 'out_for_delivery' %}selected{% endif %}>Out for Delivery</option>
+            <option value="delivered"        {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
+            <option value="cancelled"        {% if order.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+          </select>
+          <button type="submit" class="btn-action btn-approve">&#10003;</button>
+        </form>
+      </td>
+      <td>
+        <a href="{% url 'creake:admin_order_detail' order.id %}" class="btn-action btn-view">View</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<div class="admin-empty">
+  <div class="empty-icon">&#128230;</div>
+  <p>No orders found.</p>
+</div>
+{% endif %}
+
+<script>
+function filterTable(q) {
+  q = q.toLowerCase();
+  document.querySelectorAll('#ordersTable tbody tr').forEach(function(row) {
+    row.style.display = row.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+</script>
+{% endblock %}

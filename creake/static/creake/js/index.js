@@ -1,5 +1,3 @@
-
-
 var cart = [];
 var currentSort = 'name';
 var filters = { category: 'all', search: '', maxPrice: 1000, minRating: 0 };

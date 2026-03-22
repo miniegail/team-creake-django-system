@@ -1,4 +1,3 @@
-
 {% extends 'creake/base_dashboard.html' %}
 {% block title %}Profile{% endblock %}
 {% block nav_profile %}active{% endblock %}
@@ -49,7 +48,8 @@
   <div>
     <div class="profile-card">
       <h3>&#9999;&#65039; Edit Profile</h3>
-      <form method="post" action="{% url 'creake:profile' %}"> <input type="hidden" name="update_profile" value="1"></form>
+      <form method="post" action="{% url 'creake:profile' %}">
+        <input type="hidden" name="update_profile" value="1">
         {% csrf_token %}
         <div class="pf-two-col">
           <div class="pf-field"><label>First Name</label><input type="text" name="first_name" value="{{ request.user.first_name }}"></div>
@@ -73,7 +73,8 @@
 
     <div class="profile-card" style="margin-top:20px;">
       <h3>&#128276; Notifications</h3>
-      <form method="post" action="{% url 'creake:profile' %}"> <input type="hidden" name="update_notifications" value="1"></form>
+      <form method="post" action="{% url 'creake:profile' %}">
+        <input type="hidden" name="update_notifications" value="1">
         {% csrf_token %}
         <div class="pref-row">
           <div><label>Order Updates</label><br><span>SMS and email alerts</span></div>
