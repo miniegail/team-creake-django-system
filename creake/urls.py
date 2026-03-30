@@ -52,6 +52,8 @@ urlpatterns = [
     path('admin-panel/cakes/<int:cake_id>/edit/', views.admin_edit_cake, name='admin_edit_cake'),
     path('admin-panel/cakes/<int:cake_id>/delete/', views.admin_delete_cake, name='admin_delete_cake'),
     path('admin-panel/users/', views.admin_users, name='admin_users'),
+    path('rate-cake/', views.rate_cake, name='rate_cake'),
+    
 ]
 
 handler404 = 'creake.views.custom_404'

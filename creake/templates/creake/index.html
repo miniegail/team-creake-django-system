@@ -49,6 +49,8 @@
   </nav>
 </header>
 
+
+
 <!-- ========== HERO BANNER ========== -->
 <div class="hero-banner" id="hero-banner">
   <div class="banner-bg">
@@ -304,9 +306,23 @@
 
 <!-- Django data — template tags required, cannot go in .js files -->
 <script>
+var isLoggedIn = {{ request.user.is_authenticated|yesno:"true,false" }};
+var csrfToken = (function() {
+  var match = document.cookie.match(/csrftoken=([^;]+)/);
+  return match ? match[1] : '';
+})();
+var userRatings = (function() {
+  var raw = {{ user_ratings|safe }};
+  var out = {};
+  Object.keys(raw).forEach(function(k) { out[String(k)] = raw[k]; });
+  return out;
+})();
+
+
 var cakesData = [
   {% for cake in cakes %}
   {
+    id:       {{ cake.id }},
     name:     "{{ cake.name|escapejs }}",
     category: "{{ cake.category|escapejs }}",
     desc:     "{{ cake.description|escapejs }}",

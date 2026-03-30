@@ -119,7 +119,6 @@
       <div class="af-field"><label>Description</label><textarea name="description" id="editDesc"></textarea></div>
       <div class="af-two-col">
         <div class="af-field"><label>Badge (optional)</label><input type="text" name="badge" id="editBadge"></div>
-        <div class="af-field"><label>Rating</label><input type="number" name="rating" id="editRating" min="0" max="5" step="0.1"></div>
       </div>
       <div class="af-field"><label>New Image (leave blank to keep current)</label><input type="file" name="image" accept="image/*"></div>
       <div class="af-field" style="display:flex;align-items:center;gap:10px;">
@@ -146,7 +145,6 @@ function openEditModal(id, name, category, price, desc, badge, rating, isNew) {
   document.getElementById('editPrice').value = price;
   document.getElementById('editDesc').value = desc;
   document.getElementById('editBadge').value = badge;
-  document.getElementById('editRating').value = rating;
   document.getElementById('editIsNew').checked = isNew;
   document.getElementById('editModal').classList.add('active');
 }
