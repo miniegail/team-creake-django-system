@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_http_methods, require_POST
 from django.http import JsonResponse
 from django.contrib import messages
 from django.db.models import Q, Sum, Count
@@ -11,7 +11,7 @@ from django.conf import settings
 from datetime import datetime, timedelta, date
 import json
 
-from .models import Cake, Order, CakeDesign, Wishlist, UserProfile, Address
+from .models import Cake, Order, CakeDesign, Wishlist, UserProfile, Address, CakeRating
 from .forms import UserRegistrationForm, UserProfileForm
 
 # ==================== HELPERS ====================
@@ -28,8 +28,15 @@ def quiz(request):
 
 def index(request):
     cakes = Cake.objects.all()
+    user_ratings = {}
+    if request.user.is_authenticated:
+        user_ratings = {
+            str(r.cake_id): r.rating
+            for r in CakeRating.objects.filter(user=request.user)
+        }
     context = {
         'cakes': cakes,
+        'user_ratings': user_ratings,
         'show_quiz': request.session.pop('show_quiz', False),
     }
     return render(request, 'creake/index.html', context)
@@ -53,6 +60,8 @@ def login_view(request):
             messages.error(request, 'Invalid email or password.')
 
     return render(request, 'creake/index.html')
+
+
 
 
 def register_view(request):
@@ -524,7 +533,6 @@ def admin_add_cake(request):
             description=request.POST.get('description', ''),
             price=request.POST.get('price'),
             badge=request.POST.get('badge', '') or None,
-            rating=request.POST.get('rating', 4.5),
             is_new=request.POST.get('is_new') == 'on',
             image=request.FILES.get('image'),
         )
@@ -545,7 +553,6 @@ def admin_edit_cake(request, cake_id):
         cake.description = request.POST.get('description', cake.description)
         cake.price = request.POST.get('price', cake.price)
         cake.badge = request.POST.get('badge', '') or None
-        cake.rating = request.POST.get('rating', cake.rating)
         cake.is_new = request.POST.get('is_new') == 'on'
         if request.FILES.get('image'):
             cake.image = request.FILES.get('image')
@@ -590,3 +597,24 @@ def custom_404(request, exception):
 
 def custom_500(request):
     return render(request, 'creake/500.html', status=500)
+
+@login_required
+@require_POST
+def rate_cake(request):
+    from django.db.models import Avg
+    data = json.loads(request.body)
+    cake_id = data.get('cake_id')
+    rating_val = int(data.get('rating'))
+
+    cake = get_object_or_404(Cake, id=cake_id)
+    CakeRating.objects.update_or_create(
+        cake=cake, user=request.user,
+        defaults={'rating': rating_val}
+    )
+
+    # Recalculate average from all ratings
+    avg = CakeRating.objects.filter(cake=cake).aggregate(avg=Avg('rating'))['avg'] or rating_val
+    review_count = CakeRating.objects.filter(cake=cake).count()
+
+
+    return JsonResponse({'success': True, 'new_rating': avg, 'review_count': review_count})

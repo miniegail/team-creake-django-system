@@ -118,10 +118,201 @@ function updateCartCount() {
   }, 0);
 }
 
+/* ── Stars ── */
 function generateStars(r) {
   return '\u2B50'.repeat(Math.floor(r));
 }
 
+/**
+ * Renders clickable star rating HTML for a cake.
+ * Shows the user's own previous rating if they've already rated.
+ * Falls back to static stars if no cakeId (demo/fallback data).
+ */
+function renderRatingStars(rating, cakeId) {
+  if (!cakeId) {
+    return '<span class="stars">' + generateStars(rating) + '</span>';
+  }
+
+  // Check if this user has already rated this cake
+  var userRating = (typeof userRatings !== 'undefined' && userRatings[String(cakeId)]) ? userRatings[String(cakeId)] : 0;
+  var displayRating = userRating > 0 ? userRating : Math.round(rating);
+  var label = userRating > 0 ? 'Your rating:' : 'Rate:';
+
+  var stars = '';
+  for (var i = 1; i <= 5; i++) {
+    var filled = i <= displayRating;
+    stars += '<span'
+      + ' class="star-btn"'
+      + ' data-value="' + i + '"'
+      + ' onclick="submitRating(' + cakeId + ',' + i + ')"'
+      + ' onmouseover="hoverStars(this,' + i + ',' + cakeId + ')"'
+      + ' onmouseout="resetStars(' + cakeId + ',' + displayRating + ')"'
+      + ' style="cursor:pointer;font-size:20px;color:' + (filled ? '#f5a623' : '#ddd') + ';transition:color 0.15s;"'
+      + '>\u2605</span>';
+  }
+
+  return '<div class="cake-rating-stars" data-cake-id="' + cakeId + '" data-current-rating="' + displayRating + '" data-user-rating="' + userRating + '">'
+    + '<span class="rate-label">' + label + '</span>'
+    + stars
+    + '</div>';
+}
+
+/** Lights up stars on hover */
+function hoverStars(el, value, cakeId) {
+  var container = document.querySelector('[data-cake-id="' + cakeId + '"]');
+  if (!container) return;
+  container.querySelectorAll('.star-btn').forEach(function(star) {
+    star.style.color = parseInt(star.dataset.value) <= value ? '#ffb300' : '#ddd';
+  });
+}
+
+/** Resets stars back to the saved rating after hover */
+function resetStars(cakeId, savedRating) {
+  var container = document.querySelector('[data-cake-id="' + cakeId + '"]');
+  if (!container) return;
+  container.querySelectorAll('.star-btn').forEach(function(star) {
+    star.style.color = parseInt(star.dataset.value) <= savedRating ? '#f5a623' : '#ddd';
+  });
+}
+
+/**
+ * Custom confirmation dialog — nicer than browser confirm().
+ * Calls onConfirm() if user clicks Yes, onCancel() if No.
+ */
+function showRatingConfirm(cakeId, previousRating, newValue, onConfirm, onCancel) {
+  // Remove any existing dialog
+  var existing = document.getElementById('ratingConfirmDialog');
+  if (existing) existing.remove();
+
+  var dialog = document.createElement('div');
+  dialog.id = 'ratingConfirmDialog';
+  dialog.style.cssText = [
+    'position:fixed', 'top:0', 'left:0', 'width:100%', 'height:100%',
+    'background:rgba(0,0,0,0.5)', 'z-index:9999',
+    'display:flex', 'align-items:center', 'justify-content:center',
+    'backdrop-filter:blur(3px)'
+  ].join(';');
+
+  var stars = function(n) {
+    return '\u2605'.repeat(n) + '\u2606'.repeat(5 - n);
+  };
+
+  dialog.innerHTML = '<div style="'
+    + 'background:white;border-radius:20px;padding:30px 35px;max-width:360px;width:90%;'
+    + 'box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center;'
+    + 'animation:popIn 0.25s ease;font-family:Poppins,sans-serif;">'
+    + '<div style="font-size:40px;margin-bottom:12px;">\u{1F370}</div>'
+    + '<h3 style="color:#d7736b;margin:0 0 8px;font-size:17px;font-weight:700;">You already rated this cake!</h3>'
+    + '<p style="color:#888;font-size:13px;margin:0 0 6px;">Your previous rating: '
+    + '<strong style="color:#f5a623;">' + stars(previousRating) + '</strong></p>'
+    + '<p style="color:#888;font-size:13px;margin:0 0 20px;">Change to: '
+    + '<strong style="color:#ffb300;">' + stars(newValue) + '</strong></p>'
+    + '<div style="display:flex;gap:10px;justify-content:center;">'
+    + '<button id="ratingConfirmNo" style="'
+    + 'flex:1;padding:11px;border:2px solid #ffe4f6;background:white;color:#d7736b;'
+    + 'border-radius:10px;cursor:pointer;font-weight:700;font-family:Poppins,sans-serif;font-size:13px;">'
+    + 'Keep ' + previousRating + ' \u2605</button>'
+    + '<button id="ratingConfirmYes" style="'
+    + 'flex:1;padding:11px;border:none;background:linear-gradient(135deg,#d7736b,#c9605a);color:white;'
+    + 'border-radius:10px;cursor:pointer;font-weight:700;font-family:Poppins,sans-serif;font-size:13px;">'
+    + 'Change to ' + newValue + ' \u2605</button>'
+    + '</div></div>';
+
+  document.body.appendChild(dialog);
+
+  document.getElementById('ratingConfirmYes').onclick = function() {
+    dialog.remove();
+    onConfirm();
+  };
+  document.getElementById('ratingConfirmNo').onclick = function() {
+    dialog.remove();
+    onCancel();
+  };
+  dialog.addEventListener('click', function(e) {
+    if (e.target === dialog) { dialog.remove(); onCancel(); }
+  });
+}
+
+/**
+ * Submits a user star rating to the Django backend.
+ * If user already rated, shows a confirmation dialog first.
+ * Prompts login modal if the user is not authenticated.
+ */
+function submitRating(cakeId, value) {
+  if (typeof isLoggedIn === 'undefined' || !isLoggedIn) {
+    openAuthModal('login');
+    return;
+  }
+
+  var container = document.querySelector('[data-cake-id="' + cakeId + '"]');
+  var previousRating = container ? parseInt(container.dataset.userRating) : 0;
+
+  // If already rated, show confirmation dialog
+  if (previousRating > 0) {
+    showRatingConfirm(cakeId, previousRating, value,
+      function() { doSubmitRating(cakeId, value, container); },  // confirmed
+      function() { resetStars(cakeId, previousRating); }         // cancelled
+    );
+    return;
+  }
+
+  doSubmitRating(cakeId, value, container);
+}
+
+/** Actually sends the rating to the server */
+function doSubmitRating(cakeId, value, container) {
+  // Optimistically update UI
+  if (container) {
+    container.querySelectorAll('.star-btn').forEach(function(star) {
+      star.style.color = parseInt(star.dataset.value) <= value ? '#f5a623' : '#ddd';
+    });
+    container.dataset.currentRating = value;
+    container.dataset.userRating = value;
+    // Update label to "Your rating:"
+    var label = container.querySelector('.rate-label');
+    if (label) label.textContent = 'Your rating:';
+  }
+
+  // Read CSRF token from cookie (most reliable method)
+  var csrf = (function() {
+    var match = document.cookie.match(/csrftoken=([^;]+)/);
+    return match ? match[1] : (typeof csrfToken !== 'undefined' ? csrfToken : '');
+  })();
+
+  fetch('/rate-cake/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': csrf
+    },
+    body: JSON.stringify({ cake_id: cakeId, rating: value })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.success) {
+      showNotification('Rating saved! \u2B50', 'success');
+      var newRating = Math.round(data.new_rating);
+      if (container) {
+        container.querySelectorAll('.star-btn').forEach(function(star) {
+          star.style.color = parseInt(star.dataset.value) <= newRating ? '#f5a623' : '#ddd';
+        });
+        container.dataset.currentRating = newRating;
+        // Update review count
+        var reviewEl = container.parentElement.querySelector('.review-count');
+        if (reviewEl) reviewEl.textContent = '(' + data.review_count + ')';
+      }
+      // Update local userRatings so re-rate detection works without page refresh
+      if (typeof userRatings !== 'undefined') userRatings[String(cakeId)] = value;
+    } else {
+      showNotification('Could not save rating.', 'error');
+    }
+  })
+  .catch(function() {
+    showNotification('Something went wrong. Please try again.', 'error');
+  });
+}
+
+/* ── Filters ── */
 function applyFilters() {
   filters.category  = document.getElementById('categoryFilter').value;
   filters.search    = document.getElementById('searchCake').value.toLowerCase();
@@ -162,6 +353,7 @@ function getFilteredAndSortedCakes() {
   return f;
 }
 
+/* ── Cake grid render ── */
 function renderCakes(arr) {
   var g = document.getElementById('cakeGrid');
   g.innerHTML = '';
@@ -184,7 +376,10 @@ function renderCakes(arr) {
       + '<div class="cake-content">'
       + '<h3>' + c.name + '</h3>'
       + '<p class="cake-desc">' + c.desc + '</p>'
-      + '<div class="cake-rating"><span class="stars">' + generateStars(c.rating) + '</span><span>(' + c.reviews + ')</span></div>'
+      + '<div class="cake-rating">'
+      +   renderRatingStars(c.rating, c.id)
+      +   '<span class="review-count">(' + c.reviews + ')</span>'
+      + '</div>'
       + '<div class="cake-price">&#8369;' + c.price + '</div>'
       + '<div class="cake-actions">'
       + '<button class="add-to-cart-btn" onclick="addToCart(\'' + c.name + '\',' + c.price + ',\'' + c.img + '\')">Add to Cart</button>'
@@ -193,6 +388,7 @@ function renderCakes(arr) {
   });
 }
 
+/* ── Cart actions ── */
 function addToCart(name, price, img) {
   var ex = cart.find(function(i) { return i.name === name; });
   if (ex) ex.quantity++;

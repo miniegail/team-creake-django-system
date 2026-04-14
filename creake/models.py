@@ -14,10 +14,8 @@ class Cake(models.Model):
     category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
     description = models.TextField()
     price = models.DecimalField(max_digits=6, decimal_places=2)
-    image = models.ImageField(upload_to='cakes/')
+    image = models.ImageField(upload_to='cakes/', blank=True, null=True)
     badge = models.CharField(max_length=50, blank=True, null=True)
-    rating = models.DecimalField(max_digits=2, decimal_places=1, default=4.5)
-    review_count = models.IntegerField(default=0)
     is_new = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -26,6 +24,18 @@ class Cake(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def rating(self):
+        from django.db.models import Avg
+        avg = self.ratings.aggregate(Avg('rating'))['rating__avg']
+        return round(avg, 1) if avg else 0
+
+    @property
+    def review_count(self):
+        return self.ratings.count()
+    
+    
 
 
 class Order(models.Model):
@@ -142,3 +152,13 @@ class Address(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.label}"
+
+
+class CakeRating(models.Model):
+    cake = models.ForeignKey(Cake, on_delete=models.CASCADE, related_name='ratings')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)])
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('cake', 'user')  # one rating per user per cake

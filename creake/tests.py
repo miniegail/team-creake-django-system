@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ============================================
 # IMPORTS
 # Standard libraries and Selenium components
@@ -96,3 +97,5 @@ class HomepageTest(unittest.TestCase):
 # ============================================
 if __name__ == "__main__":
     unittest.main()
+=======
+>>>>>>> a53e65880afd6fb6aedbac40105c4b08ef7a677c
