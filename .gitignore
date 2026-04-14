@@ -9,4 +9,4 @@ env/
 *.pyo
 *.pyd
 .Python
-*.so
+db.sqlite3
