@@ -19,7 +19,9 @@
   <nav class="header-nav">
     <a id="homeNav" href="#hero-banner" class="active">&#127968; Home</a>
     <a id="browseNav" href="#main-content">&#127874; Browse</a>
+    {% if not request.user.is_staff %}
     <a class="cart-icon-btn" onclick="toggleCart()" href="#">&#128722; Cart<span class="cart-count" id="cartCount">0</span></a>
+    {% endif %}
     {% if request.user.is_authenticated %}
     <div class="user-dropdown-wrap">
       <button class="user-nav-btn" onclick="toggleUserDropdown()">
@@ -34,7 +36,7 @@
         </div>
         <a href="{% url 'creake:delivery' %}">&#127874; Dashboard</a>
         <a href="{% url 'creake:quiz' %}">&#127919; Cake Quiz</a>
-        <a href="{% url 'creake:order_history' %}">&#128203; My Orders</a>
+        <a href="{% url 'creake:order_history' %}">&#128203; {% if request.user.is_staff %}Orders{% else %}My Orders{% endif %}</a>
         <form method="post" action="{% url 'creake:logout' %}" style="margin:0;">
           {% csrf_token %}
           <button type="submit" class="logout-item">&#128682; Log Out</button>
@@ -276,10 +278,12 @@
         <p id="detailDesc" style="font-size:13px;color:#666;line-height:1.7;margin-bottom:18px;"></p>
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
           <div id="detailPrice" style="font-size:26px;font-weight:900;color:#d7736b;"></div>
+          {% if not request.user.is_staff %}
           <div style="display:flex;gap:10px;">
             <button id="detailWishlistBtn" onclick="toggleWishlistFromDetail()" style="padding:11px 14px;border:2px solid #f0b9b5;background:white;color:#d7736b;border-radius:12px;cursor:pointer;font-size:18px;line-height:1;">&#9825;</button>
             <button id="detailCartBtn" onclick="addToCartFromDetail()" style="padding:11px 22px;border:none;background:linear-gradient(135deg,#d7736b,#c9605a);color:#fff;border-radius:12px;cursor:pointer;font-weight:700;font-size:13px;font-family:Poppins,sans-serif;">&#127874; Add to Cart</button>
           </div>
+          {% endif %}
         </div>
         <!-- Category -->
         <div style="margin-top:18px;padding-top:16px;border-top:1px solid #f5f5f5;">
@@ -447,6 +451,8 @@
 
 <!-- ========== SCRIPTS ========== -->
 <script>
+// ✅ CRITICAL: Set isAdmin flag from Django context
+var isAdmin = {{ is_admin|lower }};
 var isLoggedIn = {{ request.user.is_authenticated|yesno:"true,false" }};
 var csrfToken = (function() {
   var match = document.cookie.match(/csrftoken=([^;]+)/);
@@ -498,6 +504,46 @@ document.addEventListener('DOMContentLoaded', function() {
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   initShop();
+
+  // ── CATEGORY FILTER: auto-apply on change ──
+  var catFilter = document.getElementById('categoryFilter');
+  if (catFilter) {
+    catFilter.addEventListener('change', function() {
+      applyFilters();
+    });
+  }
+
+  // ── ENSURE category filter value "all" is treated correctly ──
+  // Patch: if applyFilters uses '' for "all", keep "all" as is and let the function handle it
+  // This ensures the change event always triggers a re-render
+  // ── ADMIN: hide cart/wishlist/order elements ──
+  if (isAdmin) {
+    // Hide cart modal completely
+    var cartModal = document.getElementById('cartModal');
+    if (cartModal) cartModal.style.display = 'none';
+
+    // Hide checkout modal completely
+    var checkoutModal = document.getElementById('checkoutModal');
+    if (checkoutModal) checkoutModal.style.display = 'none';
+
+    // After cards render, hide Add to Cart & Wishlist buttons on all cake cards
+    // Use MutationObserver since cards are rendered dynamically
+    var grid = document.getElementById('cakeGrid');
+    if (grid) {
+      var observer = new MutationObserver(function() {
+        grid.querySelectorAll('.add-to-cart-btn, .cart-btn, [onclick*="addToCart"], [onclick*="toggleWishlist"]').forEach(function(btn) {
+          btn.style.display = 'none';
+        });
+        // Also hide any button containing "Add to Cart" text
+        grid.querySelectorAll('button').forEach(function(btn) {
+          if (btn.textContent.includes('Add to Cart') || btn.textContent.includes('🎂 Add to Cart')) {
+            btn.style.display = 'none';
+          }
+        });
+      });
+      observer.observe(grid, { childList: true, subtree: true });
+    }
+  }
 });
 </script>
 

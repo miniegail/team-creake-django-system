@@ -37,14 +37,14 @@ function switchAuthTab(tab) {
   document.getElementById('panelSignup').classList.toggle('active', tab === 'signup');
   document.getElementById('authCardTitle').textContent = tab === 'login' ? 'Welcome Back!' : 'Join CREAKE!';
   document.getElementById('authCardSubtitle').textContent = tab === 'login'
-    ? 'Sign in to your sweet account \u{1F370}'
-    : 'Create your account and start baking \u{1F382}';
+    ? 'Sign in to your sweet account 🍰'
+    : 'Create your account and start baking 🎂';
 }
 
 function togglePassword(id, btn) {
   var i = document.getElementById(id);
   i.type = i.type === 'password' ? 'text' : 'password';
-  btn.textContent = i.type === 'password' ? '\u{1F441}\uFE0F' : '\u{1F648}';
+  btn.textContent = i.type === 'password' ? '👁️' : '🙈';
 }
 
 function checkStrength(pw) {
@@ -128,7 +128,6 @@ window.addEventListener('load', updateActiveNav);
 /* ── Cart count ── */
 function updateCartCount() {
   var total = cart.reduce(function(s, i) { return s + i.quantity; }, 0);
-  // Update all .cart-count badges on the page
   document.querySelectorAll('.cart-count, #cartCount').forEach(function(el) {
     el.textContent = total;
   });
@@ -193,7 +192,7 @@ function renderCakes(arr) {
   document.getElementById('resultsCount').textContent = arr.length;
   if (!arr.length) {
     g.innerHTML = '<div class="no-results">'
-      + '<div class="no-results-icon">\u{1F50D}</div>'
+      + '<div class="no-results-icon">🔍</div>'
       + '<h3 class="no-results-title">No cakes found</h3>'
       + '<p class="no-results-text">Try adjusting your filters</p>'
       + '</div>';
@@ -203,6 +202,12 @@ function renderCakes(arr) {
     var card = document.createElement('div');
     card.className = 'cake-card';
     var wishlisted = typeof wishlistIds !== 'undefined' && wishlistIds.has(c.id);
+    
+    // ✅ HIDE ADD TO CART FOR ADMIN - CHECK IF ADMIN FLAG IS SET
+    var addToCartBtn = (typeof isAdmin !== 'undefined' && isAdmin) 
+      ? '' 
+      : '<button class="add-to-cart-btn" style="flex:1;">Add to Cart</button>';
+    
     card.innerHTML = '<div class="cake-image-wrapper" style="position:relative;">'
       + '<img src="' + c.img + '" alt="' + c.name + '">'
       + (c.badge ? '<div class="cake-badge">' + c.badge + '</div>' : '')
@@ -216,11 +221,12 @@ function renderCakes(arr) {
       + '</div>'
       + '<div class="cake-price">&#8369;' + c.price + '</div>'
       + '<div class="cake-actions" style="display:flex;gap:8px;align-items:center;">'
-      + '<button class="add-to-cart-btn" style="flex:1;">Add to Cart</button>'
+      + addToCartBtn
       + '<button class="card-wishlist-btn" data-id="' + c.id + '" style="background:white;border:1.5px solid #f0b9b5;border-radius:10px;width:38px;height:38px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:' + (wishlisted ? '#d7736b' : '#ccc') + ';flex-shrink:0;">'
       + (wishlisted ? '&#9829;' : '&#9825;')
       + '</button>'
       + '</div></div>';
+    
     var wishBtn = card.querySelector('.card-wishlist-btn');
     wishBtn.addEventListener('click', function(e) {
       e.stopPropagation();
@@ -252,10 +258,13 @@ function renderCakes(arr) {
     wishBtn.style.color = wishlisted ? '#d7736b' : '#999';
 
     var btn = card.querySelector('.add-to-cart-btn');
-    btn.addEventListener('click', function(e) {
-      e.stopPropagation();
-      addToCart(c.name, c.price, c.img, c.id);
-    });
+    if (btn) {
+      btn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        addToCart(c.name, c.price, c.img, c.id);
+      });
+    }
+    
     card.style.cursor = 'pointer';
     card.addEventListener('click', function() {
       openCakeDetail(c);
@@ -266,7 +275,6 @@ function renderCakes(arr) {
 
 /* ── Cart actions ── */
 function addToCart(name, price, img, id) {
-  // Match by id if available, fallback to name (for wishlist items that have id)
   var ex = cart.find(function(i) {
     return id ? i.id === id : i.name === name;
   });
@@ -277,7 +285,7 @@ function addToCart(name, price, img, id) {
   }
   updateCartCount();
   renderCart();
-  showNotification(name + ' added to cart! \u{1F382}');
+  showNotification(name + ' added to cart! 🎂');
 }
 
 function removeFromCart(name) {
@@ -300,7 +308,7 @@ function renderCart() {
   if (!list) return;
   if (!cart.length) {
     list.innerHTML = '<div class="cart-empty">'
-      + '<div class="cart-empty-icon">\u{1F6D2}</div>'
+      + '<div class="cart-empty-icon">🛒</div>'
       + '<p><strong>Your cart is empty!</strong></p>'
       + '<p style="font-size:12px;color:#999;margin-top:10px;">Add some delicious cakes to get started.</p>'
       + '</div>';
@@ -312,7 +320,6 @@ function renderCart() {
   var btn = document.getElementById('checkoutBtn');
   if (btn) btn.disabled = false;
   list.innerHTML = cart.map(function(i) {
-    // Fallback image — if img is empty (added from wishlist page), look it up from cakesData
     var imgSrc = i.img;
     if (!imgSrc && typeof cakesData !== 'undefined') {
       var match = cakesData.find(function(c) { return c.id === i.id || c.name === i.name; });
@@ -324,11 +331,11 @@ function renderCart() {
       + '<h4>' + i.name + '</h4>'
       + '<p>&#8369;' + i.price + '</p>'
       + '<div class="cart-item-qty">'
-      + '<button onclick="updateQuantity(\'' + i.name.replace(/'/g, "\\'") + '\',-1)">\u2212</button>'
+      + '<button onclick="updateQuantity(\'' + i.name.replace(/'/g, "\\'") + '\',-1)">−</button>'
       + '<span>' + i.quantity + '</span>'
       + '<button onclick="updateQuantity(\'' + i.name.replace(/'/g, "\\'") + '\',1)">+</button>'
       + '</div></div>'
-      + '<button class="remove-item" onclick="removeFromCart(\'' + i.name.replace(/'/g, "\\'") + '\')">&#10005;</button>'
+      + '<button class="remove-item" onclick="removeFromCart(\'' + i.name.replace(/'/g, "\\'") + '\')">✕</button>'
       + '</div>';
   }).join('');
   updateTotals();
@@ -336,19 +343,19 @@ function renderCart() {
 
 function updateTotals() {
   var sub = cart.reduce(function(s, i) { return s + (i.price * i.quantity); }, 0);
-  if (document.getElementById('subtotal')) document.getElementById('subtotal').textContent = '&#8369;' + sub.toFixed(2);
-  if (document.getElementById('delivery')) document.getElementById('delivery').textContent = '&#8369;0.00';
-  if (document.getElementById('total'))    document.getElementById('total').textContent    = '&#8369;' + sub.toFixed(2);
+  if (document.getElementById('subtotal')) document.getElementById('subtotal').innerHTML = '&#8369;' + sub.toFixed(2);
+  if (document.getElementById('delivery')) document.getElementById('delivery').innerHTML = '&#8369;0.00';
+  if (document.getElementById('total'))    document.getElementById('total').innerHTML    = '&#8369;' + sub.toFixed(2);
 }
 
 function updateDelivery() {
   var sub = cart.reduce(function(s, i) { return s + (i.price * i.quantity); }, 0);
   var dt  = document.getElementById('deliveryType') ? document.getElementById('deliveryType').value : '';
   var del = dt === 'standard' ? 50 : dt === 'express' ? 150 : dt === 'sameday' ? 300 : 0;
-  if (document.getElementById('delivery'))  document.getElementById('delivery').textContent  = '&#8369;' + del.toFixed(2);
-  if (document.getElementById('delivery2')) document.getElementById('delivery2').textContent = '&#8369;' + del.toFixed(2);
-  if (document.getElementById('total'))     document.getElementById('total').textContent     = '&#8369;' + (sub + del).toFixed(2);
-  if (document.getElementById('total2'))    document.getElementById('total2').textContent    = '&#8369;' + (sub + del).toFixed(2);
+  if (document.getElementById('delivery'))  document.getElementById('delivery').innerHTML  = '&#8369;' + del.toFixed(2);
+  if (document.getElementById('delivery2')) document.getElementById('delivery2').innerHTML = '&#8369;' + del.toFixed(2);
+  if (document.getElementById('total'))     document.getElementById('total').innerHTML     = '&#8369;' + (sub + del).toFixed(2);
+  if (document.getElementById('total2'))    document.getElementById('total2').innerHTML    = '&#8369;' + (sub + del).toFixed(2);
 }
 
 function toggleCart() { document.getElementById('cartModal').classList.toggle('active'); }
@@ -362,13 +369,13 @@ function renderCheckoutSummary() {
   var sub = cart.reduce(function(t, i) { return t + i.price * i.quantity; }, 0);
   s.innerHTML = '<h3>Order Summary</h3>'
     + cart.map(function(i) {
-        return '<div class="order-item"><span>' + i.name + ' \xD7 ' + i.quantity + '</span>'
+        return '<div class="order-item"><span>' + i.name + ' × ' + i.quantity + '</span>'
           + '<span>&#8369;' + (i.price * i.quantity).toFixed(2) + '</span></div>';
       }).join('')
     + '<div class="order-total"><span>Total</span><span>&#8369;' + sub.toFixed(2) + '</span></div>';
-  if (document.getElementById('subtotal2')) document.getElementById('subtotal2').textContent = '&#8369;' + sub.toFixed(2);
-  if (document.getElementById('delivery2')) document.getElementById('delivery2').textContent = '&#8369;0.00';
-  if (document.getElementById('total2'))    document.getElementById('total2').textContent    = '&#8369;' + sub.toFixed(2);
+  if (document.getElementById('subtotal2')) document.getElementById('subtotal2').innerHTML = '&#8369;' + sub.toFixed(2);
+  if (document.getElementById('delivery2')) document.getElementById('delivery2').innerHTML = '&#8369;0.00';
+  if (document.getElementById('total2'))    document.getElementById('total2').innerHTML    = '&#8369;' + sub.toFixed(2);
 }
 
 function setGridView(cols) {
@@ -432,12 +439,12 @@ function renderReviewsPage() {
       + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">'
       + '<div>'
       + '<div style="font-weight:700;font-size:13px;color:#333;">'
-      + (r.is_mine ? '👤 You' : '&#128100; ' + r.user)
+      + (r.is_mine ? '👤 You' : '👤 ' + r.user)
       + '</div>'
       + '<div style="display:flex;align-items:center;gap:4px;margin-top:2px;">' + stars + '<span style="font-size:11px;color:#bbb;margin-left:4px;">' + r.created_at + '</span></div>'
       + '</div>'
       + (r.is_mine
-          ? '<button onclick="deleteReview()" style="background:none;border:none;color:#ccc;font-size:12px;cursor:pointer;padding:2px 6px;border-radius:6px;" title="Delete my review">&#128465;</button>'
+          ? '<button onclick="deleteReview()" style="background:none;border:none;color:#ccc;font-size:12px;cursor:pointer;padding:2px 6px;border-radius:6px;" title="Delete my review">🗑️</button>'
           : '')
       + '</div>'
       + '<p style="margin:0;font-size:13px;color:#555;line-height:1.6;">' + escapeHtml(r.comment) + '</p>'
@@ -464,12 +471,10 @@ function setStarPicker(val) {
 }
 
 function initStarPicker() {
-  // Clone each star to wipe all previously stacked event listeners
   document.querySelectorAll('.star-pick').forEach(function(s) {
     var fresh = s.cloneNode(true);
     s.parentNode.replaceChild(fresh, s);
   });
-  // Re-attach listeners on the fresh nodes
   document.querySelectorAll('.star-pick').forEach(function(s) {
     s.addEventListener('mouseover', function() {
       document.querySelectorAll('.star-pick').forEach(function(x) {
@@ -551,7 +556,7 @@ function openCakeDetail(cake) {
   document.getElementById("detailImg").alt          = cake.name;
   document.getElementById("detailName").textContent = cake.name;
   document.getElementById("detailDesc").textContent = cake.desc;
-  document.getElementById("detailPrice").textContent = "u20B1" + cake.price.toLocaleString();
+  document.getElementById("detailPrice").innerHTML = "&#8369;" + cake.price.toLocaleString();
   document.getElementById("detailStars").innerHTML   = renderRatingStars(cake.rating);
   document.getElementById("detailReviews").textContent = "(" + cake.reviews + " reviews)";
   document.getElementById("detailCategory").textContent = cake.category;
@@ -620,8 +625,18 @@ function handleDetailOverlayClick(e) {
 
 function addToCartFromDetail() {
   if (!detailCake) return;
-  addToCart(detailCake.name, detailCake.price, detailCake.img, detailCake.id);
-  closeCakeDetail();
+  if (typeof isAdmin !== 'undefined' && isAdmin) {
+    showNotification('❌ Admins can only view their own cakes!', 'error');
+    return;
+  }
+  if (typeof isLoggedIn !== 'undefined' && isLoggedIn) {
+    addToCart(detailCake.name, detailCake.price, detailCake.img, detailCake.id);
+    closeCakeDetail();
+    setTimeout(function() { openCheckout(); }, 200);
+  } else {
+    addToCart(detailCake.name, detailCake.price, detailCake.img, detailCake.id);
+    closeCakeDetail();
+  }
 }
 
 /* ── Saved-address checkout ── */
@@ -671,7 +686,6 @@ function submitSavedAddressOrder() {
 
 /* ── Init ── */
 function initShop() {
-  // Load cart from localStorage first (picks up items added from wishlist page)
   loadCart();
 
   document.querySelectorAll('.header-nav a[href^="#"]').forEach(function(l) {
@@ -759,9 +773,7 @@ function initShop() {
 function openReviewsPanel() {
   document.getElementById('detailPanel').style.display = 'none';
   document.getElementById('reviewsPanel').style.display = 'block';
-  // Scroll modal back to top
   document.getElementById('cakeDetailBox').scrollTop = 0;
-  // Init star picker fresh each time panel opens
   initStarPicker();
   setStarPicker(0);
   var ta = document.getElementById('reviewComment');
