@@ -9,4 +9,3 @@ env/
 *.pyo
 *.pyd
 .Python
-*.so
