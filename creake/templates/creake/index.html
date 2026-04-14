@@ -48,8 +48,6 @@
   </nav>
 </header>
 
-
-
 <!-- ========== HERO BANNER ========== -->
 <div class="hero-banner" id="hero-banner">
   <div class="banner-bg">
@@ -161,6 +159,55 @@
   <div class="checkout-container">
     <h2>&#128230; Checkout</h2>
     <div class="checkout-order-summary" id="checkoutSummary"></div>
+
+    {% if request.user.is_authenticated and saved_address %}
+    <div style="margin-bottom:20px;">
+      <div style="font-size:13px;font-weight:600;color:#666;margin-bottom:10px;">&#128205; Delivering to</div>
+      <div style="background:#fff5f4;border:1.5px solid #f0b9b5;border-radius:14px;padding:16px 18px;">
+        <div style="font-weight:700;font-size:14px;color:#333;margin-bottom:4px;">{{ saved_address.label }}</div>
+        <div style="font-size:13px;color:#555;line-height:1.6;">
+          {{ saved_address.street }}<br>
+          {{ saved_address.city }}, {{ saved_address.zip_code }}
+        </div>
+        <a href="{% url 'creake:profile' %}" style="font-size:11px;color:#d7736b;text-decoration:none;margin-top:8px;display:inline-block;">&#9998; Change address in Profile</a>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+      <div>
+        <label style="font-size:12px;font-weight:600;color:#666;display:block;margin-bottom:4px;">Delivery</label>
+        <select id="deliveryType" required onchange="updateDelivery()" style="width:100%;padding:10px;border:1.5px solid #f0b9b5;border-radius:10px;font-family:Poppins,sans-serif;font-size:13px;">
+          <option value="">Select delivery</option>
+          <option value="standard">Standard (&#8369;50)</option>
+          <option value="express">Express (&#8369;150)</option>
+          <option value="sameday">Same Day (&#8369;300)</option>
+        </select>
+      </div>
+      <div>
+        <label style="font-size:12px;font-weight:600;color:#666;display:block;margin-bottom:4px;">Payment</label>
+        <select id="paymentMethod" required style="width:100%;padding:10px;border:1.5px solid #f0b9b5;border-radius:10px;font-family:Poppins,sans-serif;font-size:13px;">
+          <option value="">Select payment</option>
+          <option value="credit">&#128179; Credit Card</option>
+          <option value="debit">&#128179; Debit Card</option>
+          <option value="paypal">&#127837;&#65039; PayPal</option>
+          <option value="cod">&#128181; Cash on Delivery</option>
+        </select>
+      </div>
+    </div>
+    <div style="margin-bottom:20px;">
+      <label style="font-size:12px;font-weight:600;color:#666;display:block;margin-bottom:4px;">Special Instructions (Optional)</label>
+      <input type="text" id="notes" placeholder="Any special requests?" style="width:100%;padding:10px;border:1.5px solid #f0b9b5;border-radius:10px;font-family:Poppins,sans-serif;font-size:13px;box-sizing:border-box;">
+    </div>
+    <div style="background:#f9f9f9;border-radius:12px;padding:14px 16px;margin-bottom:20px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:#666;margin-bottom:6px;"><span>Subtotal</span><span id="subtotal2">&#8369;0.00</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:#666;margin-bottom:6px;"><span>Delivery</span><span id="delivery2">&#8369;0.00</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:700;color:#333;border-top:1px solid #eee;padding-top:8px;margin-top:4px;"><span>Total</span><span id="total2">&#8369;0.00</span></div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button type="button" onclick="closeCheckout()" style="flex:1;padding:12px;border:2px solid #f0b9b5;background:white;color:#d7736b;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;font-family:Poppins,sans-serif;">Cancel</button>
+      <button type="button" onclick="submitSavedAddressOrder()" style="flex:1;padding:12px;border:none;background:linear-gradient(135deg,#d7736b,#c9605a);color:white;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;font-family:Poppins,sans-serif;">&#127874; Place Order</button>
+    </div>
+
+    {% else %}
     <form id="checkoutForm">
       {% csrf_token %}
       <div class="form-group"><label>Full Name</label><input type="text" id="fullName" placeholder="John Doe" required></div>
@@ -198,6 +245,110 @@
         <button type="submit" class="place-order-btn">Place Order</button>
       </div>
     </form>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ========== CAKE DETAIL MODAL ========== -->
+<div id="cakeDetailOverlay" onclick="handleDetailOverlayClick(event)" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.55);z-index:8000;align-items:center;justify-content:center;backdrop-filter:blur(4px);">
+  <div id="cakeDetailBox" style="background:#fff;border-radius:24px;max-width:560px;width:92%;max-height:90vh;overflow-y:auto;font-family:Poppins,sans-serif;box-shadow:0 24px 60px rgba(0,0,0,0.18);position:relative;">
+
+    <!-- Close -->
+    <button onclick="closeCakeDetail()" style="position:absolute;top:14px;right:16px;background:rgba(255,255,255,0.85);border:none;border-radius:50%;width:34px;height:34px;font-size:17px;cursor:pointer;color:#666;z-index:10;display:flex;align-items:center;justify-content:center;">&#10005;</button>
+
+    <!-- ── PANEL 1: CAKE INFO ── -->
+    <div id="detailPanel">
+      <!-- Image -->
+      <div style="width:100%;height:280px;border-radius:24px 24px 0 0;background:#fef3f2;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+        <img id="detailImg" src="" alt="" style="max-width:100%;max-height:280px;object-fit:contain;padding:16px;">
+      </div>
+      <!-- Info body -->
+      <div style="padding:24px 28px 28px;">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px;">
+          <h2 id="detailName" style="margin:0;font-size:20px;font-weight:800;color:#2d2d2d;"></h2>
+          <span id="detailBadge" style="display:none;background:linear-gradient(135deg,#d7736b,#c9605a);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;white-space:nowrap;"></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+          <div id="detailStars"></div>
+          <span id="detailReviews" style="font-size:12px;color:#999;"></span>
+          <span id="detailNew" style="display:none;background:#e8f5e9;color:#388e3c;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;">✨ New</span>
+        </div>
+        <p id="detailDesc" style="font-size:13px;color:#666;line-height:1.7;margin-bottom:18px;"></p>
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div id="detailPrice" style="font-size:26px;font-weight:900;color:#d7736b;"></div>
+          <div style="display:flex;gap:10px;">
+            <button id="detailWishlistBtn" onclick="toggleWishlistFromDetail()" style="padding:11px 14px;border:2px solid #f0b9b5;background:white;color:#d7736b;border-radius:12px;cursor:pointer;font-size:18px;line-height:1;">&#9825;</button>
+            <button id="detailCartBtn" onclick="addToCartFromDetail()" style="padding:11px 22px;border:none;background:linear-gradient(135deg,#d7736b,#c9605a);color:#fff;border-radius:12px;cursor:pointer;font-weight:700;font-size:13px;font-family:Poppins,sans-serif;">&#127874; Add to Cart</button>
+          </div>
+        </div>
+        <!-- Category -->
+        <div style="margin-top:18px;padding-top:16px;border-top:1px solid #f5f5f5;">
+          <span style="font-size:11px;color:#aaa;font-weight:600;text-transform:uppercase;letter-spacing:.5px;">Category</span>
+          <div id="detailCategory" style="margin-top:4px;display:inline-block;background:#fff5f4;color:#d7736b;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;border:1px solid #f0b9b5;text-transform:capitalize;"></div>
+        </div>
+        <!-- Reviews button -->
+        <div style="margin-top:18px;padding-top:16px;border-top:1px solid #f5f5f5;">
+          <button onclick="openReviewsPanel()" style="width:100%;padding:12px;border:2px solid #f0b9b5;background:white;color:#d7736b;border-radius:12px;cursor:pointer;font-weight:700;font-size:13px;font-family:Poppins,sans-serif;display:flex;align-items:center;justify-content:center;gap:8px;">
+            &#11088; Reviews <span id="detailReviewsBadge" style="background:#fff0ef;color:#d7736b;font-size:11px;padding:2px 8px;border-radius:20px;"></span>
+            <span style="margin-left:auto;font-size:16px;">&#8250;</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PANEL 2: REVIEWS ── -->
+    <div id="reviewsPanel" style="display:none;padding:24px 28px 28px;">
+      <!-- Back button -->
+      <button onclick="closeReviewsPanel()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:#d7736b;font-weight:700;font-size:13px;cursor:pointer;padding:0;margin-bottom:20px;font-family:Poppins,sans-serif;">
+        &#8249; Back to cake
+      </button>
+
+      <!-- Reviews header -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
+        <div>
+          <span style="font-size:15px;font-weight:800;color:#2d2d2d;">Customer Reviews</span>
+          <span id="reviewCountLabel" style="font-size:12px;color:#999;margin-left:6px;"></span>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div id="reviewAvgStars" style="font-size:14px;"></div>
+          <span id="reviewAvgNum" style="font-weight:800;color:#f5a623;font-size:14px;"></span>
+        </div>
+      </div>
+
+      <!-- Write a review -->
+      {% if request.user.is_authenticated %}
+      <div id="reviewFormWrap" style="background:#fff8f7;border:1.5px solid #f0b9b5;border-radius:14px;padding:16px;margin-bottom:18px;">
+        <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:10px;">&#9997;&#65039; Write a Review</div>
+        <div style="display:flex;gap:6px;margin-bottom:10px;" id="starPicker">
+          <span class="star-pick" data-v="1" style="font-size:28px;cursor:pointer;color:#ddd;transition:color 0.15s;">★</span>
+          <span class="star-pick" data-v="2" style="font-size:28px;cursor:pointer;color:#ddd;transition:color 0.15s;">★</span>
+          <span class="star-pick" data-v="3" style="font-size:28px;cursor:pointer;color:#ddd;transition:color 0.15s;">★</span>
+          <span class="star-pick" data-v="4" style="font-size:28px;cursor:pointer;color:#ddd;transition:color 0.15s;">★</span>
+          <span class="star-pick" data-v="5" style="font-size:28px;cursor:pointer;color:#ddd;transition:color 0.15s;">★</span>
+        </div>
+        <textarea id="reviewComment" placeholder="Share your experience with this cake..." rows="3" style="width:100%;padding:10px;border:1.5px solid #f0b9b5;border-radius:10px;font-family:Poppins,sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;outline:none;"></textarea>
+        <div style="display:flex;justify-content:flex-end;margin-top:10px;">
+          <button onclick="submitReview()" style="padding:9px 20px;border:none;background:linear-gradient(135deg,#d7736b,#c9605a);color:#fff;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;font-family:Poppins,sans-serif;">Post Review</button>
+        </div>
+      </div>
+      {% else %}
+      <div style="background:#fff8f7;border:1.5px solid #f0b9b5;border-radius:14px;padding:16px;margin-bottom:18px;text-align:center;">
+        <p style="font-size:13px;color:#888;margin:0 0 10px;">Log in to write a review</p>
+        <button onclick="openAuthModal()" style="padding:8px 20px;border:none;background:linear-gradient(135deg,#d7736b,#c9605a);color:#fff;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;font-family:Poppins,sans-serif;">&#128100; Log In</button>
+      </div>
+      {% endif %}
+
+      <!-- Reviews list -->
+      <div id="reviewsList" style="display:flex;flex-direction:column;gap:12px;">
+        <div style="text-align:center;color:#bbb;font-size:13px;padding:20px 0;">Loading reviews...</div>
+      </div>
+
+      <!-- Load more -->
+      <div id="loadMoreWrap" style="display:none;text-align:center;margin-top:14px;">
+        <button onclick="loadMoreReviews()" style="padding:8px 20px;border:1.5px solid #f0b9b5;background:white;color:#d7736b;border-radius:10px;cursor:pointer;font-weight:700;font-size:12px;font-family:Poppins,sans-serif;">Load More</button>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -217,8 +368,6 @@
       <p id="authCardSubtitle">Sign in to your sweet account &#127856;</p>
     </div>
     <div class="card-body">
-
-      <!-- LOGIN -->
       <div class="form-panel-auth active" id="panelLogin">
         <form method="post" action="{% url 'creake:login' %}" id="loginForm">
           {% csrf_token %}
@@ -239,17 +388,13 @@
             </div>
           </div>
           <div class="forgot-link"><a href="{% url 'password_reset' %}">Forgot Password?</a></div>
-          {% if messages %}
-          {% for msg in messages %}
+          {% if messages %}{% for msg in messages %}
           <div class="field-error" style="display:block;margin-bottom:10px;">{{ msg }}</div>
-          {% endfor %}
-          {% endif %}
+          {% endfor %}{% endif %}
           <button type="submit" class="auth-submit-btn">&#128273; Log In</button>
         </form>
         <div class="switch-link">Don't have an account? <a onclick="switchAuthTab('signup')">Sign Up</a></div>
       </div>
-
-      <!-- SIGNUP -->
       <div class="form-panel-auth" id="panelSignup">
         <form method="post" action="{% url 'creake:register' %}" id="signupForm">
           {% csrf_token %}
@@ -295,29 +440,29 @@
         </form>
         <div class="switch-link">Already have an account? <a onclick="switchAuthTab('login')">Log In</a></div>
       </div>
-
     </div>
   </div>
 </div>
 {% endif %}
 
 <!-- ========== SCRIPTS ========== -->
-
-<!-- Django data — template tags required, cannot go in .js files -->
 <script>
 var isLoggedIn = {{ request.user.is_authenticated|yesno:"true,false" }};
 var csrfToken = (function() {
   var match = document.cookie.match(/csrftoken=([^;]+)/);
   return match ? match[1] : '';
 })();
+var wishlistIds = new Set({{ wishlist_ids|safe }});
 var userRatings = (function() {
   var raw = {{ user_ratings|safe }};
   var out = {};
   Object.keys(raw).forEach(function(k) { out[String(k)] = raw[k]; });
   return out;
 })();
-
-
+var receivedCakeNames = (function() {
+  var raw = {{ received_cake_names|safe }};
+  return raw.map(function(n) { return n.toLowerCase(); });
+})();
 var cakesData = [
   {% for cake in cakes %}
   {
@@ -342,7 +487,6 @@ var cakesData = [
   {name:"Vanilla Berry",category:"vanilla",desc:"Vanilla with berries",price:470,img:"{% static 'creake/images/cakes/cake6.jpg' %}",badge:"New",rating:4.4,reviews:67,new:true}
   {% endfor %}
 ];
-
 {% for message in messages %}
 document.addEventListener('DOMContentLoaded', function() {
   showNotification("{{ message|escapejs }}", "{% if message.tags %}{{ message.tags }}{% else %}success{% endif %}");
@@ -350,10 +494,7 @@ document.addEventListener('DOMContentLoaded', function() {
 {% endfor %}
 </script>
 
-<!-- External JS -->
 <script src="{% static 'creake/js/index.js' %}"></script>
-
-<!-- Init -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   initShop();

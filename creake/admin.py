@@ -24,19 +24,19 @@ class OrderAdmin(admin.ModelAdmin):
     list_display = ('id', 'user', 'cake_name', 'total', 'status', 'created_at')
     list_filter = ('status', 'created_at')
     search_fields = ('user__username', 'cake_name', 'address')
-    readonly_fields = ('created_at', 'user')
+    readonly_fields = ('id', 'created_at', 'user', 'special_instructions')
     fieldsets = (
         ('Order Info', {
-            'fields': ('user', 'id', 'created_at', 'status')
+            'fields': ('id', 'user', 'created_at', 'status')
         }),
         ('Cake Details', {
             'fields': ('cake_name', 'quantity', 'total')
         }),
         ('Delivery', {
-            'fields': ('delivery_type', 'address', 'city', 'zip_code', 'phone', 'rider_name', 'estimated_arrival')
+            'fields': ('address', 'city', 'zip_code', 'phone', 'rider_name', 'estimated_arrival')
         }),
-        ('Payment', {
-            'fields': ('payment_method',)
+        ('Notes', {
+            'fields': ('special_instructions',)
         }),
         ('Tracking', {
             'fields': ('step', 'paid_at', 'baking_at', 'delivered_at')

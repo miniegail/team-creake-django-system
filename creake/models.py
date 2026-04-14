@@ -45,6 +45,7 @@ class Order(models.Model):
         ('baking', 'Baking'),
         ('out_for_delivery', 'Out for Delivery'),
         ('delivered', 'Delivered'),
+        ('received', 'Received'),
         ('cancelled', 'Cancelled'),
     ]
 
@@ -63,7 +64,7 @@ class Order(models.Model):
     city       = models.CharField(max_length=100, default='')
     zip_code   = models.CharField(max_length=20, default='')
     status     = models.CharField(max_length=50, default='pending', choices=STATUS_CHOICES)
-    phone      = models.CharField(max_length=20)
+    phone = models.CharField(max_length=20, blank=True, default='')
 
     # Custom cake fields
     is_custom_cake  = models.BooleanField(default=False)
@@ -74,6 +75,7 @@ class Order(models.Model):
     paid_at           = models.DateTimeField(null=True, blank=True)
     baking_at         = models.DateTimeField(null=True, blank=True)
     delivered_at      = models.DateTimeField(null=True, blank=True)
+    received_at       = models.DateTimeField(null=True, blank=True) 
     rider_name        = models.CharField(max_length=100, blank=True, null=True)
     estimated_arrival = models.CharField(max_length=100, blank=True, null=True)
     step              = models.IntegerField(default=0)
@@ -162,3 +164,14 @@ class CakeRating(models.Model):
 
     class Meta:
         unique_together = ('cake', 'user')  # one rating per user per cake
+
+
+class CakeReview(models.Model):
+    cake = models.ForeignKey(Cake, on_delete=models.CASCADE, related_name='cake_reviews')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.IntegerField()
+    comment = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('cake', 'user')

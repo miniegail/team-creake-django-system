@@ -53,7 +53,11 @@ urlpatterns = [
     path('admin-panel/cakes/<int:cake_id>/delete/', views.admin_delete_cake, name='admin_delete_cake'),
     path('admin-panel/users/', views.admin_users, name='admin_users'),
     path('rate-cake/', views.rate_cake, name='rate_cake'),
-    
+    path('confirm-received/<int:order_id>/', views.confirm_received, name='confirm_received'),
+    path('wishlist/toggle/', views.toggle_wishlist, name='toggle_wishlist'),
+    path('cakes/<int:cake_id>/reviews/',         views.get_reviews,    name='get_reviews'),
+    path('cakes/<int:cake_id>/reviews/submit/',  views.submit_review,  name='submit_review'),
+    path('cakes/<int:cake_id>/reviews/delete/',  views.delete_review,  name='delete_review'),
 ]
 
 handler404 = 'creake.views.custom_404'
