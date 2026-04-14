@@ -2,42 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 
-class Cake(models.Model):
-    CATEGORY_CHOICES = [
-        ('chocolate', 'Chocolate'),
-        ('vanilla', 'Vanilla'),
-        ('strawberry', 'Strawberry'),
-        ('redvelvet', 'Red Velvet'),
-    ]
-
-    name = models.CharField(max_length=100)
-    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
-    description = models.TextField()
-    price = models.DecimalField(max_digits=6, decimal_places=2)
-    image = models.ImageField(upload_to='cakes/', blank=True, null=True)
-    badge = models.CharField(max_length=50, blank=True, null=True)
-    is_new = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return self.name
-
-    @property
-    def rating(self):
-        from django.db.models import Avg
-        avg = self.ratings.aggregate(Avg('rating'))['rating__avg']
-        return round(avg, 1) if avg else 0
-
-    @property
-    def review_count(self):
-        return self.ratings.count()
-    
-    
-
-
 class Order(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -111,7 +75,7 @@ class CakeDesign(models.Model):
 
 class Wishlist(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='wishlist')
-    cake = models.ForeignKey(Cake, on_delete=models.CASCADE)
+    cake = models.ForeignKey('Cake', on_delete=models.CASCADE)
     added_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -126,7 +90,7 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
     phone = models.CharField(max_length=20, blank=True, null=True)
     birthday = models.DateField(blank=True, null=True)
-    favourite_cake = models.ForeignKey(Cake, on_delete=models.SET_NULL, blank=True, null=True)
+    favourite_cake = models.ForeignKey('Cake', on_delete=models.SET_NULL, blank=True, null=True)
 
     notif_orders   = models.BooleanField(default=True)
     notif_promos   = models.BooleanField(default=True)
@@ -157,17 +121,17 @@ class Address(models.Model):
 
 
 class CakeRating(models.Model):
-    cake = models.ForeignKey(Cake, on_delete=models.CASCADE, related_name='ratings')
+    cake = models.ForeignKey('Cake', on_delete=models.CASCADE, related_name='ratings')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     rating = models.IntegerField(choices=[(i, i) for i in range(1, 6)])
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('cake', 'user')  # one rating per user per cake
+        unique_together = ('cake', 'user')
 
 
 class CakeReview(models.Model):
-    cake = models.ForeignKey(Cake, on_delete=models.CASCADE, related_name='cake_reviews')
+    cake = models.ForeignKey('Cake', on_delete=models.CASCADE, related_name='cake_reviews')
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     rating = models.IntegerField()
     comment = models.TextField()
@@ -175,3 +139,38 @@ class CakeReview(models.Model):
 
     class Meta:
         unique_together = ('cake', 'user')
+
+
+class Cake(models.Model):
+    CATEGORY_CHOICES = [
+        ('chocolate', 'Chocolate'),
+        ('vanilla', 'Vanilla'),
+        ('strawberry', 'Strawberry'),
+        ('redvelvet', 'Red Velvet'),
+    ]
+
+    name = models.CharField(max_length=100)
+    category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    description = models.TextField()
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+    image = models.ImageField(upload_to='cakes/', blank=True, null=True)
+    badge = models.CharField(max_length=50, blank=True, null=True)
+    is_new = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='created_cakes', null=True, blank=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def rating(self):
+        from django.db.models import Avg
+        avg = self.ratings.aggregate(Avg('rating'))['rating__avg']
+        return round(avg, 1) if avg else 0
+
+    @property
+    def review_count(self):
+        return self.ratings.count()

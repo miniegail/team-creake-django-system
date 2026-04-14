@@ -1,6 +1,6 @@
 /* ================= GLOBAL ================= */
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-html, body { width:100%; height:100%; }
+html, body { width:100%; height:100vh; }
 body { font-family:'Poppins',sans-serif; background:#fffaf5; color:#333; overflow-x:hidden; }
 
 /* ================= HEADER ================= */
@@ -35,10 +35,10 @@ body { font-family:'Poppins',sans-serif; background:#fffaf5; color:#333; overflo
 .mobile-menu-btn { display:none; background:transparent !important; border:none !important; font-size:24px; color:white !important; padding:0 !important; }
 
 /* ================= HERO BANNER ================= */
-.hero-banner { margin-top:0; padding-top:75px; width:100%; min-height:560px; padding:75px 40px 60px; background:#ffffba; display:flex; justify-content:center; align-items:center; position:relative; overflow:hidden; }
+.hero-banner { margin-top:(); width:100%; height:100vh; min-height:100vh; padding:20px 40px 60px; background:#ffffba; display:flex; justify-content:center; align-items:center; position:relative; overflow:hidden; }
 .banner-bg { position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
 .banner-shape { position:absolute; border-radius:50%; opacity:0.06; }
-.banner-shape:nth-child(1) { width:500px; height:500px; background:#d7736b; top:-200px; left:-200px; animation:float 15s ease-in-out infinite; }
+.banner-shape:nth-child(1) { width:500px; height:px; background:#d7736b; top:-200px; left:-200px; animation:float 15s ease-in-out infinite; }
 .banner-shape:nth-child(2) { width:350px; height:350px; background:#ffb347; top:10%; right:-100px; animation:float 18s ease-in-out infinite 1s; }
 .banner-shape:nth-child(3) { width:400px; height:400px; background:#5fb7f9; bottom:-150px; left:5%; animation:float 20s ease-in-out infinite 2s; }
 @keyframes float { 0%,100%{transform:translateY(0) rotate(0deg);} 50%{transform:translateY(50px) rotate(5deg);} }

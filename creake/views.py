@@ -31,9 +31,11 @@ def quiz(request):
 
 def index(request):
     cakes = Cake.objects.all()
+    
     user_ratings = {}
     received_cake_names = set()
-    saved_address = None        # ← ADD
+    saved_address = None
+    
     if request.user.is_authenticated:
         user_ratings = {
             str(r.cake_id): r.rating
@@ -44,14 +46,15 @@ def index(request):
                 user=request.user, status='received'
             ).values_list('cake_name', flat=True)
         )
-        # Get default address, fall back to most recent
         saved_address = (
             Address.objects.filter(user=request.user, is_default=True).first()
             or Address.objects.filter(user=request.user).order_by('-created_at').first()
         )
+    
     wishlist_ids = list(
         Wishlist.objects.filter(user=request.user).values_list('cake_id', flat=True)
     ) if request.user.is_authenticated else []
+    
     context = {
         'cakes': cakes,
         'user_ratings': user_ratings,
@@ -59,6 +62,7 @@ def index(request):
         'show_quiz': request.session.pop('show_quiz', False),
         'saved_address': saved_address,
         'wishlist_ids': wishlist_ids,
+        'is_admin': request.user.is_authenticated and request.user.is_staff,  # ✅ PASS ADMIN FLAG
     }
     return render(request, 'creake/index.html', context)
 
@@ -81,8 +85,6 @@ def login_view(request):
             messages.error(request, 'Invalid email or password.')
 
     return render(request, 'creake/index.html')
-
-
 
 
 def register_view(request):
@@ -222,6 +224,10 @@ def checkout(request):
         payment_method = data.get('payment_method', 'cash')
         if not cart:
             return JsonResponse({'error': 'Cart is empty'}, status=400)
+
+        # Admin should not be placing orders via the Browse page
+        if request.user.is_staff:
+            return JsonResponse({'error': 'Admins cannot place orders.'}, status=403)
 
         # Use saved address if flagged
         if data.get('use_saved_address'):
@@ -591,6 +597,7 @@ def admin_add_cake(request):
             badge=request.POST.get('badge', '') or None,
             is_new=request.POST.get('is_new') == 'on',
             image=request.FILES.get('image'),
+            created_by=request.user,  # ✅ SET ADMIN AS CREATOR
         )
         messages.success(request, 'Cake added successfully!')
     except Exception as e:
@@ -603,7 +610,7 @@ def admin_add_cake(request):
 @user_passes_test(is_admin, login_url='creake:index')
 @require_http_methods(["POST"])
 def admin_edit_cake(request, cake_id):
-    cake = get_object_or_404(Cake, id=cake_id)
+    cake = get_object_or_404(Cake, id=cake_id)  # Admin can edit any cake
     try:
         cake.name = request.POST.get('name', cake.name)
         cake.category = request.POST.get('category', cake.category)
@@ -625,7 +632,7 @@ def admin_edit_cake(request, cake_id):
 @user_passes_test(is_admin, login_url='creake:index')
 @require_http_methods(["POST"])
 def admin_delete_cake(request, cake_id):
-    cake = get_object_or_404(Cake, id=cake_id)
+    cake = get_object_or_404(Cake, id=cake_id)  # Admin can delete any cake
     name = cake.name
     cake.delete()
     messages.success(request, f'{name} deleted.')
@@ -659,35 +666,50 @@ def custom_500(request):
 @login_required
 @require_POST
 def rate_cake(request):
-    data = json.loads(request.body)
-    rating_val = int(data.get('rating'))
+    try:
+        data = json.loads(request.body)
+        rating_val = int(data.get('rating', 0))
+        if not (1 <= rating_val <= 5):
+            return JsonResponse({'error': 'Rating must be between 1 and 5.'}, status=400)
 
-    cake_id = data.get('cake_id')
-    cake_name = data.get('cake_name')
-    if cake_id:
-        cake = get_object_or_404(Cake, id=cake_id)
-    elif cake_name:
-        cake = get_object_or_404(Cake, name=cake_name)
-    else:
-        return JsonResponse({'error': 'No cake specified.'}, status=400)
+        cake_id = data.get('cake_id')
+        cake_name = data.get('cake_name')
+        if cake_id:
+            cake = Cake.objects.filter(id=cake_id).first()
+        elif cake_name:
+            cake = Cake.objects.filter(name=cake_name).first()
+        else:
+            return JsonResponse({'error': 'No cake specified.'}, status=400)
 
-    has_received = Order.objects.filter(
-        user=request.user,
-        cake_name=cake.name,
-        status='received'
-    ).exists()
-    if not has_received:
-        return JsonResponse({'error': 'You can only rate a cake after confirming receipt.'}, status=403)
+        if not cake:
+            return JsonResponse({'error': 'Cake not found in catalogue.'}, status=404)
 
-    CakeRating.objects.update_or_create(
-        cake=cake, user=request.user,
-        defaults={'rating': rating_val}
-    )
+        has_received = Order.objects.filter(
+            user=request.user,
+            cake_name__icontains=cake.name,
+            status__in=['received', 'delivered']
+        ).exists()
+        if not has_received:
+            has_received = Order.objects.filter(
+                user=request.user,
+                status__in=['received', 'delivered']
+            ).filter(cake_name__icontains=cake.name.split()[0]).exists()
 
-    avg = CakeRating.objects.filter(cake=cake).aggregate(avg=Avg('rating'))['avg'] or rating_val
-    review_count = CakeRating.objects.filter(cake=cake).count()
+        if not has_received:
+            return JsonResponse({'error': 'You can only rate a cake after it has been delivered.'}, status=403)
 
-    return JsonResponse({'success': True, 'new_rating': avg, 'review_count': review_count})
+        CakeRating.objects.update_or_create(
+            cake=cake, user=request.user,
+            defaults={'rating': rating_val}
+        )
+
+        avg = CakeRating.objects.filter(cake=cake).aggregate(avg=Avg('rating'))['avg'] or rating_val
+        review_count = CakeRating.objects.filter(cake=cake).count()
+
+        return JsonResponse({'success': True, 'new_rating': round(float(avg), 1), 'review_count': review_count})
+    except Exception as e:
+        logger.error(f"Rate cake error: {e}", exc_info=True)
+        return JsonResponse({'error': str(e)}, status=400)
 
 @login_required
 @require_POST
@@ -733,12 +755,10 @@ def submit_review(request, cake_id):
             return JsonResponse({'error': 'Rating must be between 1 and 5.'}, status=400)
         if not comment:
             return JsonResponse({'error': 'Please write a review.'}, status=400)
-        # update or create
         review, created = CakeReview.objects.update_or_create(
             cake=cake, user=request.user,
             defaults={'rating': rating, 'comment': comment}
         )
-        # also update the CakeRating aggregate
         CakeRating.objects.update_or_create(
             cake=cake, user=request.user,
             defaults={'rating': rating}
