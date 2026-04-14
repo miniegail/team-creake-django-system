@@ -2,6 +2,14 @@ var cart = [];
 var currentSort = 'name';
 var filters = { category: 'all', search: '', maxPrice: 1000, minRating: 0 };
 
+// Currency formatter for consistent PHP display
+var currencyFormatter = new Intl.NumberFormat('en-PH', {
+  style: 'currency',
+  currency: 'PHP',
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 0
+});
+
 /* ── localStorage cart helpers ── */
 function saveCart() {
   localStorage.setItem('cart', JSON.stringify(cart));
@@ -266,6 +274,7 @@ function renderCakes(arr) {
 
 /* ── Cart actions ── */
 function addToCart(name, price, img, id) {
+  price = Number(price) || 0; // Ensure numeric
   // Match by id if available, fallback to name (for wishlist items that have id)
   var ex = cart.find(function(i) {
     return id ? i.id === id : i.name === name;
@@ -277,7 +286,7 @@ function addToCart(name, price, img, id) {
   }
   updateCartCount();
   renderCart();
-  showNotification(name + ' added to cart! \u{1F382}');
+  showNotification(name + ' added to cart! 🎂');
 }
 
 function removeFromCart(name) {
@@ -291,7 +300,11 @@ function updateQuantity(name, change) {
   if (i) {
     i.quantity += change;
     if (i.quantity <= 0) removeFromCart(name);
-    else { renderCart(); saveCart(); }
+    else { 
+      renderCart(); 
+      updateCartCount();
+      saveCart(); 
+    }
   }
 }
 
@@ -335,10 +348,19 @@ function renderCart() {
 }
 
 function updateTotals() {
-  var sub = cart.reduce(function(s, i) { return s + (i.price * i.quantity); }, 0);
-  if (document.getElementById('subtotal')) document.getElementById('subtotal').textContent = '&#8369;' + sub.toFixed(2);
-  if (document.getElementById('delivery')) document.getElementById('delivery').textContent = '&#8369;0.00';
-  if (document.getElementById('total'))    document.getElementById('total').textContent    = '&#8369;' + sub.toFixed(2);
+  var sub = cart.reduce(function(s, i) {
+    var price = Number(i.price) || 0;
+    var qty = Number(i.quantity) || 0;
+    return s + (price * qty);
+  }, 0);
+  var formatter = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' });
+  var subFormatted = currencyFormatter.format(sub);
+  
+  console.log('Cart totals debug:', { cart: cart.map(i => ({name: i.name, price: i.price, qty: i.quantity})), subtotal: sub });
+  
+  if (document.getElementById('subtotal')) document.getElementById('subtotal').textContent = subFormatted;
+  if (document.getElementById('delivery')) document.getElementById('delivery').textContent = '₱0.00';
+  if (document.getElementById('total')) document.getElementById('total').textContent = subFormatted;
 }
 
 function updateDelivery() {
@@ -363,12 +385,12 @@ function renderCheckoutSummary() {
   s.innerHTML = '<h3>Order Summary</h3>'
     + cart.map(function(i) {
         return '<div class="order-item"><span>' + i.name + ' \xD7 ' + i.quantity + '</span>'
-          + '<span>&#8369;' + (i.price * i.quantity).toFixed(2) + '</span></div>';
+          + '<span>' + currencyFormatter.format(i.price * i.quantity) + '</span></div>';
       }).join('')
-    + '<div class="order-total"><span>Total</span><span>&#8369;' + sub.toFixed(2) + '</span></div>';
-  if (document.getElementById('subtotal2')) document.getElementById('subtotal2').textContent = '&#8369;' + sub.toFixed(2);
-  if (document.getElementById('delivery2')) document.getElementById('delivery2').textContent = '&#8369;0.00';
-  if (document.getElementById('total2'))    document.getElementById('total2').textContent    = '&#8369;' + sub.toFixed(2);
+    + '<div class="order-total"><span>Total</span><span>' + currencyFormatter.format(sub) + '</span></div>';
+  if (document.getElementById('subtotal2')) document.getElementById('subtotal2').textContent = currencyFormatter.format(sub);
+  if (document.getElementById('delivery2')) document.getElementById('delivery2').textContent = '₱0';
+  if (document.getElementById('total2'))    document.getElementById('total2').textContent    = currencyFormatter.format(sub);
 }
 
 function setGridView(cols) {
@@ -551,7 +573,7 @@ function openCakeDetail(cake) {
   document.getElementById("detailImg").alt          = cake.name;
   document.getElementById("detailName").textContent = cake.name;
   document.getElementById("detailDesc").textContent = cake.desc;
-  document.getElementById("detailPrice").textContent = "u20B1" + cake.price.toLocaleString();
+  document.getElementById("detailPrice").textContent = currencyFormatter.format(cake.price);
   document.getElementById("detailStars").innerHTML   = renderRatingStars(cake.rating);
   document.getElementById("detailReviews").textContent = "(" + cake.reviews + " reviews)";
   document.getElementById("detailCategory").textContent = cake.category;
