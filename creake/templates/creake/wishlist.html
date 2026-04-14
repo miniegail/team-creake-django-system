@@ -12,22 +12,24 @@
 {% if wishlist_items %}
 <div class="wishlist-grid">
   {% for item in wishlist_items %}
-  <div class="wish-card">
-    <div class="wish-img {{ item.thumb_class|default:'' }}">
-      {% if item.image %}
-        <img src="{{ item.image.url }}" alt="{{ item.cake_name }}" style="width:100%;height:100%;object-fit:cover;">
+  <div class="wish-card" data-cake-id="{{ item.cake.id }}">
+    <div class="wish-img {{ item.cake.thumb_class|default:'' }}">
+      {% if item.cake.image %}
+        <img src="{{ item.cake.image.url }}" alt="{{ item.cake.name }}" style="width:100%;height:100%;object-fit:cover;">
       {% else %}
-        {{ item.emoji|default:"&#127874;" }}
+        {{ item.cake.emoji|default:"&#127874;" }}
       {% endif %}
     </div>
     <button class="wish-remove" onclick="removeWish(this)" title="Remove from wishlist">&#128148;</button>
     <div class="wish-info">
-      <h4>{{ item.cake_name }}</h4>
-      <div class="wish-price">&#8369;{{ item.price }}</div>
-      <form method="post" action="{% url 'creake:add_to_cart' item.cake_id %}">
-        {% csrf_token %}
-        <button type="submit" class="wish-btn">&#128722; Add to Cart</button>
-      </form>
+      <h4>{{ item.cake.name }}</h4>
+      <div class="wish-price">&#8369;{{ item.cake.price }}</div>
+      <button
+        type="button"
+        class="wish-btn"
+        onclick="addToCartFromWishlist('{{ item.cake.name }}', {{ item.cake.price }}, {{ item.cake.id }})">
+        &#128722; Add to Cart
+      </button>
     </div>
   </div>
   {% endfor %}
@@ -41,5 +43,7 @@
   <a href="{% url 'creake:index' %}#main-content" style="background:linear-gradient(135deg,var(--coral),var(--coral-dark));color:white;padding:12px 28px;border-radius:25px;text-decoration:none;font-weight:700;font-size:13px;">&#127874; Browse Cakes</a>
 </div>
 {% endif %}
+
+
 
 {% endblock %}

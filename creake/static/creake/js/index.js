@@ -2,6 +2,20 @@ var cart = [];
 var currentSort = 'name';
 var filters = { category: 'all', search: '', maxPrice: 1000, minRating: 0 };
 
+/* ── localStorage cart helpers ── */
+function saveCart() {
+  localStorage.setItem('cart', JSON.stringify(cart));
+}
+
+function loadCart() {
+  try {
+    var stored = localStorage.getItem('cart');
+    cart = stored ? JSON.parse(stored) : [];
+  } catch(e) {
+    cart = [];
+  }
+}
+
 /* ── Auth modal ── */
 function openAuthModal(tab) {
   switchAuthTab(tab || 'login');
@@ -111,205 +125,24 @@ function updateActiveNav() {
 window.addEventListener('scroll', updateActiveNav);
 window.addEventListener('load', updateActiveNav);
 
-/* ── Cart ── */
+/* ── Cart count ── */
 function updateCartCount() {
-  document.getElementById('cartCount').textContent = cart.reduce(function(s, i) {
-    return s + i.quantity;
-  }, 0);
+  var total = cart.reduce(function(s, i) { return s + i.quantity; }, 0);
+  // Update all .cart-count badges on the page
+  document.querySelectorAll('.cart-count, #cartCount').forEach(function(el) {
+    el.textContent = total;
+  });
+  saveCart();
 }
 
-/* ── Stars ── */
-function generateStars(r) {
-  return '\u2B50'.repeat(Math.floor(r));
-}
-
-/**
- * Renders clickable star rating HTML for a cake.
- * Shows the user's own previous rating if they've already rated.
- * Falls back to static stars if no cakeId (demo/fallback data).
- */
-function renderRatingStars(rating, cakeId) {
-  if (!cakeId) {
-    return '<span class="stars">' + generateStars(rating) + '</span>';
-  }
-
-  // Check if this user has already rated this cake
-  var userRating = (typeof userRatings !== 'undefined' && userRatings[String(cakeId)]) ? userRatings[String(cakeId)] : 0;
-  var displayRating = userRating > 0 ? userRating : Math.round(rating);
-  var label = userRating > 0 ? 'Your rating:' : 'Rate:';
-
+/* ── Stars — read-only display only ── */
+function renderRatingStars(rating) {
+  var displayRating = Math.round(rating) || 0;
   var stars = '';
   for (var i = 1; i <= 5; i++) {
-    var filled = i <= displayRating;
-    stars += '<span'
-      + ' class="star-btn"'
-      + ' data-value="' + i + '"'
-      + ' onclick="submitRating(' + cakeId + ',' + i + ')"'
-      + ' onmouseover="hoverStars(this,' + i + ',' + cakeId + ')"'
-      + ' onmouseout="resetStars(' + cakeId + ',' + displayRating + ')"'
-      + ' style="cursor:pointer;font-size:20px;color:' + (filled ? '#f5a623' : '#ddd') + ';transition:color 0.15s;"'
-      + '>\u2605</span>';
+    stars += '<span style="font-size:16px;color:' + (i <= displayRating ? '#f5a623' : '#ddd') + ';">★</span>';
   }
-
-  return '<div class="cake-rating-stars" data-cake-id="' + cakeId + '" data-current-rating="' + displayRating + '" data-user-rating="' + userRating + '">'
-    + '<span class="rate-label">' + label + '</span>'
-    + stars
-    + '</div>';
-}
-
-/** Lights up stars on hover */
-function hoverStars(el, value, cakeId) {
-  var container = document.querySelector('[data-cake-id="' + cakeId + '"]');
-  if (!container) return;
-  container.querySelectorAll('.star-btn').forEach(function(star) {
-    star.style.color = parseInt(star.dataset.value) <= value ? '#ffb300' : '#ddd';
-  });
-}
-
-/** Resets stars back to the saved rating after hover */
-function resetStars(cakeId, savedRating) {
-  var container = document.querySelector('[data-cake-id="' + cakeId + '"]');
-  if (!container) return;
-  container.querySelectorAll('.star-btn').forEach(function(star) {
-    star.style.color = parseInt(star.dataset.value) <= savedRating ? '#f5a623' : '#ddd';
-  });
-}
-
-/**
- * Custom confirmation dialog — nicer than browser confirm().
- * Calls onConfirm() if user clicks Yes, onCancel() if No.
- */
-function showRatingConfirm(cakeId, previousRating, newValue, onConfirm, onCancel) {
-  // Remove any existing dialog
-  var existing = document.getElementById('ratingConfirmDialog');
-  if (existing) existing.remove();
-
-  var dialog = document.createElement('div');
-  dialog.id = 'ratingConfirmDialog';
-  dialog.style.cssText = [
-    'position:fixed', 'top:0', 'left:0', 'width:100%', 'height:100%',
-    'background:rgba(0,0,0,0.5)', 'z-index:9999',
-    'display:flex', 'align-items:center', 'justify-content:center',
-    'backdrop-filter:blur(3px)'
-  ].join(';');
-
-  var stars = function(n) {
-    return '\u2605'.repeat(n) + '\u2606'.repeat(5 - n);
-  };
-
-  dialog.innerHTML = '<div style="'
-    + 'background:white;border-radius:20px;padding:30px 35px;max-width:360px;width:90%;'
-    + 'box-shadow:0 20px 60px rgba(0,0,0,0.2);text-align:center;'
-    + 'animation:popIn 0.25s ease;font-family:Poppins,sans-serif;">'
-    + '<div style="font-size:40px;margin-bottom:12px;">\u{1F370}</div>'
-    + '<h3 style="color:#d7736b;margin:0 0 8px;font-size:17px;font-weight:700;">You already rated this cake!</h3>'
-    + '<p style="color:#888;font-size:13px;margin:0 0 6px;">Your previous rating: '
-    + '<strong style="color:#f5a623;">' + stars(previousRating) + '</strong></p>'
-    + '<p style="color:#888;font-size:13px;margin:0 0 20px;">Change to: '
-    + '<strong style="color:#ffb300;">' + stars(newValue) + '</strong></p>'
-    + '<div style="display:flex;gap:10px;justify-content:center;">'
-    + '<button id="ratingConfirmNo" style="'
-    + 'flex:1;padding:11px;border:2px solid #ffe4f6;background:white;color:#d7736b;'
-    + 'border-radius:10px;cursor:pointer;font-weight:700;font-family:Poppins,sans-serif;font-size:13px;">'
-    + 'Keep ' + previousRating + ' \u2605</button>'
-    + '<button id="ratingConfirmYes" style="'
-    + 'flex:1;padding:11px;border:none;background:linear-gradient(135deg,#d7736b,#c9605a);color:white;'
-    + 'border-radius:10px;cursor:pointer;font-weight:700;font-family:Poppins,sans-serif;font-size:13px;">'
-    + 'Change to ' + newValue + ' \u2605</button>'
-    + '</div></div>';
-
-  document.body.appendChild(dialog);
-
-  document.getElementById('ratingConfirmYes').onclick = function() {
-    dialog.remove();
-    onConfirm();
-  };
-  document.getElementById('ratingConfirmNo').onclick = function() {
-    dialog.remove();
-    onCancel();
-  };
-  dialog.addEventListener('click', function(e) {
-    if (e.target === dialog) { dialog.remove(); onCancel(); }
-  });
-}
-
-/**
- * Submits a user star rating to the Django backend.
- * If user already rated, shows a confirmation dialog first.
- * Prompts login modal if the user is not authenticated.
- */
-function submitRating(cakeId, value) {
-  if (typeof isLoggedIn === 'undefined' || !isLoggedIn) {
-    openAuthModal('login');
-    return;
-  }
-
-  var container = document.querySelector('[data-cake-id="' + cakeId + '"]');
-  var previousRating = container ? parseInt(container.dataset.userRating) : 0;
-
-  // If already rated, show confirmation dialog
-  if (previousRating > 0) {
-    showRatingConfirm(cakeId, previousRating, value,
-      function() { doSubmitRating(cakeId, value, container); },  // confirmed
-      function() { resetStars(cakeId, previousRating); }         // cancelled
-    );
-    return;
-  }
-
-  doSubmitRating(cakeId, value, container);
-}
-
-/** Actually sends the rating to the server */
-function doSubmitRating(cakeId, value, container) {
-  // Optimistically update UI
-  if (container) {
-    container.querySelectorAll('.star-btn').forEach(function(star) {
-      star.style.color = parseInt(star.dataset.value) <= value ? '#f5a623' : '#ddd';
-    });
-    container.dataset.currentRating = value;
-    container.dataset.userRating = value;
-    // Update label to "Your rating:"
-    var label = container.querySelector('.rate-label');
-    if (label) label.textContent = 'Your rating:';
-  }
-
-  // Read CSRF token from cookie (most reliable method)
-  var csrf = (function() {
-    var match = document.cookie.match(/csrftoken=([^;]+)/);
-    return match ? match[1] : (typeof csrfToken !== 'undefined' ? csrfToken : '');
-  })();
-
-  fetch('/rate-cake/', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-CSRFToken': csrf
-    },
-    body: JSON.stringify({ cake_id: cakeId, rating: value })
-  })
-  .then(function(r) { return r.json(); })
-  .then(function(data) {
-    if (data.success) {
-      showNotification('Rating saved! \u2B50', 'success');
-      var newRating = Math.round(data.new_rating);
-      if (container) {
-        container.querySelectorAll('.star-btn').forEach(function(star) {
-          star.style.color = parseInt(star.dataset.value) <= newRating ? '#f5a623' : '#ddd';
-        });
-        container.dataset.currentRating = newRating;
-        // Update review count
-        var reviewEl = container.parentElement.querySelector('.review-count');
-        if (reviewEl) reviewEl.textContent = '(' + data.review_count + ')';
-      }
-      // Update local userRatings so re-rate detection works without page refresh
-      if (typeof userRatings !== 'undefined') userRatings[String(cakeId)] = value;
-    } else {
-      showNotification('Could not save rating.', 'error');
-    }
-  })
-  .catch(function() {
-    showNotification('Something went wrong. Please try again.', 'error');
-  });
+  return '<div style="display:inline-flex;align-items:center;gap:2px;">' + stars + '</div>';
 }
 
 /* ── Filters ── */
@@ -369,7 +202,8 @@ function renderCakes(arr) {
   arr.forEach(function(c) {
     var card = document.createElement('div');
     card.className = 'cake-card';
-    card.innerHTML = '<div class="cake-image-wrapper">'
+    var wishlisted = typeof wishlistIds !== 'undefined' && wishlistIds.has(c.id);
+    card.innerHTML = '<div class="cake-image-wrapper" style="position:relative;">'
       + '<img src="' + c.img + '" alt="' + c.name + '">'
       + (c.badge ? '<div class="cake-badge">' + c.badge + '</div>' : '')
       + '</div>'
@@ -377,22 +211,70 @@ function renderCakes(arr) {
       + '<h3>' + c.name + '</h3>'
       + '<p class="cake-desc">' + c.desc + '</p>'
       + '<div class="cake-rating">'
-      +   renderRatingStars(c.rating, c.id)
+      +   renderRatingStars(c.rating)
       +   '<span class="review-count">(' + c.reviews + ')</span>'
       + '</div>'
       + '<div class="cake-price">&#8369;' + c.price + '</div>'
-      + '<div class="cake-actions">'
-      + '<button class="add-to-cart-btn" onclick="addToCart(\'' + c.name + '\',' + c.price + ',\'' + c.img + '\')">Add to Cart</button>'
+      + '<div class="cake-actions" style="display:flex;gap:8px;align-items:center;">'
+      + '<button class="add-to-cart-btn" style="flex:1;">Add to Cart</button>'
+      + '<button class="card-wishlist-btn" data-id="' + c.id + '" style="background:white;border:1.5px solid #f0b9b5;border-radius:10px;width:38px;height:38px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:' + (wishlisted ? '#d7736b' : '#ccc') + ';flex-shrink:0;">'
+      + (wishlisted ? '&#9829;' : '&#9825;')
+      + '</button>'
       + '</div></div>';
+    var wishBtn = card.querySelector('.card-wishlist-btn');
+    wishBtn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      var cakeId = c.id;
+      if (!isLoggedIn) { showNotification('Please log in to save to wishlist.', 'error'); return; }
+      fetch('/wishlist/toggle/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+        body: JSON.stringify({ cake_id: cakeId }),
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.success) {
+          if (data.wishlisted) {
+            wishlistIds.add(cakeId);
+            wishBtn.innerHTML = '&#9829;';
+            wishBtn.style.color = '#d7736b';
+            showNotification(c.name + ' added to wishlist! ♡');
+          } else {
+            wishlistIds.delete(cakeId);
+            wishBtn.innerHTML = '&#9825;';
+            wishBtn.style.color = '#999';
+            showNotification(c.name + ' removed from wishlist.');
+          }
+        }
+      })
+      .catch(function() { showNotification('Could not update wishlist.', 'error'); });
+    });
+    wishBtn.style.color = wishlisted ? '#d7736b' : '#999';
+
+    var btn = card.querySelector('.add-to-cart-btn');
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      addToCart(c.name, c.price, c.img, c.id);
+    });
+    card.style.cursor = 'pointer';
+    card.addEventListener('click', function() {
+      openCakeDetail(c);
+    });
     g.appendChild(card);
   });
 }
 
 /* ── Cart actions ── */
-function addToCart(name, price, img) {
-  var ex = cart.find(function(i) { return i.name === name; });
-  if (ex) ex.quantity++;
-  else cart.push({ name: name, price: price, img: img, quantity: 1 });
+function addToCart(name, price, img, id) {
+  // Match by id if available, fallback to name (for wishlist items that have id)
+  var ex = cart.find(function(i) {
+    return id ? i.id === id : i.name === name;
+  });
+  if (ex) {
+    ex.quantity++;
+  } else {
+    cart.push({ id: id || null, name: name, price: price, img: img || '', quantity: 1 });
+  }
   updateCartCount();
   renderCart();
   showNotification(name + ' added to cart! \u{1F382}');
@@ -409,35 +291,44 @@ function updateQuantity(name, change) {
   if (i) {
     i.quantity += change;
     if (i.quantity <= 0) removeFromCart(name);
-    else renderCart();
+    else { renderCart(); saveCart(); }
   }
 }
 
 function renderCart() {
   var list = document.getElementById('cartItemsList');
+  if (!list) return;
   if (!cart.length) {
     list.innerHTML = '<div class="cart-empty">'
       + '<div class="cart-empty-icon">\u{1F6D2}</div>'
       + '<p><strong>Your cart is empty!</strong></p>'
       + '<p style="font-size:12px;color:#999;margin-top:10px;">Add some delicious cakes to get started.</p>'
       + '</div>';
-    document.getElementById('checkoutBtn').disabled = true;
+    var btn = document.getElementById('checkoutBtn');
+    if (btn) btn.disabled = true;
     updateTotals();
     return;
   }
-  document.getElementById('checkoutBtn').disabled = false;
+  var btn = document.getElementById('checkoutBtn');
+  if (btn) btn.disabled = false;
   list.innerHTML = cart.map(function(i) {
+    // Fallback image — if img is empty (added from wishlist page), look it up from cakesData
+    var imgSrc = i.img;
+    if (!imgSrc && typeof cakesData !== 'undefined') {
+      var match = cakesData.find(function(c) { return c.id === i.id || c.name === i.name; });
+      if (match) imgSrc = match.img;
+    }
     return '<div class="cart-item">'
-      + '<img src="' + i.img + '" alt="' + i.name + '" class="cart-item-img">'
+      + (imgSrc ? '<img src="' + imgSrc + '" alt="' + i.name + '" class="cart-item-img">' : '')
       + '<div class="cart-item-info">'
       + '<h4>' + i.name + '</h4>'
       + '<p>&#8369;' + i.price + '</p>'
       + '<div class="cart-item-qty">'
-      + '<button onclick="updateQuantity(\'' + i.name + '\',-1)">\u2212</button>'
+      + '<button onclick="updateQuantity(\'' + i.name.replace(/'/g, "\\'") + '\',-1)">\u2212</button>'
       + '<span>' + i.quantity + '</span>'
-      + '<button onclick="updateQuantity(\'' + i.name + '\',1)">+</button>'
+      + '<button onclick="updateQuantity(\'' + i.name.replace(/'/g, "\\'") + '\',1)">+</button>'
       + '</div></div>'
-      + '<button class="remove-item" onclick="removeFromCart(\'' + i.name + '\')">&#10005;</button>'
+      + '<button class="remove-item" onclick="removeFromCart(\'' + i.name.replace(/'/g, "\\'") + '\')">&#10005;</button>'
       + '</div>';
   }).join('');
   updateTotals();
@@ -445,20 +336,28 @@ function renderCart() {
 
 function updateTotals() {
   var sub = cart.reduce(function(s, i) { return s + (i.price * i.quantity); }, 0);
-  var dt  = document.getElementById('deliveryType').value;
-  var del = dt === 'standard' ? 50 : dt === 'express' ? 150 : dt === 'sameday' ? 300 : 0;
-  document.getElementById('subtotal').textContent = '&#8369;' + sub.toFixed(2);
-  document.getElementById('delivery').textContent = '&#8369;' + del.toFixed(2);
-  document.getElementById('total').textContent    = '&#8369;' + (sub + del).toFixed(2);
+  if (document.getElementById('subtotal')) document.getElementById('subtotal').textContent = '&#8369;' + sub.toFixed(2);
+  if (document.getElementById('delivery')) document.getElementById('delivery').textContent = '&#8369;0.00';
+  if (document.getElementById('total'))    document.getElementById('total').textContent    = '&#8369;' + sub.toFixed(2);
 }
 
-function updateDelivery() { updateTotals(); }
+function updateDelivery() {
+  var sub = cart.reduce(function(s, i) { return s + (i.price * i.quantity); }, 0);
+  var dt  = document.getElementById('deliveryType') ? document.getElementById('deliveryType').value : '';
+  var del = dt === 'standard' ? 50 : dt === 'express' ? 150 : dt === 'sameday' ? 300 : 0;
+  if (document.getElementById('delivery'))  document.getElementById('delivery').textContent  = '&#8369;' + del.toFixed(2);
+  if (document.getElementById('delivery2')) document.getElementById('delivery2').textContent = '&#8369;' + del.toFixed(2);
+  if (document.getElementById('total'))     document.getElementById('total').textContent     = '&#8369;' + (sub + del).toFixed(2);
+  if (document.getElementById('total2'))    document.getElementById('total2').textContent    = '&#8369;' + (sub + del).toFixed(2);
+}
+
 function toggleCart() { document.getElementById('cartModal').classList.toggle('active'); }
 function openCheckout() { document.getElementById('checkoutModal').classList.add('active'); renderCheckoutSummary(); }
 function closeCheckout() { document.getElementById('checkoutModal').classList.remove('active'); }
 
 function renderCheckoutSummary() {
   var s = document.getElementById('checkoutSummary');
+  if (!s) return;
   if (!cart.length) { s.innerHTML = '<p>No items in cart.</p>'; return; }
   var sub = cart.reduce(function(t, i) { return t + i.price * i.quantity; }, 0);
   s.innerHTML = '<h3>Order Summary</h3>'
@@ -467,6 +366,9 @@ function renderCheckoutSummary() {
           + '<span>&#8369;' + (i.price * i.quantity).toFixed(2) + '</span></div>';
       }).join('')
     + '<div class="order-total"><span>Total</span><span>&#8369;' + sub.toFixed(2) + '</span></div>';
+  if (document.getElementById('subtotal2')) document.getElementById('subtotal2').textContent = '&#8369;' + sub.toFixed(2);
+  if (document.getElementById('delivery2')) document.getElementById('delivery2').textContent = '&#8369;0.00';
+  if (document.getElementById('total2'))    document.getElementById('total2').textContent    = '&#8369;' + sub.toFixed(2);
 }
 
 function setGridView(cols) {
@@ -479,9 +381,299 @@ function setGridView(cols) {
       : 'repeat(auto-fill,minmax(220px,1fr))';
 }
 
-/* ── Init — called after inline data block in index.html ── */
+/* ── Reviews ── */
+var allReviews = [];
+var reviewPage = 1;
+var reviewsPerPage = 5;
+var selectedRating = 0;
+
+function loadReviews(cakeId) {
+  document.getElementById('reviewsList').innerHTML = '<div style="text-align:center;color:#bbb;font-size:13px;padding:20px 0;">Loading reviews...</div>';
+  fetch('/cakes/' + cakeId + '/reviews/')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      allReviews = data.reviews;
+      reviewPage = 1;
+      renderReviewMeta(data.avg, data.count);
+      renderReviewsPage();
+    })
+    .catch(function() {
+      document.getElementById('reviewsList').innerHTML = '<div style="text-align:center;color:#bbb;font-size:13px;padding:20px 0;">Could not load reviews.</div>';
+    });
+}
+
+function renderReviewMeta(avg, count) {
+  document.getElementById('reviewCountLabel').textContent = '(' + count + ')';
+  var avgEl = document.getElementById('reviewAvgNum');
+  var starsEl = document.getElementById('reviewAvgStars');
+  if (count === 0) { avgEl.textContent = ''; starsEl.innerHTML = ''; return; }
+  avgEl.textContent = avg.toFixed(1);
+  var stars = '';
+  for (var i = 1; i <= 5; i++) {
+    stars += '<span style="color:' + (i <= Math.round(avg) ? '#f5a623' : '#ddd') + ';">★</span>';
+  }
+  starsEl.innerHTML = stars;
+}
+
+function renderReviewsPage() {
+  var list = document.getElementById('reviewsList');
+  var slice = allReviews.slice(0, reviewPage * reviewsPerPage);
+  if (!allReviews.length) {
+    list.innerHTML = '<div style="text-align:center;color:#bbb;font-size:13px;padding:24px 0;">No reviews yet. Be the first to review!</div>';
+    document.getElementById('loadMoreWrap').style.display = 'none';
+    return;
+  }
+  list.innerHTML = slice.map(function(r) {
+    var stars = '';
+    for (var i = 1; i <= 5; i++) {
+      stars += '<span style="color:' + (i <= r.rating ? '#f5a623' : '#ddd') + ';font-size:13px;">★</span>';
+    }
+    return '<div style="background:#fafafa;border:1px solid #f0eded;border-radius:14px;padding:14px 16px;">'
+      + '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;">'
+      + '<div>'
+      + '<div style="font-weight:700;font-size:13px;color:#333;">'
+      + (r.is_mine ? '👤 You' : '&#128100; ' + r.user)
+      + '</div>'
+      + '<div style="display:flex;align-items:center;gap:4px;margin-top:2px;">' + stars + '<span style="font-size:11px;color:#bbb;margin-left:4px;">' + r.created_at + '</span></div>'
+      + '</div>'
+      + (r.is_mine
+          ? '<button onclick="deleteReview()" style="background:none;border:none;color:#ccc;font-size:12px;cursor:pointer;padding:2px 6px;border-radius:6px;" title="Delete my review">&#128465;</button>'
+          : '')
+      + '</div>'
+      + '<p style="margin:0;font-size:13px;color:#555;line-height:1.6;">' + escapeHtml(r.comment) + '</p>'
+      + '</div>';
+  }).join('');
+  document.getElementById('loadMoreWrap').style.display =
+    allReviews.length > reviewPage * reviewsPerPage ? 'block' : 'none';
+}
+
+function loadMoreReviews() {
+  reviewPage++;
+  renderReviewsPage();
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function setStarPicker(val) {
+  selectedRating = val;
+  document.querySelectorAll('.star-pick').forEach(function(s) {
+    s.style.color = parseInt(s.dataset.v) <= val ? '#f5a623' : '#ddd';
+  });
+}
+
+function initStarPicker() {
+  // Clone each star to wipe all previously stacked event listeners
+  document.querySelectorAll('.star-pick').forEach(function(s) {
+    var fresh = s.cloneNode(true);
+    s.parentNode.replaceChild(fresh, s);
+  });
+  // Re-attach listeners on the fresh nodes
+  document.querySelectorAll('.star-pick').forEach(function(s) {
+    s.addEventListener('mouseover', function() {
+      document.querySelectorAll('.star-pick').forEach(function(x) {
+        x.style.color = parseInt(x.dataset.v) <= parseInt(s.dataset.v) ? '#f5a623' : '#ddd';
+      });
+    });
+    s.addEventListener('mouseout', function() { setStarPicker(selectedRating); });
+    s.addEventListener('click', function() {
+      setStarPicker(parseInt(s.dataset.v));
+    });
+  });
+}
+
+function submitReview() {
+  if (!detailCake) return;
+  if (!selectedRating) { showNotification("Please select a star rating.", "error"); return; }
+  var comment = document.getElementById("reviewComment").value.trim();
+  if (!comment) { showNotification("Please write something about this cake.", "error"); return; }
+  var csrf = (function() {
+    var match = document.cookie.match(/csrftoken=([^;]+)/);
+    return match ? match[1] : "";
+  })();
+  fetch("/cakes/" + detailCake.id + "/reviews/submit/", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", "X-CSRFToken": csrf },
+    body: JSON.stringify({ rating: selectedRating, comment: comment }),
+  })
+  .then(function(r) {
+    if (!r.ok) { return r.text().then(function(t) { throw new Error("Server " + r.status + ": " + t); }); }
+    return r.json();
+  })
+  .then(function(data) {
+    if (data.success) {
+      showNotification(data.created ? "Review posted!" : "Review updated!");
+      document.getElementById("reviewComment").value = "";
+      selectedRating = 0;
+      setStarPicker(0);
+      var idx = allReviews.findIndex(function(r) { return r.is_mine; });
+      if (idx > -1) allReviews.splice(idx, 1);
+      allReviews.unshift(data.review);
+      renderReviewMeta(data.new_avg, data.count);
+      renderReviewsPage();
+    } else {
+      showNotification(data.error || "Could not post review.", "error");
+    }
+  })
+  .catch(function(err) {
+    console.error("Review submit error:", err);
+    showNotification("Could not post review. Check console for details.", "error");
+  });
+}
+
+function deleteReview() {
+  if (!detailCake) return;
+  if (!confirm('Delete your review?')) return;
+  fetch('/cakes/' + detailCake.id + '/reviews/delete/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+    body: JSON.stringify({}),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.success) {
+      showNotification('Review deleted.');
+      allReviews = allReviews.filter(function(r) { return !r.is_mine; });
+      renderReviewMeta(data.new_avg, data.count);
+      renderReviewsPage();
+    }
+  })
+  .catch(function() { showNotification('Could not delete review.', 'error'); });
+}
+
+/* ── Cake detail modal ── */
+var detailCake = null;
+
+function openCakeDetail(cake) {
+  detailCake = cake;
+  document.getElementById("detailImg").src          = cake.img;
+  document.getElementById("detailImg").alt          = cake.name;
+  document.getElementById("detailName").textContent = cake.name;
+  document.getElementById("detailDesc").textContent = cake.desc;
+  document.getElementById("detailPrice").textContent = "u20B1" + cake.price.toLocaleString();
+  document.getElementById("detailStars").innerHTML   = renderRatingStars(cake.rating);
+  document.getElementById("detailReviews").textContent = "(" + cake.reviews + " reviews)";
+  document.getElementById("detailCategory").textContent = cake.category;
+  var badge = document.getElementById("detailBadge");
+  if (cake.badge) { badge.textContent = cake.badge; badge.style.display = "inline-block"; }
+  else            { badge.style.display = "none"; }
+  var newTag = document.getElementById("detailNew");
+  newTag.style.display = cake.new ? "inline-block" : "none";
+  updateWishlistBtn(typeof wishlistIds !== "undefined" && wishlistIds.has(cake.id));
+  var reviewBadge = document.getElementById("detailReviewsBadge");
+  if (reviewBadge) reviewBadge.textContent = cake.reviews + " reviews";
+  document.getElementById("detailPanel").style.display = "block";
+  document.getElementById("reviewsPanel").style.display = "none";
+  document.getElementById("cakeDetailOverlay").style.display = "flex";
+  document.body.style.overflow = "hidden";
+  loadReviews(cake.id);
+  selectedRating = 0;
+}
+
+function updateWishlistBtn(wishlisted) {
+  var btn = document.getElementById('detailWishlistBtn');
+  if (!btn) return;
+  btn.innerHTML        = wishlisted ? '&#9829;' : '&#9825;';
+  btn.style.color      = '#d7736b';
+  btn.style.background = wishlisted ? '#fff0ef' : 'white';
+}
+
+function toggleWishlistFromDetail() {
+  if (!isLoggedIn) { showNotification('Please log in to save to wishlist.', 'error'); return; }
+  if (!detailCake) return;
+  fetch('/wishlist/toggle/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+    body: JSON.stringify({ cake_id: detailCake.id }),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.success) {
+      if (data.wishlisted) {
+        wishlistIds.add(detailCake.id);
+        showNotification(detailCake.name + ' added to wishlist! ♡');
+      } else {
+        wishlistIds.delete(detailCake.id);
+        showNotification(detailCake.name + ' removed from wishlist.');
+      }
+      updateWishlistBtn(data.wishlisted);
+    }
+  })
+  .catch(function() { showNotification('Could not update wishlist.', 'error'); });
+}
+
+function closeCakeDetail() {
+  document.getElementById("cakeDetailOverlay").style.display = "none";
+  document.getElementById("detailPanel").style.display = "block";
+  document.getElementById("reviewsPanel").style.display = "none";
+  document.body.style.overflow = "";
+  detailCake = null;
+  reviewPage = 1;
+  allReviews = [];
+  selectedRating = 0;
+}
+
+function handleDetailOverlayClick(e) {
+  if (e.target === document.getElementById('cakeDetailOverlay')) closeCakeDetail();
+}
+
+function addToCartFromDetail() {
+  if (!detailCake) return;
+  addToCart(detailCake.name, detailCake.price, detailCake.img, detailCake.id);
+  closeCakeDetail();
+}
+
+/* ── Saved-address checkout ── */
+function submitSavedAddressOrder() {
+  var deliveryType  = document.getElementById('deliveryType').value;
+  var paymentMethod = document.getElementById('paymentMethod').value;
+  if (!deliveryType)  { showNotification('Please select a delivery option.', 'error'); return; }
+  if (!paymentMethod) { showNotification('Please select a payment method.', 'error'); return; }
+
+  var csrf = (function() {
+    var match = document.cookie.match(/csrftoken=([^;]+)/);
+    return match ? match[1] : '';
+  })();
+
+  var payload = {
+    cart: cart.map(function(i) {
+      return { name: i.name, price: i.price, quantity: i.quantity };
+    }),
+    delivery_type:     deliveryType,
+    payment_method:    paymentMethod,
+    use_saved_address: true,
+    notes: document.getElementById('notes') ? document.getElementById('notes').value : '',
+  };
+
+  fetch('/checkout/', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
+    body: JSON.stringify(payload),
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.success) {
+      showNotification('🎉 Order placed successfully!');
+      cart = [];
+      updateCartCount();
+      renderCart();
+      closeCheckout();
+      localStorage.removeItem('cart');
+    } else {
+      showNotification(data.error || 'Something went wrong.', 'error');
+    }
+  })
+  .catch(function() {
+    showNotification('Could not place order. Please try again.', 'error');
+  });
+}
+
+/* ── Init ── */
 function initShop() {
-  /* Smooth scroll nav links */
+  // Load cart from localStorage first (picks up items added from wishlist page)
+  loadCart();
+
   document.querySelectorAll('.header-nav a[href^="#"]').forEach(function(l) {
     l.addEventListener('click', function(e) {
       e.preventDefault();
@@ -490,42 +682,94 @@ function initShop() {
     });
   });
 
-  /* Sort dropdown */
   var sortEl = document.getElementById('sortBy');
   if (sortEl) sortEl.addEventListener('change', function() {
     currentSort = this.value;
     renderCakes(getFilteredAndSortedCakes());
   });
 
-  /* Price range */
   var rangeEl = document.getElementById('priceRange');
   if (rangeEl) rangeEl.addEventListener('input', function() {
     document.getElementById('priceDisplay').textContent = this.value;
   });
 
-  /* Start button */
   var startBtn = document.getElementById('startBtn');
   if (startBtn) startBtn.addEventListener('click', function() {
     document.querySelector('.main-content').scrollIntoView({ behavior: 'smooth' });
   });
 
-  /* Checkout form */
   var checkoutForm = document.getElementById('checkoutForm');
   if (checkoutForm) checkoutForm.addEventListener('submit', function(e) {
     e.preventDefault();
-    showNotification('\u{1F389} Order placed successfully!');
-    cart = [];
-    updateCartCount();
-    renderCart();
-    closeCheckout();
-    toggleCart();
-    this.reset();
+
+    var csrf = (function() {
+      var match = document.cookie.match(/csrftoken=([^;]+)/);
+      return match ? match[1] : '';
+    })();
+
+    var deliveryType  = document.getElementById('deliveryType').value;
+    var paymentMethod = document.getElementById('paymentMethod') ? document.getElementById('paymentMethod').value : 'cash';
+
+    var payload = {
+      cart: cart.map(function(i) {
+        return { name: i.name, price: i.price, quantity: i.quantity };
+      }),
+      delivery_type:  deliveryType,
+      payment_method: paymentMethod,
+      address:  document.getElementById('address')    ? document.getElementById('address').value    : '',
+      city:     document.getElementById('city')       ? document.getElementById('city').value       : '',
+      zip_code: document.getElementById('postalCode') ? document.getElementById('postalCode').value : '',
+      phone:    document.getElementById('phoneField') ? document.getElementById('phoneField').value : '',
+      notes:    document.getElementById('notes')      ? document.getElementById('notes').value      : '',
+    };
+
+    fetch('/checkout/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrf },
+      body: JSON.stringify(payload),
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.success) {
+        showNotification('🎉 Order placed successfully!');
+        cart = [];
+        updateCartCount();
+        renderCart();
+        closeCheckout();
+        toggleCart();
+        checkoutForm.reset();
+        localStorage.removeItem('cart');
+      } else {
+        showNotification(data.error || 'Something went wrong.', 'error');
+      }
+    })
+    .catch(function() {
+      showNotification('Could not place order. Please try again.', 'error');
+    });
   });
 
-  /* Init quiz emojis */
   if (typeof initQuizEmojis === 'function') initQuizEmojis();
 
-  /* Render shop */
   renderCakes(getFilteredAndSortedCakes());
   updateCartCount();
+  renderCart();
+}
+
+/* ── Reviews panel open/close ── */
+function openReviewsPanel() {
+  document.getElementById('detailPanel').style.display = 'none';
+  document.getElementById('reviewsPanel').style.display = 'block';
+  // Scroll modal back to top
+  document.getElementById('cakeDetailBox').scrollTop = 0;
+  // Init star picker fresh each time panel opens
+  initStarPicker();
+  setStarPicker(0);
+  var ta = document.getElementById('reviewComment');
+  if (ta) ta.value = '';
+}
+
+function closeReviewsPanel() {
+  document.getElementById('reviewsPanel').style.display = 'none';
+  document.getElementById('detailPanel').style.display = 'block';
+  document.getElementById('cakeDetailBox').scrollTop = 0;
 }

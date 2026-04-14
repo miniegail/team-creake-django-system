@@ -63,7 +63,7 @@
       </a>
       <a class="nav-item {% block nav_wishlist %}{% endblock %}" href="{% url 'creake:wishlist' %}">
         <span class="nav-icon">&#128150;</span> Wishlist
-        <span class="nav-badge">{{ wishlist_count|default:"0" }}</span>
+        <span class="nav-badge" id="wishlist-side-count">{{ wishlist_count|default:"0" }}</span>
       </a>
       <a class="nav-item {% block nav_history %}{% endblock %}" href="{% url 'creake:order_history' %}">
         <span class="nav-icon">&#128203;</span> Order History
@@ -88,6 +88,7 @@
 </div>
 
 <script src="{% static 'creake/js/dashboard.js' %}"></script>
+
 {% block extra_js %}{% endblock %}
 </body>
 </html>

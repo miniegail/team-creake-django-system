@@ -9,9 +9,12 @@ from django.db.models import Q, Sum, Count
 from django.core.mail import send_mail
 from django.conf import settings
 from datetime import datetime, timedelta, date
+from django.db.models import Avg
 import json
+import logging
+logger = logging.getLogger(__name__)
 
-from .models import Cake, Order, CakeDesign, Wishlist, UserProfile, Address, CakeRating
+from .models import Cake, Order, CakeDesign, Wishlist, UserProfile, Address, CakeRating, CakeReview
 from .forms import UserRegistrationForm, UserProfileForm
 
 # ==================== HELPERS ====================
@@ -29,15 +32,33 @@ def quiz(request):
 def index(request):
     cakes = Cake.objects.all()
     user_ratings = {}
+    received_cake_names = set()
+    saved_address = None        # ← ADD
     if request.user.is_authenticated:
         user_ratings = {
             str(r.cake_id): r.rating
             for r in CakeRating.objects.filter(user=request.user)
         }
+        received_cake_names = set(
+            Order.objects.filter(
+                user=request.user, status='received'
+            ).values_list('cake_name', flat=True)
+        )
+        # Get default address, fall back to most recent
+        saved_address = (
+            Address.objects.filter(user=request.user, is_default=True).first()
+            or Address.objects.filter(user=request.user).order_by('-created_at').first()
+        )
+    wishlist_ids = list(
+        Wishlist.objects.filter(user=request.user).values_list('cake_id', flat=True)
+    ) if request.user.is_authenticated else []
     context = {
         'cakes': cakes,
         'user_ratings': user_ratings,
+        'received_cake_names': list(received_cake_names),
         'show_quiz': request.session.pop('show_quiz', False),
+        'saved_address': saved_address,
+        'wishlist_ids': wishlist_ids,
     }
     return render(request, 'creake/index.html', context)
 
@@ -98,10 +119,13 @@ def delivery(request):
     active_orders = Order.objects.filter(
         user=user, status__in=['pending', 'paid', 'baking', 'out_for_delivery']
     ).order_by('-created_at')
-    delivered_count = Order.objects.filter(user=user, status='delivered').count()
+    delivered_orders = Order.objects.filter(
+        user=user, status='delivered'
+    ).order_by('-created_at')
+    delivered_count = delivered_orders.count()
     out_for_delivery_count = Order.objects.filter(user=user, status='out_for_delivery').count()
     active_orders_count = active_orders.count()
-    total_spent = Order.objects.filter(user=user, status='delivered').aggregate(
+    total_spent = delivered_orders.aggregate(
         total=Sum('total'))['total'] or 0
     context = {
         'active_orders': active_orders,
@@ -109,9 +133,9 @@ def delivery(request):
         'out_for_delivery_count': out_for_delivery_count,
         'delivered_count': delivered_count,
         'total_spent': total_spent,
+        'delivered_orders': delivered_orders,
     }
     return render(request, 'creake/delivery.html', context)
-
 
 @login_required
 def my_designs(request):
@@ -195,9 +219,26 @@ def checkout(request):
         data = json.loads(request.body)
         cart = data.get('cart', [])
         delivery_type = data.get('delivery_type', 'standard')
-        payment_method = data.get('payment_method', 'credit')
+        payment_method = data.get('payment_method', 'cash')
         if not cart:
             return JsonResponse({'error': 'Cart is empty'}, status=400)
+
+        # Use saved address if flagged
+        if data.get('use_saved_address'):
+            addr = (
+                Address.objects.filter(user=request.user, is_default=True).first()
+                or Address.objects.filter(user=request.user).order_by('-created_at').first()
+            )
+            address = addr.street if addr else ''
+            city = addr.city if addr else ''
+            zip_code = addr.zip_code if addr else ''
+            phone = request.user.profile.phone if hasattr(request.user, 'profile') else ''
+        else:
+            address = data.get('address', '')
+            city = data.get('city', '')
+            zip_code = data.get('zip_code', '')
+            phone = data.get('phone', '')
+
         for item in cart:
             Order.objects.create(
                 user=request.user,
@@ -205,16 +246,17 @@ def checkout(request):
                 quantity=item['quantity'],
                 total=item['price'] * item['quantity'],
                 status='pending',
-                address=data.get('address', ''),
-                city=data.get('city', ''),
-                zip_code=data.get('zip_code', ''),
-                phone=data.get('phone', ''),
+                address=address,
+                city=city,
+                zip_code=zip_code,
+                phone=phone,
                 special_instructions=f"Delivery: {delivery_type} | Payment: {payment_method} | Notes: {data.get('notes', '')}",
                 estimated_arrival=_calculate_arrival(delivery_type),
             )
         messages.success(request, '🎉 Order placed successfully!')
         return JsonResponse({'success': True})
     except Exception as e:
+        logger.error(f"Checkout error for user {request.user.username}: {e}", exc_info=True)
         return JsonResponse({'error': str(e)}, status=400)
 
 
@@ -230,6 +272,21 @@ def _calculate_arrival(delivery_type):
 
 
 # ==================== WISHLIST ====================
+
+@login_required
+@require_POST
+def toggle_wishlist(request):
+    try:
+        data = json.loads(request.body)
+        cake_id = data.get('cake_id')
+        cake = get_object_or_404(Cake, id=cake_id)
+        obj, created = Wishlist.objects.get_or_create(user=request.user, cake=cake)
+        if not created:
+            obj.delete()
+        return JsonResponse({'success': True, 'wishlisted': created})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
 
 @login_required
 def add_wishlist(request, cake_id):
@@ -301,9 +358,7 @@ def add_address(request):
             is_default=request.POST.get('is_default') == 'on',
         )
         messages.success(request, 'Address added!')
-        return redirect('creake:profile')
-    return render(request, 'creake/add_address.html')
-
+    return redirect('creake:profile')
 
 # ==================== CUSTOMIZE PAGE ====================
 
@@ -377,6 +432,7 @@ def customize_order(request):
         )
         return JsonResponse({'success': True})
     except Exception as e:
+        logger.error(f"Custom order error for user {request.user if request.user.is_authenticated else 'guest'}: {e}", exc_info=True)
         return JsonResponse({'error': str(e)}, status=400)
 
 
@@ -538,6 +594,7 @@ def admin_add_cake(request):
         )
         messages.success(request, 'Cake added successfully!')
     except Exception as e:
+        logger.error(f"Add cake error: {e}", exc_info=True)
         messages.error(request, f'Error adding cake: {str(e)}')
     return redirect('creake:admin_cakes')
 
@@ -559,6 +616,7 @@ def admin_edit_cake(request, cake_id):
         cake.save()
         messages.success(request, f'{cake.name} updated successfully!')
     except Exception as e:
+        logger.error(f"Edit cake {cake_id} error: {e}", exc_info=True)
         messages.error(request, f'Error updating cake: {str(e)}')
     return redirect('creake:admin_cakes')
 
@@ -601,20 +659,121 @@ def custom_500(request):
 @login_required
 @require_POST
 def rate_cake(request):
-    from django.db.models import Avg
     data = json.loads(request.body)
-    cake_id = data.get('cake_id')
     rating_val = int(data.get('rating'))
 
-    cake = get_object_or_404(Cake, id=cake_id)
+    cake_id = data.get('cake_id')
+    cake_name = data.get('cake_name')
+    if cake_id:
+        cake = get_object_or_404(Cake, id=cake_id)
+    elif cake_name:
+        cake = get_object_or_404(Cake, name=cake_name)
+    else:
+        return JsonResponse({'error': 'No cake specified.'}, status=400)
+
+    has_received = Order.objects.filter(
+        user=request.user,
+        cake_name=cake.name,
+        status='received'
+    ).exists()
+    if not has_received:
+        return JsonResponse({'error': 'You can only rate a cake after confirming receipt.'}, status=403)
+
     CakeRating.objects.update_or_create(
         cake=cake, user=request.user,
         defaults={'rating': rating_val}
     )
 
-    # Recalculate average from all ratings
     avg = CakeRating.objects.filter(cake=cake).aggregate(avg=Avg('rating'))['avg'] or rating_val
     review_count = CakeRating.objects.filter(cake=cake).count()
 
-
     return JsonResponse({'success': True, 'new_rating': avg, 'review_count': review_count})
+
+@login_required
+@require_POST
+def confirm_received(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+    if order.status != 'delivered':
+        return JsonResponse({'error': 'Order is not in delivered status.'}, status=400)
+    order.status = 'received'
+    order.received_at = datetime.now()
+    order.step = 6
+    order.save()
+    return JsonResponse({'success': True})
+
+
+# ==================== REVIEWS ====================
+
+def get_reviews(request, cake_id):
+    cake = get_object_or_404(Cake, id=cake_id)
+    reviews = CakeReview.objects.filter(cake=cake).select_related('user').order_by('-created_at')
+    data = []
+    for r in reviews:
+        data.append({
+            'id': r.id,
+            'user': r.user.get_full_name() or r.user.username,
+            'rating': r.rating,
+            'comment': r.comment,
+            'created_at': r.created_at.strftime('%b %d, %Y'),
+            'is_mine': request.user.is_authenticated and r.user == request.user,
+        })
+    avg = reviews.aggregate(avg=Avg('rating'))['avg']
+    return JsonResponse({'reviews': data, 'count': reviews.count(), 'avg': round(avg, 1) if avg else 0})
+
+
+@login_required
+@require_POST
+def submit_review(request, cake_id):
+    try:
+        cake = get_object_or_404(Cake, id=cake_id)
+        data = json.loads(request.body)
+        rating = int(data.get('rating', 0))
+        comment = data.get('comment', '').strip()
+        if not (1 <= rating <= 5):
+            return JsonResponse({'error': 'Rating must be between 1 and 5.'}, status=400)
+        if not comment:
+            return JsonResponse({'error': 'Please write a review.'}, status=400)
+        # update or create
+        review, created = CakeReview.objects.update_or_create(
+            cake=cake, user=request.user,
+            defaults={'rating': rating, 'comment': comment}
+        )
+        # also update the CakeRating aggregate
+        CakeRating.objects.update_or_create(
+            cake=cake, user=request.user,
+            defaults={'rating': rating}
+        )
+        avg = CakeReview.objects.filter(cake=cake).aggregate(avg=Avg('rating'))['avg'] or rating
+        return JsonResponse({
+            'success': True,
+            'created': created,
+            'review': {
+                'id': review.id,
+                'user': request.user.get_full_name() or request.user.username,
+                'rating': rating,
+                'comment': comment,
+                'created_at': review.created_at.strftime('%b %d, %Y'),
+                'is_mine': True,
+            },
+            'new_avg': round(avg, 1),
+            'count': CakeReview.objects.filter(cake=cake).count(),
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+@login_required
+@require_POST
+def delete_review(request, cake_id):
+    try:
+        cake = get_object_or_404(Cake, id=cake_id)
+        CakeReview.objects.filter(cake=cake, user=request.user).delete()
+        CakeRating.objects.filter(cake=cake, user=request.user).delete()
+        avg = CakeReview.objects.filter(cake=cake).aggregate(avg=Avg('rating'))['avg']
+        return JsonResponse({
+            'success': True,
+            'new_avg': round(avg, 1) if avg else 0,
+            'count': CakeReview.objects.filter(cake=cake).count(),
+        })
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
