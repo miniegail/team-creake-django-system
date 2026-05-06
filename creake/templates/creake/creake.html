@@ -376,8 +376,7 @@
                     <span>&#128100; User</span>
                 </div>
                 <a href="{% url 'creake:delivery' %}">&#128202; Dashboard</a>
-                <a href="{% url 'creake:profile' %}">&#128100; My Profile</a>
-                <a href="{% url 'creake:order_history' %}">&#127874; My Orders</a>
+                <a href="{% url 'creake:quiz' %}">&#127919; Cake Quiz</a>
                 <form method="post" action="{% url 'creake:logout' %}" style="margin:0;">
                     {% csrf_token %}
                     <button type="submit" class="logout-item">&#128682; Log Out</button>
@@ -685,7 +684,16 @@
         <div class="total-section">
             <div class="total-line"><span>TOTAL</span><span id="totalPrice">&#8369;25</span></div>
         </div>
+        {% if request.user.is_authenticated %}
+        <!-- Save Design button is hidden here; it appears on the success screen after ordering -->
+        <!-- Order Now: opens the order form -->
         <button id="confirmOrder" class="order-button">&#127874; Order Now</button>
+        {% else %}
+        <!-- Guest: Order Now opens form directly (no login required) -->
+        <button id="confirmOrder" class="order-button">&#127874; Order Now</button>
+        {% endif %}
+        <!-- Cancel button: resets the customizer -->
+        <button class="order-button" onclick="confirmCancelDesign()" style="background:white;color:#d7736b;border:2px solid #f0b9b5;margin-top:6px;font-size:12px;padding:8px;">&#10005; Cancel / Reset</button>
     </div>
 
 </div>
@@ -708,17 +716,55 @@
             </div>
             <form id="orderForm">
                 {% csrf_token %}
-                <div class="om-two-col">
-                    <div class="om-field"><label>First Name</label><input type="text" id="omFirstName" placeholder="Jane" value="{{ request.user.first_name }}" required></div>
-                    <div class="om-field"><label>Last Name</label><input type="text" id="omLastName" placeholder="Doe" value="{{ request.user.last_name }}" required></div>
+                {% if request.user.is_authenticated %}
+                <!-- LOGGED-IN: account details auto-filled; only delivery/payment needed -->
+                <div style="background:#fff8f7;border:1.5px solid #f0b9b5;border-radius:12px;padding:14px 16px;margin-bottom:18px;">
+                    <div style="font-size:11px;font-weight:700;color:#d7736b;text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">&#128100; Your Account Details</div>
+                    <div style="font-size:13px;color:#555;line-height:1.8;">
+                        <div><strong>{{ request.user.get_full_name|default:request.user.username }}</strong></div>
+                        <div>{{ request.user.email }}</div>
+                        <div id="autoPhone">{{ user_phone }}</div>
+                        {% if user_address %}
+                        <div style="margin-top:6px;font-size:12px;color:#888;">&#128205; {{ user_address }}, {{ user_city }} {{ user_zip }}</div>
+                        {% else %}
+                        <div style="margin-top:6px;font-size:12px;color:#e07070;">&#9888;&#65039; No saved address — <a href="{% url 'creake:profile' %}" style="color:#d7736b;font-weight:600;">add one in Profile</a></div>
+                        {% endif %}
+                    </div>
+                    <!-- Hidden fields for submission -->
+                    <input type="hidden" id="omFirstName" value="{{ request.user.first_name }}">
+                    <input type="hidden" id="omLastName"  value="{{ request.user.last_name }}">
+                    <input type="hidden" id="omEmail"     value="{{ request.user.email }}">
+                    <input type="hidden" id="omPhone"     value="{{ user_phone }}">
+                    <input type="hidden" id="omAddress"   value="{{ user_address }}">
+                    <input type="hidden" id="omCity"      value="{{ user_city }}">
+                    <input type="hidden" id="omZip"       value="{{ user_zip }}">
                 </div>
-                <div class="om-field"><label>Email Address</label><input type="email" id="omEmail" placeholder="you@example.com" value="{{ request.user.email }}" required></div>
+                {% if not user_address %}
+                <!-- If no saved address, show address fields -->
+                <div class="om-field"><label>Delivery Address</label><input type="text" id="omAddressInput" placeholder="123 Main St" oninput="document.getElementById('omAddress').value=this.value" required></div>
+                <div class="om-two-col">
+                    <div class="om-field"><label>City</label><input type="text" id="omCityInput" placeholder="Manila" oninput="document.getElementById('omCity').value=this.value" required></div>
+                    <div class="om-field"><label>Zip Code</label><input type="text" id="omZipInput" placeholder="1000" oninput="document.getElementById('omZip').value=this.value" required></div>
+                </div>
+                {% endif %}
+                {% if not user_phone %}
+                <div class="om-field"><label>Phone Number</label><input type="tel" id="omPhoneInput" placeholder="+63 9XX XXX XXXX" oninput="document.getElementById('omPhone').value=this.value" required></div>
+                {% endif %}
+                {% else %}
+                <!-- GUEST: must fill in everything manually -->
+                <div class="om-two-col">
+                    <div class="om-field"><label>First Name</label><input type="text" id="omFirstName" placeholder="Jane" required></div>
+                    <div class="om-field"><label>Last Name</label><input type="text" id="omLastName" placeholder="Doe" required></div>
+                </div>
+                <div class="om-field"><label>Email Address</label><input type="email" id="omEmail" placeholder="you@example.com" required></div>
                 <div class="om-field"><label>Phone Number</label><input type="tel" id="omPhone" placeholder="+63 9XX XXX XXXX" required></div>
                 <div class="om-field"><label>Delivery Address</label><input type="text" id="omAddress" placeholder="123 Main St" required></div>
                 <div class="om-two-col">
                     <div class="om-field"><label>City</label><input type="text" id="omCity" placeholder="Manila" required></div>
                     <div class="om-field"><label>Zip Code</label><input type="text" id="omZip" placeholder="1000" required></div>
                 </div>
+                {% endif %}
+                <!-- Delivery & Payment: always shown -->
                 <div class="om-two-col">
                     <div class="om-field"><label>Delivery Type</label><select id="omDelivery" required><option value="">Select delivery</option><option value="standard">Standard (&#8369;50)</option><option value="express">Express (&#8369;150)</option><option value="sameday">Same Day (&#8369;300)</option></select></div>
                     <div class="om-field"><label>Payment Method</label><select id="omPayment" required><option value="">Select payment</option><option value="credit">&#128179; Credit Card</option><option value="debit">&#128179; Debit Card</option><option value="gcash">&#128241; GCash</option><option value="cod">&#128181; Cash on Delivery</option></select></div>
@@ -736,7 +782,70 @@
             <p>Thank you, <strong id="successName">there</strong>!</p>
             <p>Your custom cake order has been received.<br>A confirmation has been sent to <strong id="successEmail"></strong>.</p>
             <p style="margin-top:12px;font-size:12px;color:#bbb;">Our team will contact you shortly to confirm your order.</p>
-            <button class="success-close" onclick="finishOrder()">&#127968; Back to Home</button>
+            {% if request.user.is_authenticated %}
+            <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px;align-items:center;">
+                <button class="success-close" onclick="openSaveDesignAfterOrder()" style="background:linear-gradient(135deg,#f0b9b5,#e89e9a);width:100%;max-width:280px;">&#128190; Save This Design</button>
+                <button class="success-close" onclick="finishOrder()" style="width:100%;max-width:280px;">&#127968; Back to Home</button>
+            </div>
+            {% else %}
+            <div style="margin-top:20px;display:flex;flex-direction:column;gap:10px;align-items:center;">
+                <p style="font-size:12px;color:#b07878;">&#128274; <a href="{% url 'creake:index' %}" style="color:#d7736b;font-weight:600;">Log in or sign up</a> to save this design for future orders.</p>
+                <button class="success-close" onclick="finishOrder()" style="width:100%;max-width:280px;">&#127968; Back to Home</button>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- ========== SAVE DESIGN MODAL ========== -->
+<div class="order-modal-overlay" id="saveDesignOverlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.5);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+    <div class="order-modal" style="max-width:420px;">
+        <div class="order-modal-header">
+            <h2>&#128190; Save Your Design</h2>
+            <button class="order-modal-close" onclick="closeSaveDesign()">&#10005;</button>
+        </div>
+        <p style="font-size:13px;color:#888;margin-bottom:18px;line-height:1.6;">Give your design a name to save it. Our team will be notified and will review it. Once approved, the finished cake photo will be shared with you.</p>
+        <form id="saveDesignForm" method="post" action="{% url 'creake:create_design' %}">
+            {% csrf_token %}
+            <div class="om-field">
+                <label>Design Name</label>
+                <input type="text" name="name" id="sdName" placeholder="e.g. My Birthday Cake" required>
+            </div>
+            <div class="om-field">
+                <label>Emoji / Icon</label>
+                <select name="emoji" id="sdEmoji">
+                    <option value="🎂">🎂 Birthday Cake</option>
+                    <option value="🍰">🍰 Slice of Cake</option>
+                    <option value="🧁">🧁 Cupcake</option>
+                    <option value="🍫">🍫 Chocolate</option>
+                    <option value="🍓">🍓 Strawberry</option>
+                    <option value="🌸">🌸 Floral</option>
+                    <option value="⭐">⭐ Special</option>
+                    <option value="❤️">❤️ Romance</option>
+                </select>
+            </div>
+            <input type="hidden" name="layers" id="sdLayers" value="1">
+            <div class="om-field">
+                <label>Description (Optional)</label>
+                <textarea name="description" id="sdDescription" placeholder="Describe your cake design..."></textarea>
+            </div>
+            <div class="om-actions">
+                <button type="button" class="om-cancel" onclick="closeSaveDesign()">Cancel</button>
+                <button type="submit" class="om-submit">&#128190; Save Design</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========== GUEST PROMPT MODAL ========== -->
+<div class="order-modal-overlay" id="guestPromptOverlay" style="display:none;position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.5);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+    <div class="order-modal" style="max-width:380px;text-align:center;padding:36px 32px;">
+        <div style="font-size:52px;margin-bottom:12px;">&#128274;</div>
+        <h2 style="color:#d7736b;font-size:18px;font-weight:700;margin-bottom:8px;" id="guestPromptTitle">Log In Required</h2>
+        <p style="font-size:13px;color:#888;margin-bottom:24px;" id="guestPromptMsg">Please log in or create an account to place your order.</p>
+        <div style="display:flex;gap:12px;">
+            <button onclick="document.getElementById('guestPromptOverlay').style.display='none';" style="flex:1;padding:12px;border:2px solid #f0b9b5;background:white;color:#d7736b;border-radius:10px;font-weight:700;font-size:13px;cursor:pointer;font-family:'Poppins',sans-serif;">Cancel</button>
+            <a href="{% url 'creake:index' %}" style="flex:2;padding:12px;background:linear-gradient(135deg,#d7736b,#c9605a);color:white;border-radius:10px;font-weight:700;font-size:13px;text-decoration:none;display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;">&#128100; Log In / Sign Up</a>
         </div>
     </div>
 </div>
@@ -900,7 +1009,10 @@ document.getElementById('orderForm').addEventListener('submit',function(e){
     var btn=document.getElementById('omSubmitBtn');btn.disabled=true;btn.textContent='Placing order...';
     var csrfToken=this.querySelector('[name=csrfmiddlewaretoken]').value;
     var decTypes=[...new Set((customizer.placedDecorations||[]).map(function(d){return d.type;}))];
-    var payload={first_name:document.getElementById('omFirstName').value,last_name:document.getElementById('omLastName').value,email:document.getElementById('omEmail').value,phone:document.getElementById('omPhone').value,address:document.getElementById('omAddress').value,city:document.getElementById('omCity').value,zip_code:document.getElementById('omZip').value,delivery_type:document.getElementById('omDelivery').value,payment_method:document.getElementById('omPayment').value,notes:document.getElementById('omNotes').value,cake_size:customizer.customization.size,cake_layers:customizer.customization.layers,cake_flavor:customizer.customization.flavor,filling:customizer.customization.filling,icing_type:customizer.customization.icingType,icing_color:customizer.customization.icingColor,toppings:decTypes,cake_message:customizer.customization.message,total_price:customizer.getTotalPrice(),cart:[{name:'Custom Cake ('+customizer.customization.flavor+', '+customizer.customization.size+'")',price:customizer.getTotalPrice(),quantity:1}]};
+    var flavorName=customizer.customization.flavor||'custom';
+    var designName='Custom '+flavorName.charAt(0).toUpperCase()+flavorName.slice(1)+' Cake';
+    var designDesc='Size: '+customizer.customization.size+'" | Frosting: '+(customizer.customization.icingType||'')+' ('+(customizer.customization.icingColor||'')+') | Filling: '+(customizer.customization.filling||'')+(decTypes.length?' | Decorations: '+decTypes.join(', '):'');
+    var payload={first_name:document.getElementById('omFirstName').value,last_name:document.getElementById('omLastName').value,email:document.getElementById('omEmail').value,phone:document.getElementById('omPhone').value,address:document.getElementById('omAddress').value,city:document.getElementById('omCity').value,zip_code:document.getElementById('omZip').value,delivery_type:document.getElementById('omDelivery').value,payment_method:document.getElementById('omPayment').value,notes:document.getElementById('omNotes').value,cake_size:customizer.customization.size,cake_layers:customizer.customization.layers,cake_flavor:customizer.customization.flavor,filling:customizer.customization.filling,icing_type:customizer.customization.icingType,icing_color:customizer.customization.icingColor,toppings:decTypes,cake_message:customizer.customization.message,total_price:customizer.getTotalPrice(),cart:[{name:'Custom Cake ('+customizer.customization.flavor+', '+customizer.customization.size+'")',price:customizer.getTotalPrice(),quantity:1}],save_design_with_order:true,design_name:designName,design_layers:customizer.customization.layers||1,design_description:designDesc};
     fetch("{% url 'creake:customize_order' %}",{method:'POST',headers:{'Content-Type':'application/json','X-CSRFToken':csrfToken},body:JSON.stringify(payload)})
     .then(function(res){return res.json();})
     .then(function(data){if(data.success){document.getElementById('orderFormView').style.display='none';document.getElementById('successName').textContent=payload.first_name;document.getElementById('successEmail').textContent=payload.email;document.getElementById('orderSuccessView').classList.add('active');}else{showToast('Error: '+(data.error||'Something went wrong.'),'linear-gradient(135deg,#f44336,#d32f2f)');btn.disabled=false;btn.textContent='\u2705 Place Order';}})
@@ -935,6 +1047,61 @@ function finishOrder(){
     showToast('\uD83C\uDF89 Order placed! Ready for your next creation.');
     window.scrollTo({top:0,behavior:'smooth'});
 }
+// ── Save Design Modal ─────────────────────────────────────────────────────────
+function saveDesign(){
+    // Pre-fill layers from the current customizer state
+    var layersEl=document.getElementById('layers');
+    if(layersEl)document.getElementById('sdLayers').value=layersEl.value;
+    document.getElementById('saveDesignOverlay').style.display='flex';
+    document.body.style.overflow='hidden';
+}
+function openSaveDesignAfterOrder(){
+    // Called from the success screen — pre-fill and open Save Design modal
+    var layersEl=document.getElementById('layers');
+    if(layersEl)document.getElementById('sdLayers').value=layersEl.value;
+    // Pre-fill a default name from the current flavor
+    var flavor=customizer&&customizer.customization&&customizer.customization.flavor?customizer.customization.flavor:'Custom';
+    var sdNameEl=document.getElementById('sdName');
+    if(sdNameEl&&!sdNameEl.value)sdNameEl.value='My '+flavor.charAt(0).toUpperCase()+flavor.slice(1)+' Cake';
+    document.getElementById('saveDesignOverlay').style.display='flex';
+    document.body.style.overflow='hidden';
+}
+function closeSaveDesign(){
+    document.getElementById('saveDesignOverlay').style.display='none';
+    document.body.style.overflow='';
+}
+document.getElementById('saveDesignOverlay').addEventListener('click',function(e){if(e.target===this)closeSaveDesign();});
+
+// ── Guest prompt (save design only) ──────────────────────────────────────────
+function showGuestPrompt(type){
+    var title='Log In to Save Design';
+    var msg='Please log in or create an account to save your design to your profile.';
+    document.getElementById('guestPromptTitle').textContent=title;
+    document.getElementById('guestPromptMsg').textContent=msg;
+    document.getElementById('guestPromptOverlay').style.display='flex';
+    document.body.style.overflow='hidden';
+}
+document.getElementById('guestPromptOverlay').addEventListener('click',function(e){if(e.target===this){this.style.display='none';document.body.style.overflow='';}});
+
+// ── Cancel / Reset design ─────────────────────────────────────────────────────
+function confirmCancelDesign(){
+    if(confirm('Reset your cake design? All your customizations will be cleared.')){
+        // Reset all selects and inputs
+        var layerSel=document.getElementById('layers');if(layerSel){layerSel.value='1';layerSel.dispatchEvent(new Event('change'));}
+        var flavorSel=document.getElementById('flavor');if(flavorSel){flavorSel.value='vanilla';flavorSel.dispatchEvent(new Event('change'));}
+        var fillingSel=document.getElementById('filling');if(fillingSel){fillingSel.value='none';fillingSel.dispatchEvent(new Event('change'));}
+        var icingSel=document.getElementById('icingType');if(icingSel){icingSel.value='buttercream';icingSel.dispatchEvent(new Event('change'));}
+        document.querySelectorAll('.radio-option').forEach(function(l){l.classList.remove('selected');});
+        var first=document.querySelector('.radio-option');if(first)first.classList.add('selected');
+        document.querySelectorAll('.frosting-card').forEach(function(c){c.classList.remove('selected');});
+        var firstFrost=document.querySelector('.frosting-card');if(firstFrost)firstFrost.classList.add('selected');
+        document.getElementById('decCounts').innerHTML='';
+        var msgEl=document.getElementById('message');if(msgEl){msgEl.value='';msgEl.dispatchEvent(new Event('input'));}
+        customizer=new CakeCustomizer();
+        showToast('&#127912; Design reset! Start fresh.');
+    }
+}
+
 document.getElementById('confirmOrder').addEventListener('click',openOrderModal);
 
 // ── 3D CAKE CUSTOMIZER ────────────────────────────────────────────────────────

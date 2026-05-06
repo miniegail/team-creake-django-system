@@ -87,29 +87,20 @@
 
 <header class="site-header">
   <div class="header-logo">
-    <a href="{% url 'creake:index' %}">
+    <!-- CHANGED: Creake logo now links directly to Admin Dashboard (no dropdown) -->
+    <a href="{% url 'creake:admin_dashboard' %}">
       <img src="{% static 'creake/images/creaked.png' %}" alt="CREAKE">
     </a>
   </div>
   <nav class="header-nav">
     <a href="{% url 'creake:index' %}">&#127968; Home</a>
     <a href="{% url 'creake:index' %}#main-content">&#127874; Browse</a>
-    <div class="user-dropdown-wrap">
-      <button class="user-nav-btn" onclick="toggleDropdown()">
-        &#128737;&#65039; {{ request.user.first_name|default:request.user.username }} &#9660;
+    <form method="post" action="{% url 'creake:logout' %}" style="margin:0;">
+      {% csrf_token %}
+      <button type="submit" class="user-nav-btn" style="cursor:pointer;">
+        &#128682; Log Out
       </button>
-      <div class="user-dropdown" id="userDropdown">
-        <div class="user-dropdown-header">
-          <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
-          <span>&#128737;&#65039; Admin</span>
-        </div>
-        <a href="{% url 'creake:admin_dashboard' %}">&#128202; Admin Panel</a>
-        <form method="post" action="{% url 'creake:logout' %}" style="margin:0;">
-          {% csrf_token %}
-          <button type="submit" class="logout-item">&#128682; Log Out</button>
-        </form>
-      </div>
-    </div>
+    </form>
   </nav>
 </header>
 

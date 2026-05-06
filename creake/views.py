@@ -36,6 +36,7 @@ def index(request):
     received_cake_names = set()
     saved_address = None
     
+    purchased_cake_ids = []
     if request.user.is_authenticated:
         user_ratings = {
             str(r.cake_id): r.rating
@@ -45,6 +46,15 @@ def index(request):
             Order.objects.filter(
                 user=request.user, status='received'
             ).values_list('cake_name', flat=True)
+        )
+        # Cake IDs the user has actually bought (received or delivered)
+        purchased_cake_ids = list(
+            Cake.objects.filter(
+                name__in=Order.objects.filter(
+                    user=request.user,
+                    status__in=['received', 'delivered']
+                ).values_list('cake_name', flat=True)
+            ).values_list('id', flat=True)
         )
         saved_address = (
             Address.objects.filter(user=request.user, is_default=True).first()
@@ -59,10 +69,11 @@ def index(request):
         'cakes': cakes,
         'user_ratings': user_ratings,
         'received_cake_names': list(received_cake_names),
+        'purchased_cake_ids': purchased_cake_ids,
         'show_quiz': request.session.pop('show_quiz', False),
         'saved_address': saved_address,
         'wishlist_ids': wishlist_ids,
-        'is_admin': request.user.is_authenticated and request.user.is_staff,  # ✅ PASS ADMIN FLAG
+        'is_admin': request.user.is_authenticated and request.user.is_staff,
     }
     return render(request, 'creake/index.html', context)
 
@@ -215,8 +226,6 @@ def profile(request):
 
 @require_http_methods(["POST"])
 def checkout(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({'error': 'Not authenticated'}, status=401)
     try:
         data = json.loads(request.body)
         cart = data.get('cart', [])
@@ -226,11 +235,11 @@ def checkout(request):
             return JsonResponse({'error': 'Cart is empty'}, status=400)
 
         # Admin should not be placing orders via the Browse page
-        if request.user.is_staff:
+        if request.user.is_authenticated and request.user.is_staff:
             return JsonResponse({'error': 'Admins cannot place orders.'}, status=403)
 
-        # Use saved address if flagged
-        if data.get('use_saved_address'):
+        # Use saved address if flagged (logged-in users only)
+        if data.get('use_saved_address') and request.user.is_authenticated:
             addr = (
                 Address.objects.filter(user=request.user, is_default=True).first()
                 or Address.objects.filter(user=request.user).order_by('-created_at').first()
@@ -239,15 +248,20 @@ def checkout(request):
             city = addr.city if addr else ''
             zip_code = addr.zip_code if addr else ''
             phone = request.user.profile.phone if hasattr(request.user, 'profile') else ''
+            guest_email = request.user.email
+            guest_name = request.user.get_full_name() or request.user.username
         else:
             address = data.get('address', '')
             city = data.get('city', '')
             zip_code = data.get('zip_code', '')
             phone = data.get('phone', '')
+            guest_email = data.get('email', '')
+            guest_name = data.get('full_name', data.get('first_name', '') + ' ' + data.get('last_name', '')).strip()
 
+        orders_created = []
         for item in cart:
-            Order.objects.create(
-                user=request.user,
+            order = Order.objects.create(
+                user=request.user if request.user.is_authenticated else None,
                 cake_name=item['name'],
                 quantity=item['quantity'],
                 total=item['price'] * item['quantity'],
@@ -256,13 +270,52 @@ def checkout(request):
                 city=city,
                 zip_code=zip_code,
                 phone=phone,
-                special_instructions=f"Delivery: {delivery_type} | Payment: {payment_method} | Notes: {data.get('notes', '')}",
+                special_instructions=f"Delivery: {delivery_type} | Payment: {payment_method} | Notes: {data.get('notes', '')} | Customer: {guest_name}",
                 estimated_arrival=_calculate_arrival(delivery_type),
             )
+            orders_created.append(order)
+
+        # Send confirmation email to guest (or logged-in user without saved address flow)
+        if guest_email and not data.get('use_saved_address'):
+            try:
+                order_lines = '\n'.join(
+                    f"  - {item['name']} x{item['quantity']}  ₱{item['price'] * item['quantity']:.2f}"
+                    for item in cart
+                )
+                subtotal = sum(item['price'] * item['quantity'] for item in cart)
+                del_fee = 50 if delivery_type == 'standard' else 150 if delivery_type == 'express' else 300
+                receipt_body = (
+                    f"Hi {guest_name or 'there'}!\n\n"
+                    f"Thank you for ordering from CREAKE 🎂\n"
+                    f"Your order has been received and is being prepared.\n\n"
+                    f"ORDER RECEIPT\n{'='*30}\n"
+                    f"{order_lines}\n"
+                    f"{'─'*30}\n"
+                    f"Subtotal   : ₱{subtotal:.2f}\n"
+                    f"Delivery   : ₱{del_fee:.2f}\n"
+                    f"TOTAL      : ₱{subtotal + del_fee:.2f}\n"
+                    f"{'─'*30}\n"
+                    f"Delivery   : {delivery_type.title()} ({_calculate_arrival(delivery_type)})\n"
+                    f"Payment    : {payment_method.title()}\n"
+                    f"Address    : {address}, {city} {zip_code}\n\n"
+                    f"Our team will contact you shortly to confirm your order.\n\n"
+                    f"— CREAKE Team 🎂"
+                )
+                send_mail(
+                    subject="🎂 Your CREAKE Order Confirmation",
+                    message=receipt_body,
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[guest_email],
+                    fail_silently=True,
+                )
+            except Exception as e:
+                logger.error(f"Receipt email error: {e}")
+
         messages.success(request, '🎉 Order placed successfully!')
         return JsonResponse({'success': True})
     except Exception as e:
-        logger.error(f"Checkout error for user {request.user.username}: {e}", exc_info=True)
+        user_label = request.user.username if request.user.is_authenticated else 'guest'
+        logger.error(f"Checkout error for user {user_label}: {e}", exc_info=True)
         return JsonResponse({'error': str(e)}, status=400)
 
 
@@ -317,16 +370,48 @@ def remove_wishlist(request, wishlist_id):
 @login_required
 def create_design(request):
     if request.method == 'POST':
-        CakeDesign.objects.create(
+        design = CakeDesign.objects.create(
             user=request.user,
             name=request.POST.get('name', 'My Design'),
             emoji=request.POST.get('emoji', '🎂'),
             layers=int(request.POST.get('layers', 2)),
             description=request.POST.get('description', ''),
         )
-        messages.success(request, 'Design created!')
+        # Notify admin of new custom design submission
+        try:
+            design_details = (
+                f"NEW CUSTOM CAKE DESIGN SUBMISSION\n{'='*35}\n"
+                f"User     : {request.user.get_full_name() or request.user.username}\n"
+                f"Email    : {request.user.email}\n"
+                f"Design   : {design.name}\n"
+                f"Layers   : {design.layers}\n"
+                f"Emoji    : {design.emoji}\n"
+                f"Desc     : {design.description or 'None'}\n"
+                f"Submitted: {design.created_at.strftime('%B %d, %Y %I:%M %p')}\n\n"
+                f"Please review this design in the admin panel and create the cake if approved."
+            )
+            send_mail(
+                subject=f"🎂 New Custom Design — {design.name} by {request.user.username}",
+                message=design_details,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[settings.ADMIN_EMAIL],
+                fail_silently=True,
+            )
+        except Exception as e:
+            logger.error(f"Admin notification error for design {design.id}: {e}")
+        messages.success(request, '🎉 Design saved! Our team will review it shortly.')
         return redirect('creake:my_designs')
     return render(request, 'creake/create_design.html')
+
+
+@login_required
+@require_POST
+def delete_design(request, design_id):
+    design = get_object_or_404(CakeDesign, id=design_id, user=request.user)
+    name = design.name
+    design.delete()
+    messages.success(request, f'Design "{name}" deleted.')
+    return redirect('creake:my_designs')
 
 
 @login_required
@@ -369,7 +454,23 @@ def add_address(request):
 # ==================== CUSTOMIZE PAGE ====================
 
 def customize(request):
-    return render(request, 'creake/creake.html')
+    context = {}
+    if request.user.is_authenticated:
+        profile = getattr(request.user, 'profile', None)
+        saved_address = (
+            Address.objects.filter(user=request.user, is_default=True).first()
+            or Address.objects.filter(user=request.user).order_by('-created_at').first()
+        )
+        context = {
+            'user_first_name': request.user.first_name,
+            'user_last_name': request.user.last_name,
+            'user_email': request.user.email,
+            'user_phone': profile.phone if profile else '',
+            'user_address': saved_address.street if saved_address else '',
+            'user_city': saved_address.city if saved_address else '',
+            'user_zip': saved_address.zip_code if saved_address else '',
+        }
+    return render(request, 'creake/creake.html', context)
 
 
 @require_http_methods(["POST"])

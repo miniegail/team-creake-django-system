@@ -35,7 +35,7 @@ body { font-family:'Poppins',sans-serif; background:#fffaf5; color:#333; overflo
 .mobile-menu-btn { display:none; background:transparent !important; border:none !important; font-size:24px; color:white !important; padding:0 !important; }
 
 /* ================= HERO BANNER ================= */
-.hero-banner { margin-top:(); width:100%; height:100vh; min-height:100vh; padding:20px 40px 60px; background:#ffffba; display:flex; justify-content:center; align-items:center; position:relative; overflow:hidden; }
+.hero-banner { margin-top:75px; width:100%; height:calc(100vh - 75px); min-height:calc(100vh - 75px); padding:20px 40px 60px; background:#ffffba; display:flex; justify-content:center; align-items:center; position:relative; overflow:hidden; }
 .banner-bg { position:absolute; inset:0; z-index:0; overflow:hidden; pointer-events:none; }
 .banner-shape { position:absolute; border-radius:50%; opacity:0.06; }
 .banner-shape:nth-child(1) { width:500px; height:px; background:#d7736b; top:-200px; left:-200px; animation:float 15s ease-in-out infinite; }

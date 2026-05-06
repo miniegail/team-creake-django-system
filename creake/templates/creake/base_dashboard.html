@@ -33,8 +33,7 @@
           <span>&#128100; User</span>
         </div>
         <a href="{% url 'creake:delivery' %}">&#128202; Dashboard</a>
-        <a href="{% url 'creake:profile' %}">&#128100; My Profile</a>
-        <a href="{% url 'creake:order_history' %}">&#127874; My Orders</a>
+        <a href="{% url 'creake:quiz' %}">&#127919; Cake Quiz</a>
         <form method="post" action="{% url 'creake:logout' %}" style="margin:0;">
           {% csrf_token %}
           <button type="submit" class="logout-item">&#128682; Log Out</button>

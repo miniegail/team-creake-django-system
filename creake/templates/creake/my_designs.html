@@ -6,8 +6,14 @@
 
 <div>
   <div class="section-title">My Cake Designs</div>
-  <div class="section-sub">Your saved custom creations &mdash; edit, reorder, or start fresh.</div>
+  <div class="section-sub">Your saved custom creations &mdash; edit the info, view the design, or delete.</div>
 </div>
+
+{% if messages %}
+  {% for message in messages %}
+  <div class="alert-success">&#10003; {{ message }}</div>
+  {% endfor %}
+{% endif %}
 
 <div class="designs-grid">
   {% for design in designs %}
@@ -18,21 +24,34 @@
     </div>
     <div class="design-info">
       <h4>{{ design.name }}</h4>
-      <p>Saved {{ design.created_at|date:"M d" }} &middot; {{ design.layers }} layers</p>
-      <div class="design-actions">
-        <a href="{% url 'creake:edit_design' design.id %}" class="design-btn edit">&#9999;&#65039; Edit</a>
-        <form method="post" action="{% url 'creake:reorder_design' design.id %}" style="flex:1;">
+      <p>Saved {{ design.created_at|date:"M d" }} &middot; {{ design.layers }} layer{{ design.layers|pluralize }}</p>
+      {% if design.description %}
+      <p style="font-size:11px;color:#b07878;margin-top:2px;margin-bottom:6px;">{{ design.description|truncatechars:60 }}</p>
+      {% endif %}
+      <div class="design-actions" style="gap:6px;">
+        <!-- Edit: modify the design's saved info (name, emoji, layers, description) -->
+        <a href="{% url 'creake:edit_design' design.id %}" class="design-btn edit" title="Edit design details">&#9999;&#65039; Edit</a>
+        <!-- View: go to the 3D customizer to see/recreate the design visually -->
+        <a href="{% url 'creake:customize' %}" class="design-btn order" style="flex:1;text-align:center;" title="View in customizer">&#128065;&#65039; View</a>
+        <!-- Delete: remove this saved design -->
+        <form method="post" action="{% url 'creake:delete_design' design.id %}" style="margin:0;" onsubmit="return confirm('Delete \'{{ design.name|escapejs }}\'? This cannot be undone.');">
           {% csrf_token %}
-          <button type="submit" class="design-btn order" style="width:100%;">&#128722; Order</button>
+          <button type="submit" class="design-btn" style="background:#fff0ef;color:#d7736b;border:1.5px solid #f0b9b5;border-radius:8px;padding:7px 10px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;" title="Delete design">&#128465;&#65039;</button>
         </form>
       </div>
     </div>
   </div>
-  {% empty %}{% endfor %}
+  {% empty %}
+  <div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:#b07878;">
+    <div style="font-size:48px;margin-bottom:12px;">&#127912;</div>
+    <p style="font-weight:600;color:#d7736b;font-size:15px;margin-bottom:6px;">No designs yet</p>
+    <p style="font-size:13px;">Start creating your first custom cake!</p>
+  </div>
+  {% endfor %}
 
-  <a class="design-add-card" href="{% url 'creake:create_design' %}">
+  <a class="design-add-card" href="{% url 'creake:customize' %}" title="Create a new custom cake design">
     <div class="design-add-icon">&#127912;</div>
-    <p>Create New Design</p>
+    <p>Start Creaking</p>
   </a>
 </div>
 

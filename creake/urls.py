@@ -27,6 +27,7 @@ urlpatterns = [
     # ── Designs ────────────────────────────────────────────────
     path('designs/create/', views.create_design, name='create_design'),
     path('designs/<int:design_id>/edit/', views.edit_design, name='edit_design'),
+    path('designs/<int:design_id>/delete/', views.delete_design, name='delete_design'),
     path('designs/<int:design_id>/reorder/', views.reorder_design, name='reorder_design'),
 
     # ── Addresses ──────────────────────────────────────────────

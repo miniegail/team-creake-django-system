@@ -36,7 +36,6 @@
         </div>
         <a href="{% url 'creake:delivery' %}">&#127874; Dashboard</a>
         <a href="{% url 'creake:quiz' %}">&#127919; Cake Quiz</a>
-        <a href="{% url 'creake:order_history' %}">&#128203; {% if request.user.is_staff %}Orders{% else %}My Orders{% endif %}</a>
         <form method="post" action="{% url 'creake:logout' %}" style="margin:0;">
           {% csrf_token %}
           <button type="submit" class="logout-item">&#128682; Log Out</button>
@@ -151,7 +150,8 @@
       <div class="cart-summary"><span>Subtotal:</span><span id="subtotal">&#8369;0.00</span></div>
       <div class="cart-summary"><span>Delivery:</span><span id="delivery">&#8369;0.00</span></div>
       <div class="cart-summary"><span class="total">Total:</span><span class="total" id="total">&#8369;0.00</span></div>
-      <button class="checkout-btn" id="checkoutBtn" onclick="openCheckout()" disabled>Proceed to Checkout</button>
+      <button class="checkout-btn" id="checkoutBtn" onclick="openCheckout()" disabled
+        title="Add items to your cart first">Proceed to Checkout</button>
     </div>
   </div>
 </div>
@@ -163,21 +163,21 @@
     <div class="checkout-order-summary" id="checkoutSummary"></div>
 
     {% if request.user.is_authenticated and saved_address %}
-    <div style="margin-bottom:20px;">
+    <div style="margin-bottom:24px;">
       <div style="font-size:13px;font-weight:600;color:#666;margin-bottom:10px;">&#128205; Delivering to</div>
-      <div style="background:#fff5f4;border:1.5px solid #f0b9b5;border-radius:14px;padding:16px 18px;">
-        <div style="font-weight:700;font-size:14px;color:#333;margin-bottom:4px;">{{ saved_address.label }}</div>
-        <div style="font-size:13px;color:#555;line-height:1.6;">
+      <div style="background:#fff5f4;border:1.5px solid #f0b9b5;border-radius:14px;padding:18px 20px;">
+        <div style="font-weight:700;font-size:14px;color:#333;margin-bottom:6px;">{{ saved_address.label }}</div>
+        <div style="font-size:13px;color:#555;line-height:1.8;">
           {{ saved_address.street }}<br>
           {{ saved_address.city }}, {{ saved_address.zip_code }}
         </div>
-        <a href="{% url 'creake:profile' %}" style="font-size:11px;color:#d7736b;text-decoration:none;margin-top:8px;display:inline-block;">&#9998; Change address in Profile</a>
+        <a href="{% url 'creake:profile' %}" style="font-size:11px;color:#d7736b;text-decoration:none;margin-top:10px;display:inline-block;">&#9998; Change address in Profile</a>
       </div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;">
       <div>
-        <label style="font-size:12px;font-weight:600;color:#666;display:block;margin-bottom:4px;">Delivery</label>
-        <select id="deliveryType" required onchange="updateDelivery()" style="width:100%;padding:10px;border:1.5px solid #f0b9b5;border-radius:10px;font-family:Poppins,sans-serif;font-size:13px;">
+        <label style="font-size:12px;font-weight:600;color:#666;display:block;margin-bottom:6px;">Delivery</label>
+        <select id="deliveryType" required onchange="updateDelivery()" style="width:100%;padding:11px;border:1.5px solid #f0b9b5;border-radius:10px;font-family:Poppins,sans-serif;font-size:13px;">
           <option value="">Select delivery</option>
           <option value="standard">Standard (&#8369;50)</option>
           <option value="express">Express (&#8369;150)</option>
@@ -185,8 +185,8 @@
         </select>
       </div>
       <div>
-        <label style="font-size:12px;font-weight:600;color:#666;display:block;margin-bottom:4px;">Payment</label>
-        <select id="paymentMethod" required style="width:100%;padding:10px;border:1.5px solid #f0b9b5;border-radius:10px;font-family:Poppins,sans-serif;font-size:13px;">
+        <label style="font-size:12px;font-weight:600;color:#666;display:block;margin-bottom:6px;">Payment</label>
+        <select id="paymentMethod" required style="width:100%;padding:11px;border:1.5px solid #f0b9b5;border-radius:10px;font-family:Poppins,sans-serif;font-size:13px;">
           <option value="">Select payment</option>
           <option value="credit">&#128179; Credit Card</option>
           <option value="debit">&#128179; Debit Card</option>
@@ -195,18 +195,18 @@
         </select>
       </div>
     </div>
-    <div style="margin-bottom:20px;">
-      <label style="font-size:12px;font-weight:600;color:#666;display:block;margin-bottom:4px;">Special Instructions (Optional)</label>
-      <input type="text" id="notes" placeholder="Any special requests?" style="width:100%;padding:10px;border:1.5px solid #f0b9b5;border-radius:10px;font-family:Poppins,sans-serif;font-size:13px;box-sizing:border-box;">
+    <div style="margin-bottom:22px;">
+      <label style="font-size:12px;font-weight:600;color:#666;display:block;margin-bottom:6px;">Special Instructions (Optional)</label>
+      <input type="text" id="notes" placeholder="Any special requests?" style="width:100%;padding:11px;border:1.5px solid #f0b9b5;border-radius:10px;font-family:Poppins,sans-serif;font-size:13px;box-sizing:border-box;">
     </div>
-    <div style="background:#f9f9f9;border-radius:12px;padding:14px 16px;margin-bottom:20px;">
-      <div style="display:flex;justify-content:space-between;font-size:13px;color:#666;margin-bottom:6px;"><span>Subtotal</span><span id="subtotal2">&#8369;0.00</span></div>
-      <div style="display:flex;justify-content:space-between;font-size:13px;color:#666;margin-bottom:6px;"><span>Delivery</span><span id="delivery2">&#8369;0.00</span></div>
-      <div style="display:flex;justify-content:space-between;font-size:14px;font-weight:700;color:#333;border-top:1px solid #eee;padding-top:8px;margin-top:4px;"><span>Total</span><span id="total2">&#8369;0.00</span></div>
+    <div style="background:#f9f9f9;border-radius:12px;padding:16px 18px;margin-bottom:24px;">
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:#666;margin-bottom:8px;"><span>Subtotal</span><span id="subtotal2">&#8369;0.00</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:#666;margin-bottom:8px;"><span>Delivery</span><span id="delivery2">&#8369;0.00</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:15px;font-weight:700;color:#333;border-top:1px solid #eee;padding-top:10px;margin-top:6px;"><span>Total</span><span id="total2">&#8369;0.00</span></div>
     </div>
-    <div style="display:flex;gap:10px;">
-      <button type="button" onclick="closeCheckout()" style="flex:1;padding:12px;border:2px solid #f0b9b5;background:white;color:#d7736b;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;font-family:Poppins,sans-serif;">Cancel</button>
-      <button type="button" onclick="submitSavedAddressOrder()" style="flex:1;padding:12px;border:none;background:linear-gradient(135deg,#d7736b,#c9605a);color:white;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;font-family:Poppins,sans-serif;">&#127874; Place Order</button>
+    <div style="display:flex;gap:12px;">
+      <button type="button" onclick="closeCheckout()" style="flex:1;padding:13px;border:2px solid #f0b9b5;background:white;color:#d7736b;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;font-family:Poppins,sans-serif;">Cancel</button>
+      <button type="button" onclick="submitSavedAddressOrder()" style="flex:2;padding:13px;border:none;background:linear-gradient(135deg,#d7736b,#c9605a);color:white;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;font-family:Poppins,sans-serif;">&#127874; Place Order</button>
     </div>
 
     {% else %}
@@ -307,7 +307,7 @@
         &#8249; Back to cake
       </button>
 
-      <!-- Reviews header -->
+      <!-- Customer Reviews - READ ONLY in Browser. Post reviews only via Dashboard → Received section -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;">
         <div>
           <span style="font-size:15px;font-weight:800;color:#2d2d2d;">Customer Reviews</span>
@@ -319,28 +319,11 @@
         </div>
       </div>
 
-      <!-- Write a review -->
-      {% if request.user.is_authenticated %}
-      <div id="reviewFormWrap" style="background:#fff8f7;border:1.5px solid #f0b9b5;border-radius:14px;padding:16px;margin-bottom:18px;">
-        <div style="font-size:13px;font-weight:700;color:#333;margin-bottom:10px;">&#9997;&#65039; Write a Review</div>
-        <div style="display:flex;gap:6px;margin-bottom:10px;" id="starPicker">
-          <span class="star-pick" data-v="1" style="font-size:28px;cursor:pointer;color:#ddd;transition:color 0.15s;">★</span>
-          <span class="star-pick" data-v="2" style="font-size:28px;cursor:pointer;color:#ddd;transition:color 0.15s;">★</span>
-          <span class="star-pick" data-v="3" style="font-size:28px;cursor:pointer;color:#ddd;transition:color 0.15s;">★</span>
-          <span class="star-pick" data-v="4" style="font-size:28px;cursor:pointer;color:#ddd;transition:color 0.15s;">★</span>
-          <span class="star-pick" data-v="5" style="font-size:28px;cursor:pointer;color:#ddd;transition:color 0.15s;">★</span>
-        </div>
-        <textarea id="reviewComment" placeholder="Share your experience with this cake..." rows="3" style="width:100%;padding:10px;border:1.5px solid #f0b9b5;border-radius:10px;font-family:Poppins,sans-serif;font-size:13px;resize:vertical;box-sizing:border-box;outline:none;"></textarea>
-        <div style="display:flex;justify-content:flex-end;margin-top:10px;">
-          <button onclick="submitReview()" style="padding:9px 20px;border:none;background:linear-gradient(135deg,#d7736b,#c9605a);color:#fff;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;font-family:Poppins,sans-serif;">Post Review</button>
-        </div>
+      <!-- Info banner: reviews posted via dashboard only -->
+      <div style="background:#fff8f7;border:1.5px solid #f0b9b5;border-radius:14px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:10px;">
+        <span style="font-size:20px;">⭐</span>
+        <p style="font-size:12px;color:#888;margin:0;line-height:1.6;">Reviews are submitted by <strong style="color:#d7736b;">verified buyers</strong> after confirming their order in the Dashboard.</p>
       </div>
-      {% else %}
-      <div style="background:#fff8f7;border:1.5px solid #f0b9b5;border-radius:14px;padding:16px;margin-bottom:18px;text-align:center;">
-        <p style="font-size:13px;color:#888;margin:0 0 10px;">Log in to write a review</p>
-        <button onclick="openAuthModal()" style="padding:8px 20px;border:none;background:linear-gradient(135deg,#d7736b,#c9605a);color:#fff;border-radius:10px;cursor:pointer;font-weight:700;font-size:13px;font-family:Poppins,sans-serif;">&#128100; Log In</button>
-      </div>
-      {% endif %}
 
       <!-- Reviews list -->
       <div id="reviewsList" style="display:flex;flex-direction:column;gap:12px;">
@@ -516,6 +499,14 @@ document.addEventListener('DOMContentLoaded', function() {
   // ── ENSURE category filter value "all" is treated correctly ──
   // Patch: if applyFilters uses '' for "all", keep "all" as is and let the function handle it
   // This ensures the change event always triggers a re-render
+  // ── CHECKOUT BUTTON: enable once cart has items ──
+  var checkoutBtn = document.getElementById('checkoutBtn');
+  if (checkoutBtn) {
+    checkoutBtn.removeAttribute('disabled');
+    checkoutBtn.style.opacity = '';
+    checkoutBtn.style.cursor = '';
+  }
+
   // ── ADMIN: hide cart/wishlist/order elements ──
   if (isAdmin) {
     // Hide cart modal completely

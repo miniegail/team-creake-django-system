@@ -367,10 +367,10 @@ function updateDelivery() {
   var sub = cart.reduce(function(s, i) { return s + (i.price * i.quantity); }, 0);
   var dt  = document.getElementById('deliveryType') ? document.getElementById('deliveryType').value : '';
   var del = dt === 'standard' ? 50 : dt === 'express' ? 150 : dt === 'sameday' ? 300 : 0;
-  if (document.getElementById('delivery'))  document.getElementById('delivery').textContent  = '&#8369;' + del.toFixed(2);
-  if (document.getElementById('delivery2')) document.getElementById('delivery2').textContent = '&#8369;' + del.toFixed(2);
-  if (document.getElementById('total'))     document.getElementById('total').textContent     = '&#8369;' + (sub + del).toFixed(2);
-  if (document.getElementById('total2'))    document.getElementById('total2').textContent    = '&#8369;' + (sub + del).toFixed(2);
+  if (document.getElementById('delivery'))  document.getElementById('delivery').textContent  = '₱' + del.toFixed(2);
+  if (document.getElementById('delivery2')) document.getElementById('delivery2').textContent = '₱' + del.toFixed(2);
+  if (document.getElementById('total'))     document.getElementById('total').textContent     = '₱' + (sub + del).toFixed(2);
+  if (document.getElementById('total2'))    document.getElementById('total2').textContent    = '₱' + (sub + del).toFixed(2);
 }
 
 function toggleCart() { document.getElementById('cartModal').classList.toggle('active'); }
@@ -738,11 +738,13 @@ function initShop() {
       }),
       delivery_type:  deliveryType,
       payment_method: paymentMethod,
-      address:  document.getElementById('address')    ? document.getElementById('address').value    : '',
-      city:     document.getElementById('city')       ? document.getElementById('city').value       : '',
-      zip_code: document.getElementById('postalCode') ? document.getElementById('postalCode').value : '',
-      phone:    document.getElementById('phoneField') ? document.getElementById('phoneField').value : '',
-      notes:    document.getElementById('notes')      ? document.getElementById('notes').value      : '',
+      full_name: document.getElementById('fullName')    ? document.getElementById('fullName').value    : '',
+      email:    document.getElementById('emailField')  ? document.getElementById('emailField').value  : '',
+      address:  document.getElementById('address')     ? document.getElementById('address').value     : '',
+      city:     document.getElementById('city')        ? document.getElementById('city').value        : '',
+      zip_code: document.getElementById('postalCode')  ? document.getElementById('postalCode').value  : '',
+      phone:    document.getElementById('phoneField')  ? document.getElementById('phoneField').value  : '',
+      notes:    document.getElementById('notes')       ? document.getElementById('notes').value       : '',
     };
 
     fetch('/checkout/', {

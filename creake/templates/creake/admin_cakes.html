@@ -43,7 +43,7 @@
       <td>{% if cake.badge %}<span class="badge badge-approved">{{ cake.badge }}</span>{% else %}<span style="color:#ccc;">—</span>{% endif %}</td>
       <td>{% if cake.is_new %}<span class="badge badge-approved">New</span>{% else %}<span class="badge badge-pending">Regular</span>{% endif %}</td>
       <td style="display:flex;gap:6px;">
-        <button onclick="openEditModal({{ cake.id }}, '{{ cake.name|escapejs }}', '{{ cake.category }}', '{{ cake.price }}', '{{ cake.description|escapejs }}', '{{ cake.badge|default:''|escapejs }}', {{ cake.rating }}, {{ cake.is_new|yesno:'true,false' }})" class="btn-action btn-edit">&#9999; Edit</button>
+        <button onclick="openEditModal({{ cake.id }}, '{{ cake.name|escapejs }}', '{{ cake.category }}', '{{ cake.price }}', '{{ cake.description|escapejs }}', {{ cake.is_new|yesno:'true,false' }})" class="btn-action btn-edit">&#9999; Edit</button>
         <form method="post" action="{% url 'creake:admin_delete_cake' cake.id %}" onsubmit="return confirm('Delete {{ cake.name|escapejs }}?');">
           {% csrf_token %}
           <button type="submit" class="btn-action btn-delete">&#128465; Delete</button>
@@ -60,7 +60,7 @@
 </div>
 {% endif %}
 
-<!-- ADD CAKE MODAL -->
+<!-- ADD CAKE MODAL — no Rating field -->
 <div class="admin-modal-overlay" id="addModal">
   <div class="admin-modal">
     <h3>&#127874; Add New Cake</h3>
@@ -80,10 +80,7 @@
         <div class="af-field"><label>Price (&#8369;)</label><input type="number" name="price" placeholder="500" step="0.01" required></div>
       </div>
       <div class="af-field"><label>Description</label><textarea name="description" placeholder="Describe this cake..."></textarea></div>
-      <div class="af-two-col">
-        <div class="af-field"><label>Badge (optional)</label><input type="text" name="badge" placeholder="e.g. Best Seller"></div>
-        <div class="af-field"><label>Rating</label><input type="number" name="rating" value="4.5" min="0" max="5" step="0.1"></div>
-      </div>
+      <div class="af-field"><label>Badge (optional)</label><input type="text" name="badge" placeholder="e.g. Best Seller"></div>
       <div class="af-field"><label>Cake Image</label><input type="file" name="image" accept="image/*"></div>
       <div class="af-field" style="display:flex;align-items:center;gap:10px;">
         <input type="checkbox" name="is_new" id="isNewAdd" style="width:auto;">
@@ -97,7 +94,7 @@
   </div>
 </div>
 
-<!-- EDIT CAKE MODAL -->
+<!-- EDIT CAKE MODAL — no Badge field -->
 <div class="admin-modal-overlay" id="editModal">
   <div class="admin-modal">
     <h3>&#9999;&#65039; Edit Cake</h3>
@@ -117,9 +114,6 @@
         <div class="af-field"><label>Price (&#8369;)</label><input type="number" name="price" id="editPrice" step="0.01" required></div>
       </div>
       <div class="af-field"><label>Description</label><textarea name="description" id="editDesc"></textarea></div>
-      <div class="af-two-col">
-        <div class="af-field"><label>Badge (optional)</label><input type="text" name="badge" id="editBadge"></div>
-      </div>
       <div class="af-field"><label>New Image (leave blank to keep current)</label><input type="file" name="image" accept="image/*"></div>
       <div class="af-field" style="display:flex;align-items:center;gap:10px;">
         <input type="checkbox" name="is_new" id="editIsNew" style="width:auto;">
@@ -137,19 +131,16 @@
 function openAddModal() { document.getElementById('addModal').classList.add('active'); }
 function closeModal(id) { document.getElementById(id).classList.remove('active'); }
 
-function openEditModal(id, name, category, price, desc, badge, rating, isNew) {
-  document.getElementById('editForm').action = '/customize/../admin/cakes/' + id + '/edit/';
+function openEditModal(id, name, category, price, desc, isNew) {
   document.getElementById('editForm').action = "{% url 'creake:admin_edit_cake' 0 %}".replace('0', id);
   document.getElementById('editName').value = name;
   document.getElementById('editCategory').value = category;
   document.getElementById('editPrice').value = price;
   document.getElementById('editDesc').value = desc;
-  document.getElementById('editBadge').value = badge;
   document.getElementById('editIsNew').checked = isNew;
   document.getElementById('editModal').classList.add('active');
 }
 
-// Close modals on overlay click
 document.querySelectorAll('.admin-modal-overlay').forEach(function(overlay) {
   overlay.addEventListener('click', function(e) {
     if (e.target === this) this.classList.remove('active');

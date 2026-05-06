@@ -6,7 +6,7 @@
 
 <div>
   <div class="section-title">&#127912; Custom Cake Submissions</div>
-  <div class="section-sub">Review custom cakes submitted by users. Approve to add to the Browse catalogue, or reject.</div>
+  <div class="section-sub">Review custom cakes submitted by users. Click View to approve or reject each order.</div>
 </div>
 
 <!-- FILTER TABS -->
@@ -59,20 +59,8 @@
           {{ cake.custom_status|capfirst|default:"Pending" }}
         </span>
       </td>
-      <td style="display:flex;gap:6px;flex-wrap:wrap;">
-        <a href="{% url 'creake:admin_order_detail' cake.id %}" class="btn-action btn-view">View</a>
-        {% if cake.custom_status != 'approved' %}
-        <form method="post" action="{% url 'creake:admin_approve_custom_cake' cake.id %}" style="display:inline;">
-          {% csrf_token %}
-          <button type="submit" class="btn-action btn-approve">&#10003; Approve</button>
-        </form>
-        {% endif %}
-        {% if cake.custom_status != 'rejected' %}
-        <form method="post" action="{% url 'creake:admin_reject_custom_cake' cake.id %}" style="display:inline;">
-          {% csrf_token %}
-          <button type="submit" class="btn-action btn-reject">&#10007; Reject</button>
-        </form>
-        {% endif %}
+      <td>
+        <a href="{% url 'creake:admin_order_detail' cake.id %}" class="btn-action btn-view">&#128065; View</a>
       </td>
     </tr>
     {% endfor %}
