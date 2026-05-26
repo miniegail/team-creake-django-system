@@ -353,14 +353,11 @@ function updateTotals() {
     var qty = Number(i.quantity) || 0;
     return s + (price * qty);
   }, 0);
-  var formatter = new Intl.NumberFormat('en-PH', { style: 'currency', currency: 'PHP' });
   var subFormatted = currencyFormatter.format(sub);
-  
-  console.log('Cart totals debug:', { cart: cart.map(i => ({name: i.name, price: i.price, qty: i.quantity})), subtotal: sub });
-  
+
   if (document.getElementById('subtotal')) document.getElementById('subtotal').textContent = subFormatted;
-  if (document.getElementById('delivery')) document.getElementById('delivery').textContent = '₱0.00';
-  if (document.getElementById('total')) document.getElementById('total').textContent = subFormatted;
+  // Recalculate delivery + total based on currently selected delivery type
+  updateDelivery();
 }
 
 function updateDelivery() {
@@ -389,8 +386,8 @@ function renderCheckoutSummary() {
       }).join('')
     + '<div class="order-total"><span>Total</span><span>' + currencyFormatter.format(sub) + '</span></div>';
   if (document.getElementById('subtotal2')) document.getElementById('subtotal2').textContent = currencyFormatter.format(sub);
-  if (document.getElementById('delivery2')) document.getElementById('delivery2').textContent = '₱0';
-  if (document.getElementById('total2'))    document.getElementById('total2').textContent    = currencyFormatter.format(sub);
+  // Recalculate delivery for the checkout modal summary
+  updateDelivery();
 }
 
 function setGridView(cols) {

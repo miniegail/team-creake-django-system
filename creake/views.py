@@ -857,6 +857,24 @@ def submit_review(request, cake_id):
             return JsonResponse({'error': 'Rating must be between 1 and 5.'}, status=400)
         if not comment:
             return JsonResponse({'error': 'Please write a review.'}, status=400)
+
+        # Restrict: user must have purchased (received or delivered) this cake
+        has_purchased = Order.objects.filter(
+            user=request.user,
+            status__in=['received', 'delivered'],
+            cake_name__icontains=cake.name,
+        ).exists()
+        if not has_purchased:
+            # Fallback: try matching first word of cake name (handles minor name differences)
+            has_purchased = Order.objects.filter(
+                user=request.user,
+                status__in=['received', 'delivered'],
+            ).filter(cake_name__icontains=cake.name.split()[0]).exists()
+        if not has_purchased:
+            return JsonResponse(
+                {'error': 'You can only review a cake after you have received or purchased it.'},
+                status=403,
+            )
         review, created = CakeReview.objects.update_or_create(
             cake=cake, user=request.user,
             defaults={'rating': rating, 'comment': comment}
