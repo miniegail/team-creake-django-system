@@ -26,7 +26,8 @@ def is_admin(user):
 # ==================== PUBLIC VIEWS ====================
 
 def quiz(request):
-    return render(request, 'creake/quiz.html')
+    cakes = Cake.objects.all()
+    return render(request, 'creake/quiz.html', {'cakes': cakes})
 
 
 def index(request):
