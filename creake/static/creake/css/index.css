@@ -165,9 +165,13 @@ body { font-family:'Poppins',sans-serif; background:#fffaf5; color:#333; overflo
 .cancel-checkout:hover { background:#ffcce0; transform:translateY(-2px); }
 
 /* ================= NOTIFICATIONS ================= */
-.notification { position:fixed; top:95px; right:30px; background:#4caf50; color:white; padding:14px 24px; border-radius:10px; font-weight:600; z-index:6000; animation:toastSlide 0.3s ease; box-shadow:0 8px 24px rgba(0,0,0,0.2); font-size:13px; text-transform:uppercase; letter-spacing:0.5px; }
+/* Notifications must sit above ALL modals — keep at 9999 */
+.notification { position:fixed; top:95px; right:30px; background:#4caf50; color:white; padding:14px 24px; border-radius:10px; font-weight:600; z-index:9999; animation:toastSlide 0.3s ease; box-shadow:0 8px 24px rgba(0,0,0,0.2); font-size:13px; text-transform:uppercase; letter-spacing:0.5px; }
 @keyframes toastSlide { from{transform:translateX(400px);opacity:0;} to{transform:translateX(0);opacity:1;} }
 .notification.error { background:#ff6b6b; }
+
+/* Cake detail overlay — below notifications so success popup is always visible */
+#cakeDetailOverlay { z-index:4000 !important; }
 
 /* ================= AUTH MODAL ================= */
 .auth-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:3500; justify-content:center; align-items:center; padding:20px; backdrop-filter:blur(4px); overflow-y:auto; }
@@ -216,7 +220,7 @@ body { font-family:'Poppins',sans-serif; background:#fffaf5; color:#333; overflo
 .switch-link { text-align:center; font-size:12px; color:#999; margin-top:18px; }
 .switch-link a { color:#d7736b; font-weight:700; text-decoration:none; cursor:pointer; }
 .switch-link a:hover { text-decoration:underline; }
-.auth-toast { position:fixed; top:90px; right:24px; padding:13px 22px; border-radius:12px; font-size:13px; font-weight:600; color:white; z-index:5000; animation:toastIn 0.3s ease; box-shadow:0 8px 24px rgba(0,0,0,0.15); font-family:'Poppins',sans-serif; }
+.auth-toast { position:fixed; top:90px; right:24px; padding:13px 22px; border-radius:12px; font-size:13px; font-weight:600; color:white; z-index:9999; animation:toastIn 0.3s ease; box-shadow:0 8px 24px rgba(0,0,0,0.15); font-family:'Poppins',sans-serif; }
 .auth-toast.error   { background:#ff6b6b; }
 .auth-toast.success { background:#4caf50; }
 .auth-toast.info    { background:#5fb7f9; }
