@@ -37,7 +37,6 @@
   <div class="qz-blob qz-blob-1"></div>
   <div class="qz-blob qz-blob-2"></div>
   <div class="qz-blob qz-blob-3"></div>
-  <div id="qzEmojiWrap"></div>
 
   <div class="quiz-inner">
 
@@ -101,27 +100,79 @@ var QZ_QUESTIONS = [
   {id:'topping',tag:'Question 5',emoji:'\u{1F3A8}',title:'Pick your dream topping!',sub:'The finishing touch that makes it you.',layout:'c2',opts:[{ic:'\u{1F353}',lb:'Fresh Berries',ds:'Natural and vibrant.',v:'berries'},{ic:'\u{1F36B}',lb:'Choco Drizzle',ds:'More chocolate!',v:'choco'},{ic:'\u{1F339}',lb:'Buttercream Roses',ds:'Elegant and beautiful.',v:'roses'},{ic:'\u2728',lb:'Gold Sprinkles',ds:'Extra glamorous.',v:'sprinkles'}]}
 ];
 
-var QZ_CAKES = [
-  {name:'Chocolate Fudge',price:500,img:"{% static 'creake/images/cakes/cake1.jpg' %}",tags:['bold','chocolate','fudgy','choco','birthday','milestone'],why:'A rich, dense chocolate dream for the bold soul.'},
-  {name:'Vanilla Dream',price:450,img:"{% static 'creake/images/cakes/cake2.jpg' %}",tags:['light','vanilla','fluffy','roses','romance','casual'],why:'Classic elegance with a cloud-like fluffy texture.'},
-  {name:'Strawberry Surprise',price:550,img:"{% static 'creake/images/cakes/cake3.jpg' %}",tags:['festive','strawberry','moist','berries','birthday','casual'],why:'Bright fruity layers bursting with freshness.'},
-  {name:'Red Velvet Luxury',price:600,img:"{% static 'creake/images/cakes/cake4.jpg' %}",tags:['bold','redvelvet','layered','roses','romance','milestone'],why:'Velvety, dramatic and utterly show-stopping.'},
-  {name:'Choco Strawberry',price:580,img:"{% static 'creake/images/cakes/cake5.jpg' %}",tags:['festive','chocolate','moist','berries','choco','birthday'],why:'Chocolate meets strawberry — the best of both worlds.'},
-  {name:'Vanilla Berry',price:470,img:"{% static 'creake/images/cakes/cake6.jpg' %}",tags:['light','cosy','vanilla','fluffy','berries','casual','romance'],why:'Delicate vanilla paired with gorgeous fresh berries.'}
-];
-
 var QZ_PROFILES = {
   bold:    {name:'The Decadent Dreamer',desc:"You crave bold, rich flavours. Life's too short for bland cake!",cf:'\u{1F525}',tags:['Bold Soul','Flavour Chaser','Indulgent']},
   light:   {name:'The Delicate Connoisseur',desc:'You appreciate subtle beauty and elegant, airy textures.',cf:'\u{1F338}',tags:['Refined Taste','Elegance Lover','Detail-Oriented']},
   festive: {name:'The Celebration Queen',desc:"Every day is a party waiting to happen — cake makes it official!",cf:'\u{1F389}',tags:['Party Starter','Joy Spreader','Life of the Party']},
   cosy:    {name:'The Comfort Seeker',desc:'You find joy in warmth, softness, and everything delicious.',cf:'\u{1F342}',tags:['Cosy Vibes','Comfort Lover','Sweet Soul']}
 };
+
+var CATEGORY_TAGS = {
+  'chocolate':  ['bold','chocolate','fudgy','choco','birthday','milestone'],
+  'vanilla':    ['light','vanilla','fluffy','roses','romance','casual'],
+  'strawberry': ['festive','strawberry','moist','berries','birthday','casual'],
+  'redvelvet':  ['bold','redvelvet','layered','roses','romance','milestone']
+};
+
+var CATEGORY_WHY = {
+  'chocolate':  'A rich, indulgent chocolate dream for the bold soul.',
+  'vanilla':    'Classic elegance with a cloud-like fluffy texture.',
+  'strawberry': 'Bright fruity layers bursting with freshness.',
+  'redvelvet':  'Velvety, dramatic and utterly show-stopping.'
+};
+
+var QZ_CAKES = [
+  {% for cake in cakes %}
+  {
+    name:  "{{ cake.name|escapejs }}",
+    price: {{ cake.price }},
+    img:   "{% if cake.image %}{{ cake.image.url }}{% else %}{% static 'creake/images/cakes/cake1.jpg' %}{% endif %}",
+    tags:  CATEGORY_TAGS["{{ cake.category|escapejs }}"] || ["{{ cake.category|escapejs }}"],
+    why:   CATEGORY_WHY["{{ cake.category|escapejs }}"] || "{{ cake.description|escapejs|truncatechars:80 }}"
+  }{% if not forloop.last %},{% endif %}
+  {% empty %}
+  {name:"Chocolate Fudge",price:500,img:"{% static 'creake/images/cakes/cake1.jpg' %}",tags:['bold','chocolate','fudgy','choco','birthday','milestone'],why:'A rich, dense chocolate dream for the bold soul.'},
+  {name:"Vanilla Dream",price:450,img:"{% static 'creake/images/cakes/cake2.jpg' %}",tags:['light','vanilla','fluffy','roses','romance','casual'],why:'Classic elegance with a cloud-like fluffy texture.'},
+  {name:"Strawberry Surprise",price:550,img:"{% static 'creake/images/cakes/cake3.jpg' %}",tags:['festive','strawberry','moist','berries','birthday','casual'],why:'Bright fruity layers bursting with freshness.'},
+  {name:"Red Velvet Luxury",price:600,img:"{% static 'creake/images/cakes/cake4.jpg' %}",tags:['bold','redvelvet','layered','roses','romance','milestone'],why:'Velvety, dramatic and utterly show-stopping.'}
+  {% endfor %}
+];
+
+/* ── Cart helpers (quiz page has no index.js so we define these here) ── */
+function qzGetCart() {
+  try { return JSON.parse(localStorage.getItem('cart')) || []; }
+  catch(e) { return []; }
+}
+
+function qzSaveCart(cart) {
+  localStorage.setItem('cart', JSON.stringify(cart));
+}
+
+function addToCart(name, price, img) {
+  var cart = qzGetCart();
+  var existing = cart.find(function(i) { return i.name === name; });
+  if (existing) {
+    existing.quantity++;
+  } else {
+    cart.push({ name: name, price: Number(price), img: img || '', quantity: 1 });
+  }
+  qzSaveCart(cart);
+  // Show a nice notification
+  var n = document.createElement('div');
+  n.textContent = '\uD83C\uDF82 ' + name + ' added to cart!';
+  n.style.cssText = 'position:fixed;bottom:28px;left:50%;transform:translateX(-50%);'
+    + 'background:linear-gradient(135deg,#d7736b,#c9605a);color:#fff;padding:13px 28px;'
+    + 'border-radius:50px;font-family:Poppins,sans-serif;font-size:14px;font-weight:600;'
+    + 'box-shadow:0 8px 24px rgba(0,0,0,0.18);z-index:99999;white-space:nowrap;';
+  document.body.appendChild(n);
+  setTimeout(function() { n.remove(); }, 2800);
+}
 </script>
 
 <script src="{% static 'creake/js/quiz.js' %}"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  initQuizEmojis();
+  // initQuizEmojis(); // disabled
 });
 </script>
 

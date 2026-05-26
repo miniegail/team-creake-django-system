@@ -2,23 +2,8 @@ var qzStep = 0;
 var qzAnswers = {};
 var qzDir = 'right';
 
-/* ── Spawn background floating emojis ── */
-function initQuizEmojis() {
-  var list = ['\u{1F382}','\u{1F9C1}','\u{1F353}','\u{1F36B}','\u{1F370}','\u2728','\u{1F389}','\u{1F495}','\u{1F338}','\u{1F31F}'];
-  var wrap = document.getElementById('qzEmojiWrap');
-  if (!wrap) return;
-  for (var i = 0; i < 16; i++) {
-    var el = document.createElement('span');
-    el.className = 'qz-emoji';
-    el.style.cssText = 'left:' + Math.random() * 100 + '%;'
-      + 'top:' + Math.random() * 110 + '%;'
-      + 'font-size:' + (1.1 + Math.random() * 1.3) + 'rem;'
-      + 'animation-duration:' + (9 + Math.random() * 13) + 's;'
-      + 'animation-delay:' + Math.random() * 12 + 's;';
-    el.textContent = list[i % list.length];
-    wrap.appendChild(el);
-  }
-}
+/* ── Floating emojis disabled ── */
+function initQuizEmojis() {}
 
 /* ── Open / close ── */
 function openQuizModal() {
@@ -85,7 +70,6 @@ function renderQzStep() {
 
   card.innerHTML = ''
     + '<div class="qq-tag">\u{1F382} ' + q.tag + '</div>'
-    + '<span class="qq-emoji">' + q.emoji + '</span>'
     + '<h3 class="qq-title">' + q.title + '</h3>'
     + '<p class="qq-sub">' + q.sub + '</p>'
     + '<div class="qq-opts ' + q.layout + '">' + optsHtml + '</div>'
@@ -141,11 +125,11 @@ function showQzResults() {
 
   var uTags = Object.values(qzAnswers);
 
+  // FIX: Score cakes by actual tag matches only — no random padding
   var scored = QZ_CAKES.map(function(c) {
     var matchCount = c.tags.filter(function(t) { return uTags.includes(t); }).length;
-    var pct = Math.max(Math.round(matchCount / Math.max(uTags.length, 1) * 100), 22 + Math.floor(Math.random() * 18));
-    return Object.assign({}, c, { pct: pct });
-  }).sort(function(a, b) { return b.pct - a.pct; }).slice(0, 3);
+    return Object.assign({}, c, { matchCount: matchCount });
+  }).sort(function(a, b) { return b.matchCount - a.matchCount; }).slice(0, 3);
 
   var prof = QZ_PROFILES[qzAnswers['mood']] || QZ_PROFILES['bold'];
 
@@ -156,12 +140,14 @@ function showQzResults() {
     return '<span class="qr-tag">' + t + '</span>';
   }).join('');
 
+  // FIX: Calculate real match percentage from actual answers
   document.getElementById('qrGrid').innerHTML = scored.map(function(c, i) {
+    var pct = uTags.length > 0 ? Math.round(c.matchCount / uTags.length * 100) : 0;
     return '<div class="qr-card ' + (i === 0 ? 'top-pick' : '') + '" onclick="qzCloseShop()">'
       + '<div class="qr-img">'
       +   '<img src="' + c.img + '" alt="' + c.name + '" onerror="this.parentElement.style.background=\'linear-gradient(135deg,#ffe4f6,#fff0f6)\'">'
       +   (i === 0 ? '<div class="qr-pick-badge">\u2B50 Top Pick</div>' : '')
-      +   '<div class="qr-match-pct">' + c.pct + '% match</div>'
+      +   '<div class="qr-match-pct">' + pct + '% match</div>'
       + '</div>'
       + '<div class="qr-info">'
       +   '<div class="qr-name">' + c.name + '</div>'

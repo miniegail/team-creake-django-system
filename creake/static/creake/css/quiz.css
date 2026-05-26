@@ -25,9 +25,8 @@ body { font-family:'Poppins',sans-serif; background:#fffaf5; color:#333; overflo
 .qz-blob-3 { width:340px; height:340px; background:rgba(186,230,255,0.18); bottom:10%; left:8%; animation:qzBlob 18s ease-in-out infinite 5s; }
 @keyframes qzBlob { 0%,100%{transform:translate(0,0) scale(1);} 50%{transform:translate(35px,-25px) scale(1.06);} }
 
-/* floating emojis */
-.qz-emoji { position:fixed; opacity:0.1; animation:qzEmojiDrift linear infinite; pointer-events:none; user-select:none; z-index:1; }
-@keyframes qzEmojiDrift { 0%{transform:translateY(0) rotate(0);opacity:0.1;} 100%{transform:translateY(-90px) rotate(25deg);opacity:0;} }
+/* floating emojis — DISABLED */
+.qz-emoji { display:none !important; }
 
 /* inner wrapper */
 .quiz-inner { position:relative; z-index:10; width:100%; max-width:680px; margin:0 auto; display:flex; flex-direction:column; align-items:center; }
@@ -65,8 +64,7 @@ body { font-family:'Poppins',sans-serif; background:#fffaf5; color:#333; overflo
 @keyframes qzSlideR { from{opacity:0;transform:translateX(50px) scale(0.97);} to{opacity:1;transform:translateX(0) scale(1);} }
 @keyframes qzSlideL { from{opacity:0;transform:translateX(-50px) scale(0.97);} to{opacity:1;transform:translateX(0) scale(1);} }
 .qq-tag { display:inline-flex; align-items:center; gap:6px; background:linear-gradient(135deg,#ffe4f6,#fff0f6); color:#d7736b; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; padding:5px 14px; border-radius:50px; margin-bottom:14px; }
-.qq-emoji { font-size:2.6rem; margin-bottom:10px; display:block; animation:qqWiggle 3s ease-in-out infinite; }
-@keyframes qqWiggle { 0%,100%{transform:rotate(-4deg) scale(1);} 50%{transform:rotate(4deg) scale(1.07);} }
+.qq-emoji { font-size:2.6rem; margin-bottom:10px; display:block; }
 .qq-title { font-family:'Playfair Display',serif; font-size:clamp(1.25rem,2.8vw,1.85rem); font-weight:900; color:#2d2d2d; margin-bottom:6px; line-height:1.2; }
 .qq-sub { font-size:13px; color:#bbb; margin-bottom:24px; line-height:1.5; }
 .qq-opts { display:grid; gap:12px; }
